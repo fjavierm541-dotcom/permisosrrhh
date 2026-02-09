@@ -29,3 +29,8 @@ Route::get('/db-test', function() {
         return "Error de conexión: " . $e->getMessage();
     }
 });
+
+Route::get('/inicio', function () {
+    return view('paginas.inicio');
+});
+
