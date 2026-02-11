@@ -9,23 +9,21 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::table('users', function (Blueprint $table) {
-    $table->foreignId('role_id')
-        ->after('id')
-        ->constrained('roles');
-});
+    public function up()
+{
+    Schema::create('estados_permiso_sistema', function (Blueprint $table) {
+        $table->id();
+        $table->string('nombre');
+        $table->timestamps();
+    });
+}
 
-    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('estados_permiso_sistema');
     }
 };

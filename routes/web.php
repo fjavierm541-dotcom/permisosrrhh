@@ -34,3 +34,11 @@ Route::get('/inicio', function () {
     return view('paginas.inicio');
 });
 
+use App\Http\Controllers\PermisoController;
+
+Route::get('/permisos', [PermisoController::class, 'index'])
+    ->name('permisos.index');
+Route::get('/permisos/crear', [PermisoController::class, 'create'])
+    ->name('permisos.create');
+Route::post('/permisos', [PermisoController::class, 'store'])
+    ->name('permisos.store');

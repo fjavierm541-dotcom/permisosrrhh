@@ -2,36 +2,25 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Empleado extends Model
 {
-    use HasFactory;
+    protected $table = 'empleados';
 
-    protected $fillable = [
-        'codigo_empleado',
-        'nombres',
-        'apellidos',
-        'puesto',
-        'departamento',
-        'fecha_ingreso',
-        'estado',
-        'user_id'
-    ];
+    protected $primaryKey = 'DNI';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
-    public function user()
+    public $timestamps = true;
+
+    public function permisosSistema()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(PermisoSistema::class, 'dni_empleado', 'DNI');
     }
 
-    public function diasAcumulados()
+    public function diasAcumuladosSistema()
     {
-        return $this->hasOne(DiasAcumulados::class);
-    }
-
-    public function permisos()
-    {
-        return $this->hasMany(Permiso::class);
+        return $this->hasOne(DiasAcumuladosSistema::class, 'dni_empleado', 'DNI');
     }
 }

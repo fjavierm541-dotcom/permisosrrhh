@@ -2,22 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Permiso extends Model
+class PermisoSistema extends Model
 {
-    use HasFactory;
+    protected $table = 'permisos_sistema';
 
     protected $fillable = [
-        'empleado_id',
+        'dni_empleado',
         'tipo_permiso_id',
         'estado_permiso_id',
         'fecha_inicio',
         'fecha_fin',
         'horas',
         'motivo',
-        'documento',
+        'documento'
     ];
 
     protected $casts = [
@@ -27,17 +26,16 @@ class Permiso extends Model
 
     public function empleado()
     {
-        return $this->belongsTo(Empleado::class);
+        return $this->belongsTo(Empleado::class, 'dni_empleado', 'DNI');
     }
 
-    public function tipoPermiso()
+    public function tipo()
     {
-        return $this->belongsTo(TipoPermiso::class);
+        return $this->belongsTo(TipoPermisoSistema::class, 'tipo_permiso_id');
     }
 
     public function estado()
     {
-        return $this->belongsTo(EstadoPermiso::class, 'estado_permiso_id');
+        return $this->belongsTo(EstadoPermisoSistema::class, 'estado_permiso_id');
     }
 }
-
