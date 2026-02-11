@@ -9,8 +9,10 @@ class Permiso extends Model
 {
     use HasFactory;
 
+    protected $table = 'permisos';
+
     protected $fillable = [
-        'user_id',
+        'empleado_id',
         'tipo_permiso_id',
         'estado_permiso_id',
         'fecha_inicio',
@@ -20,18 +22,19 @@ class Permiso extends Model
         'documento',
     ];
 
-    /* =======================
-       RELACIONES
-    ======================= */
+    protected $casts = [
+        'fecha_inicio' => 'date',
+        'fecha_fin' => 'date',
+    ];
 
-    public function user()
+    public function empleado()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Empleado::class, 'empleado_id');
     }
 
     public function tipoPermiso()
     {
-        return $this->belongsTo(TipoPermiso::class);
+        return $this->belongsTo(TipoPermiso::class, 'tipo_permiso_id');
     }
 
     public function estado()
