@@ -12,9 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tipos_permiso', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+    $table->id();
+    $table->string('nombre');
+    $table->boolean('resta_dias')->default(false);
+    $table->boolean('resta_horas')->default(false);
+    $table->boolean('requiere_documento')->default(false);
+    $table->boolean('activo')->default(true);
+    $table->timestamps();
+});
+
     }
 
     /**

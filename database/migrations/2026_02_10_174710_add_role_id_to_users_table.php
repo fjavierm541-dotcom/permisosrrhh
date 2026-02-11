@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('estados_permiso', function (Blueprint $table) {
-    $table->id();
-    $table->string('nombre')->unique();
-    $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+    $table->foreignId('role_id')
+        ->after('id')
+        ->constrained('roles');
 });
 
     }
@@ -24,6 +24,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('estados_permiso');
+        Schema::table('users', function (Blueprint $table) {
+            //
+        });
     }
 };

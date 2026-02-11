@@ -12,9 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('empleados', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+    $table->id();
+    $table->string('codigo_empleado', 20)->unique()->nullable();
+    $table->string('nombres');
+    $table->string('apellidos');
+    $table->string('puesto')->nullable();
+    $table->string('departamento')->nullable();
+    $table->date('fecha_ingreso')->nullable();
+    $table->enum('estado', ['activo', 'inactivo'])->default('activo');
+
+    $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+
+    $table->timestamps();
+});
+
     }
 
     /**

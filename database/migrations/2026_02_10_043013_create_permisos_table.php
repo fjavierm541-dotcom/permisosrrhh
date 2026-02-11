@@ -12,9 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('permisos', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+    $table->id();
+
+    $table->foreignId('empleado_id')->constrained('empleados');
+    $table->foreignId('tipo_permiso_id')->constrained('tipos_permiso');
+    $table->foreignId('estado_permiso_id')->constrained('estados_permiso');
+
+    $table->date('fecha_inicio');
+    $table->date('fecha_fin')->nullable();
+    $table->integer('horas')->nullable();
+    $table->text('motivo')->nullable();
+    $table->string('documento')->nullable();
+
+    $table->timestamps();
+});
+
     }
 
     /**

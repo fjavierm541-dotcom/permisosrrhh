@@ -12,9 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('dias_acumulados', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+    $table->id();
+
+    $table->foreignId('empleado_id')
+        ->unique()
+        ->constrained('empleados');
+
+    $table->decimal('dias_vacaciones', 5, 2)->default(0);
+    $table->decimal('dias_compensatorios', 5, 2)->default(0);
+    $table->integer('horas_acumuladas')->default(0);
+
+    $table->timestamp('updated_at')->nullable();
+});
+
     }
 
     /**
