@@ -16,18 +16,12 @@ class TipoPermiso extends Model
         'resta_dias',
         'resta_horas',
         'requiere_documento',
-        'activo',
-    ];
-
-    protected $casts = [
-        'resta_dias' => 'boolean',
-        'resta_horas' => 'boolean',
-        'requiere_documento' => 'boolean',
-        'activo' => 'boolean',
+        'activo'
     ];
 
     public function permisos()
     {
-        return $this->hasMany(Permiso::class, 'tipo_permiso_id');
+        return $this->hasMany(Permiso::class);
     }
 }
+

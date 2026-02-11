@@ -9,8 +9,6 @@ class Empleado extends Model
 {
     use HasFactory;
 
-    protected $table = 'empleados';
-
     protected $fillable = [
         'codigo_empleado',
         'nombres',
@@ -22,10 +20,6 @@ class Empleado extends Model
         'user_id'
     ];
 
-    protected $casts = [
-        'fecha_ingreso' => 'date',
-    ];
-
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -33,11 +27,11 @@ class Empleado extends Model
 
     public function diasAcumulados()
     {
-        return $this->hasOne(DiasAcumulados::class, 'empleado_id');
+        return $this->hasOne(DiasAcumulados::class);
     }
 
     public function permisos()
     {
-        return $this->hasMany(Permiso::class, 'empleado_id');
+        return $this->hasMany(Permiso::class);
     }
 }

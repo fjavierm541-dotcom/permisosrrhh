@@ -30,15 +30,16 @@ class User extends Authenticatable
        RELACIONES
     ====================== */
 
-    public function rol()
-    {
-        return $this->belongsTo(Rol::class);
-    }
+    public function role()
+{
+    return $this->belongsTo(Role::class);
+}
 
-    public function empleado()
+public function empleado()
 {
     return $this->hasOne(Empleado::class);
 }
+
 
     public function permisos()
 {

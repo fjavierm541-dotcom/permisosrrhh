@@ -9,8 +9,6 @@ class Permiso extends Model
 {
     use HasFactory;
 
-    protected $table = 'permisos';
-
     protected $fillable = [
         'empleado_id',
         'tipo_permiso_id',
@@ -29,12 +27,12 @@ class Permiso extends Model
 
     public function empleado()
     {
-        return $this->belongsTo(Empleado::class, 'empleado_id');
+        return $this->belongsTo(Empleado::class);
     }
 
     public function tipoPermiso()
     {
-        return $this->belongsTo(TipoPermiso::class, 'tipo_permiso_id');
+        return $this->belongsTo(TipoPermiso::class);
     }
 
     public function estado()
@@ -42,3 +40,4 @@ class Permiso extends Model
         return $this->belongsTo(EstadoPermiso::class, 'estado_permiso_id');
     }
 }
+

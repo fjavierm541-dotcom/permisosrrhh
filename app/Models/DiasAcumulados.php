@@ -13,15 +13,15 @@ class DiasAcumulados extends Model
 
     protected $fillable = [
         'empleado_id',
-        'dias_vacaciones',
+        'dias_vacacionales',
         'dias_compensatorios',
         'horas_acumuladas',
     ];
 
-    public $timestamps = false; // ⚠ importante porque no tiene created_at
+    public $timestamps = false; // porque solo tiene updated_at
 
     public function empleado()
     {
-        return $this->belongsTo(Empleado::class, 'empleado_id');
+        return $this->belongsTo(Empleado::class);
     }
 }

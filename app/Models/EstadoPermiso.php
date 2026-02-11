@@ -17,6 +17,6 @@ class EstadoPermiso extends Model
 
     public function permisos()
     {
-        return $this->hasMany(Permiso::class, 'estado_permiso_id');
+        return $this->hasMany(Permiso::class);
     }
 }
