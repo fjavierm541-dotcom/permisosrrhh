@@ -9,15 +9,17 @@ class PermisoSistema extends Model
     protected $table = 'permisos_sistema';
 
     protected $fillable = [
-        'dni_empleado',
-        'tipo_permiso_id',
-        'estado_permiso_id',
-        'fecha_inicio',
-        'fecha_fin',
-        'horas',
-        'motivo',
-        'documento'
-    ];
+    'dni_empleado',
+    'modalidad',
+    'tipo_permiso_id',
+    'estado_permiso_id',
+    'fecha_inicio',
+    'fecha_fin',
+    'horas',
+    'motivo',
+    'documento'
+];
+
 
     protected $casts = [
         'fecha_inicio' => 'date',
@@ -38,4 +40,17 @@ class PermisoSistema extends Model
     {
         return $this->belongsTo(EstadoPermisoSistema::class, 'estado_permiso_id');
     }
+
+
+    public function rechazar($id)
+{
+    $permiso = PermisoSistema::findOrFail($id);
+
+    // Estado 3 = Rechazado
+    $permiso->estado_permiso_id = 3;
+    $permiso->save();
+
+    return back()->with('success', 'Permiso rechazado correctamente');
+}
+
 }
