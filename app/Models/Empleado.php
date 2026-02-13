@@ -23,4 +23,9 @@ class Empleado extends Model
     {
         return $this->hasOne(DiasAcumuladosSistema::class, 'dni_empleado', 'DNI');
     }
+    public function periodosVacaciones()
+{
+    return $this->hasMany(PeriodoVacacionesSistema::class, 'dni_empleado', 'DNI');
+}
+
 }

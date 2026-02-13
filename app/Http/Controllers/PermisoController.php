@@ -72,10 +72,14 @@ class PermisoController extends Controller
     ========================== */
 public function aprobar($id)
 {
-    $permiso = PermisoSistema::with(['tipo'])->findOrFail($id);
+    $permiso = PermisoSistema::with(['tipo','estado'])->findOrFail($id);
 
-    // Buscar estado aprobado seguro
-    $estadoAprobado = EstadoPermisoSistema::whereRaw('LOWER(nombre) = ?', ['aprobado'])->first();
+    // BLOQUEO SI YA NO ESTÁ PENDIENTE
+    if (strtolower($permiso->estado->nombre) !== 'pendiente') {
+        return back()->with('error', 'Este permiso ya fue procesado.');
+    }
+
+    $estadoAprobado = EstadoPermisoSistema::whereRaw('LOWER(nombre) = ?', ['aprobado'])->firstOrFail();
 
     if (!$estadoAprobado) {
         return back()->with('error', 'No existe el estado Aprobado en la base de datos.');
@@ -157,10 +161,14 @@ public function aprobar($id)
 
 public function rechazar($id)
 {
-    $permiso = PermisoSistema::findOrFail($id);
+    $permiso = PermisoSistema::with('estado')->findOrFail($id);
 
-    // Buscar estado Rechazado
-    $estadoRechazado = EstadoPermisoSistema::where('nombre', 'Rechazado')->first();
+    // 🚨 BLOQUEO SI YA NO ESTÁ PENDIENTE
+    if (strtolower($permiso->estado->nombre) !== 'pendiente') {
+        return back()->with('error', 'Este permiso ya fue procesado.');
+    }
+
+    $estadoRechazado = EstadoPermisoSistema::whereRaw('LOWER(nombre) = ?', ['rechazado'])->firstOrFail();
 
     $permiso->estado_permiso_id = $estadoRechazado->id;
     $permiso->save();
@@ -168,6 +176,7 @@ public function rechazar($id)
     return redirect()->route('permisos.index')
         ->with('success', 'Permiso rechazado correctamente.');
 }
+
 
 
 }

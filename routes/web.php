@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PermisoController;
+use App\Http\Controllers\PeriodoVacacionesController;
+use App\Http\Controllers\EmpleadoController;
+
+    
 
 /*
 |--------------------------------------------------------------------------
@@ -51,3 +55,24 @@ Route::post('/permisos', [PermisoController::class, 'store'])
     Route::get('permisos/{id}/rechazar', [PermisoController::class, 'rechazar'])
     ->name('permisos.rechazar');
 
+
+
+
+
+
+
+Route::get('periodos/create', [PeriodoVacacionesController::class, 'create'])
+    ->name('periodos.create');
+
+Route::post('periodos/store', [PeriodoVacacionesController::class, 'store'])
+    ->name('periodos.store');
+
+
+
+
+
+    Route::get('/empleados', [EmpleadoController::class, 'index'])
+    ->name('empleados.index');
+
+Route::get('/empleados/{dni}', [EmpleadoController::class, 'show'])
+    ->name('empleados.show');
