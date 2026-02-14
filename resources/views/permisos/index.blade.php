@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Permisos</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('layouts.master')
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+@section('title', 'Permisos')
+
+@section('content')
+
 
     <style>
         body {
@@ -222,5 +220,4 @@
     }
 </script>
 
-</body>
-</html>
+@endsection
