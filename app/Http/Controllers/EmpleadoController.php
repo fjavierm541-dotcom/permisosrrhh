@@ -15,7 +15,7 @@ class EmpleadoController extends Controller
      */
    public function index(Request $request)
 {
-    // 🔄 Marcar vencidos automáticamente (si no tienen extensión válida)
+    // 🔄 Marcar vencidos automáticamente
     PeriodoVacacionesSistema::where('estado', 'activo')
         ->where(function ($query) {
             $query->whereNull('extension_hasta')
@@ -27,12 +27,11 @@ class EmpleadoController extends Controller
         })
         ->update(['estado' => 'vencido']);
 
-    $empleados = Empleado::paginate(15);
-
+    $empleados = Empleado::all(); // ⚠ Traemos todos primero
 
     foreach ($empleados as $empleado) {
 
-        // ✅ SOLO PERÍODOS ACTIVOS
+        // ===== DÍAS DISPONIBLES =====
         $periodos = PeriodoVacacionesSistema::where('dni_empleado', $empleado->DNI)
             ->where('estado', 'activo')
             ->get();
@@ -42,24 +41,26 @@ class EmpleadoController extends Controller
         foreach ($periodos as $periodo) {
             $otorgados = (int) $periodo->dias_otorgados;
             $usados = (int) ($periodo->dias_usados ?? 0);
-
             $restantes = max(0, $otorgados - $usados);
             $totalDiasDisponibles += $restantes;
         }
 
         $empleado->dias_disponibles = $totalDiasDisponibles;
 
-        // 🔎 Buscar período activo más próximo a vencer
-        $periodoProximoAVencer = PeriodoVacacionesSistema::where('dni_empleado', $empleado->DNI)
+        $acumulado = DiasAcumuladosSistema::where('dni_empleado', $empleado->DNI)->first();
+        $empleado->horas_disponibles = $acumulado->horas_acumuladas ?? 0;
+
+        // ===== SEMÁFORO =====
+        $periodoProximo = PeriodoVacacionesSistema::where('dni_empleado', $empleado->DNI)
             ->where('estado', 'activo')
             ->whereRaw('(dias_otorgados - dias_usados) > 0')
             ->orderByRaw('COALESCE(extension_hasta, fecha_vencimiento) asc')
             ->first();
 
-        if ($periodoProximoAVencer) {
+        if ($periodoProximo) {
 
-            $fechaReferencia = $periodoProximoAVencer->extension_hasta
-                ?? $periodoProximoAVencer->fecha_vencimiento;
+            $fechaReferencia = $periodoProximo->extension_hasta
+                ?? $periodoProximo->fecha_vencimiento;
 
             $diasRestantes = Carbon::today()->diffInDays($fechaReferencia, false);
 
@@ -67,8 +68,6 @@ class EmpleadoController extends Controller
                 $empleado->semaforo = 'verde';
             } elseif ($diasRestantes > 90) {
                 $empleado->semaforo = 'amarillo';
-            } elseif ($diasRestantes >= 0) {
-                $empleado->semaforo = 'rojo';
             } else {
                 $empleado->semaforo = 'rojo';
             }
@@ -78,10 +77,22 @@ class EmpleadoController extends Controller
         }
     }
 
-    // 🔍 FILTRO POR ESTADO
+    // 🔍 FILTRAR POR COLOR SI SE ENVÍA
     if ($request->estado) {
         $empleados = $empleados->where('semaforo', $request->estado);
     }
+
+    // 🔢 PAGINACIÓN MANUAL
+    $page = $request->get('page', 1);
+    $perPage = 15;
+
+    $empleados = new \Illuminate\Pagination\LengthAwarePaginator(
+        $empleados->forPage($page, $perPage),
+        $empleados->count(),
+        $perPage,
+        $page,
+        ['path' => $request->url(), 'query' => $request->query()]
+    );
 
     return view('empleados.index', compact('empleados'));
 }
@@ -91,10 +102,10 @@ class EmpleadoController extends Controller
 
 
 
+
 public function generarVacaciones()
 {
     $hoy = Carbon::today();
-    $anioActual = $hoy->year;
 
     $empleados = Empleado::all();
 
@@ -104,31 +115,34 @@ public function generarVacaciones()
 
         $fechaIngreso = Carbon::parse($empleado->fecha_nombramiento);
 
-        // Calcular años cumplidos
+        // ¿Hoy cumple aniversario?
+        if ($fechaIngreso->month != $hoy->month ||
+            $fechaIngreso->day != $hoy->day) {
+            continue;
+        }
+
         $aniosCumplidos = $fechaIngreso->diffInYears($hoy);
 
-        if ($aniosCumplidos < 1) continue; // Aún no cumple año
+        if ($aniosCumplidos < 1) continue;
 
-        // Determinar días según tabla
-        $dias = 0;
-
+        // Tabla legal
         if ($aniosCumplidos == 1) $dias = 12;
         elseif ($aniosCumplidos == 2) $dias = 15;
         elseif ($aniosCumplidos == 3) $dias = 18;
         elseif ($aniosCumplidos == 4) $dias = 22;
         elseif ($aniosCumplidos == 5) $dias = 26;
-        elseif ($aniosCumplidos >= 6) $dias = 30;
+        else $dias = 30;
 
-        // Verificar si ya existe período este año
+        // Evitar duplicados
         $existe = PeriodoVacacionesSistema::where('dni_empleado', $empleado->DNI)
-            ->where('anio_laboral', $anioActual)
+            ->where('anio_laboral', $aniosCumplidos)
             ->exists();
 
         if ($existe) continue;
 
         PeriodoVacacionesSistema::create([
             'dni_empleado' => $empleado->DNI,
-            'anio_laboral' => $anioActual,
+            'anio_laboral' => $aniosCumplidos,
             'dias_otorgados' => $dias,
             'dias_usados' => 0,
             'fecha_inicio_periodo' => $hoy,
@@ -137,7 +151,7 @@ public function generarVacaciones()
         ]);
     }
 
-    return back()->with('success', 'Vacaciones generadas correctamente para el año actual.');
+    return back()->with('success', 'Proceso de generación ejecutado correctamente.');
 }
 
 
