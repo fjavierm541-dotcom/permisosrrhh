@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\PeriodoVacacionesController;
 use App\Http\Controllers\EmpleadoController;
+    use App\Http\Controllers\DashboardController;
+
 
     
 
@@ -76,3 +78,15 @@ Route::post('periodos/store', [PeriodoVacacionesController::class, 'store'])
 
 Route::get('/empleados/{dni}', [EmpleadoController::class, 'show'])
     ->name('empleados.show');
+
+
+
+//Generación Manual de Vacaciones Año Actual
+    Route::post('/vacaciones/generar', [EmpleadoController::class, 'generarVacaciones'])
+    ->name('vacaciones.generar');
+
+
+    // dashboard
+
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->name('dashboard');

@@ -15,16 +15,13 @@ class PeriodoVacacionesSistema extends Model
         'dni_empleado',
         'anio_laboral',
         'dias_otorgados',
-        'dias_restantes',
+        'dias_usados',
         'fecha_inicio_periodo',
-        'fecha_vencimiento',
-        'extension_hasta',
-        'estado'
+        'fecha_vencimiento'
     ];
 
     protected $casts = [
         'fecha_inicio_periodo' => 'date',
-        'fecha_vencimiento' => 'date',
-        'extension_hasta' => 'date'
+        'fecha_vencimiento' => 'date'
     ];
 }

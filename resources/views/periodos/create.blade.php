@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Carga Histórica de Vacaciones</title>
+    <title>Registrar Períodos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -46,7 +46,7 @@
     <div class="glass-card">
 
         <div class="card-header-custom p-4">
-            <h4 class="mb-0">Carga Histórica de Vacaciones</h4>
+            <h4 class="mb-0">Registrar Períodos Vacacionales</h4>
         </div>
 
         <div class="p-4">
@@ -60,6 +60,7 @@
             <form method="POST" action="{{ route('periodos.store') }}">
                 @csrf
 
+                <!-- Empleado -->
                 <div class="mb-4">
                     <label class="form-label fw-bold">Empleado</label>
                     <select name="dni_empleado" class="form-select" required>
@@ -94,7 +95,7 @@
                             </div>
 
                             <div class="col-md-3 mb-3">
-                                <label>Fecha inicio del período</label>
+                                <label>Fecha inicio período</label>
                                 <input type="date" name="fecha_inicio_periodo[]" class="form-control" required>
                             </div>
 
@@ -109,7 +110,7 @@
                 </button>
 
                 <div class="text-end">
-                    <button class="btn btn-gold px-4">
+                    <button class="btn btn-gold">
                         Guardar Períodos
                     </button>
                 </div>
@@ -117,7 +118,6 @@
             </form>
 
         </div>
-
     </div>
 
 </div>
@@ -130,6 +130,7 @@ function agregarPeriodo() {
     let nuevo = `
         <div class="periodo-item border rounded p-3 mb-3">
             <div class="row">
+
                 <div class="col-md-3 mb-3">
                     <label>Año laboral</label>
                     <input type="number" name="anio_laboral[]" class="form-control" required>
@@ -146,9 +147,10 @@ function agregarPeriodo() {
                 </div>
 
                 <div class="col-md-3 mb-3">
-                    <label>Fecha inicio del período</label>
+                    <label>Fecha inicio período</label>
                     <input type="date" name="fecha_inicio_periodo[]" class="form-control" required>
                 </div>
+
             </div>
         </div>
     `;

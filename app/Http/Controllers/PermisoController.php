@@ -8,6 +8,7 @@ use App\Models\TipoPermisoSistema;
 use App\Models\EstadoPermisoSistema;
 use Illuminate\Http\Request;
 use App\Models\DiasAcumuladosSistema;
+use App\Models\PeriodoVacacionesSistema;
 
 class PermisoController extends Controller
 {
@@ -67,38 +68,23 @@ class PermisoController extends Controller
 
 
 
-     /* ==========================
-       APROBAR PERMISOS
-    ========================== */
+    
+/* ==========================
+   APROBAR PERMISOS
+========================== */
 public function aprobar($id)
 {
     $permiso = PermisoSistema::with(['tipo','estado'])->findOrFail($id);
 
-    // BLOQUEO SI YA NO ESTÁ PENDIENTE
+    // 🔒 BLOQUEO SI YA FUE PROCESADO
     if (strtolower($permiso->estado->nombre) !== 'pendiente') {
         return back()->with('error', 'Este permiso ya fue procesado.');
     }
 
     $estadoAprobado = EstadoPermisoSistema::whereRaw('LOWER(nombre) = ?', ['aprobado'])->firstOrFail();
 
-    if (!$estadoAprobado) {
-        return back()->with('error', 'No existe el estado Aprobado en la base de datos.');
-    }
-
-    // Buscar acumulado
-    $acumulado = DiasAcumuladosSistema::firstOrCreate(
-        ['dni_empleado' => $permiso->dni_empleado],
-        [
-            'dias_vacacionales' => 0,
-            'dias_compensatorios' => 0,
-            'horas_acumuladas' => 0
-        ]
-    );
-
-    // ===== SOLO SI RESTA DIAS =====
+    // ===== SOLO SI RESTA DÍAS (VACACIONES) =====
     if ($permiso->tipo->resta_dias) {
-
-        $totalHoras = ($acumulado->dias_vacacionales * 8) + $acumulado->horas_acumuladas;
 
         $horasARestar = 0;
 
@@ -122,34 +108,90 @@ public function aprobar($id)
                 break;
         }
 
-        // Nunca permitir negativo
-        if ($horasARestar > $totalHoras) {
+        $diasARestar = floor($horasARestar / 8);
+        $horasExtras = $horasARestar % 8;
+
+        // 🔎 TRAER PERÍODOS FIFO
+       $periodos = PeriodoVacacionesSistema::where('dni_empleado', $permiso->dni_empleado)
+    ->where('estado', 'activo')
+    ->whereRaw('(dias_otorgados - dias_usados) > 0')
+    ->orderBy('fecha_vencimiento', 'asc')
+    ->get();
+
+        $diasPendientes = $diasARestar;
+
+        foreach ($periodos as $periodo) {
+
+            if ($diasPendientes <= 0) break;
+
+            $diasDisponibles = $periodo->dias_otorgados - $periodo->dias_usados;
+
+            if ($diasDisponibles >= $diasPendientes) {
+
+                $periodo->dias_usados += $diasPendientes;
+                $diasPendientes = 0;
+
+            } else {
+
+                $periodo->dias_usados += $diasDisponibles;
+                $diasPendientes -= $diasDisponibles;
+            }
+
+            $periodo->save();
+        }
+
+        // ❌ Si no alcanzó saldo
+        if ($diasPendientes > 0) {
             return back()->with('error', 'Saldo insuficiente de vacaciones.');
         }
 
-        $totalHoras -= $horasARestar;
+        // ===== MANEJO DE HORAS ACUMULADAS =====
+        $acumulado = DiasAcumuladosSistema::firstOrCreate(
+            ['dni_empleado' => $permiso->dni_empleado],
+            [
+                'dias_vacacionales' => 0,
+                'dias_compensatorios' => 0,
+                'horas_acumuladas' => 0
+            ]
+        );
 
-        $acumulado->dias_vacacionales = floor($totalHoras / 8);
-        $acumulado->horas_acumuladas = $totalHoras % 8;
+        if ($horasExtras > 0) {
+
+            if ($acumulado->horas_acumuladas < $horasExtras) {
+                return back()->with('error', 'Horas acumuladas insuficientes.');
+            }
+
+            $acumulado->horas_acumuladas -= $horasExtras;
+            $acumulado->save();
+        }
     }
 
     // ===== COMPENSATORIOS =====
     if (strtolower($permiso->tipo->nombre) == 'compensatorio') {
+
+        $acumulado = DiasAcumuladosSistema::firstOrCreate(
+            ['dni_empleado' => $permiso->dni_empleado],
+            [
+                'dias_vacacionales' => 0,
+                'dias_compensatorios' => 0,
+                'horas_acumuladas' => 0
+            ]
+        );
 
         if ($acumulado->dias_compensatorios <= 0) {
             return back()->with('error', 'Saldo compensatorio insuficiente.');
         }
 
         $acumulado->dias_compensatorios -= 1;
+        $acumulado->save();
     }
 
-    $acumulado->save();
-
+    // ✅ ACTUALIZAR ESTADO
     $permiso->estado_permiso_id = $estadoAprobado->id;
     $permiso->save();
 
     return redirect()->route('permisos.index')
-        ->with('success', 'Permiso aprobado correctamente.');
+        ->with('success', 'Permiso aprobado correctamente y saldo actualizado.');
 }
 
 

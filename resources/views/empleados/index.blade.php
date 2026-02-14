@@ -50,10 +50,29 @@
 
     <div class="glass-card">
 
-        <div class="card-header-custom p-4">
+         <!-- HEADER -->
+        <div class="card-header-custom p-4 d-flex justify-content-between align-items-center">
             <h4 class="mb-0">Listado de Empleados</h4>
+
+            <div class="d-flex gap-2">
+
+                <!-- BOTÓN GENERAR VACACIONES -->
+                <form method="POST" action="{{ route('vacaciones.generar') }}">
+                    @csrf
+                    <button class="btn btn-warning btn-sm">
+                        Generar Vacaciones Año Actual
+                    </button>
+                </form>
+
+                <!-- BOTÓN ATRÁS -->
+                <a href="{{ url()->previous() }}" class="btn btn-light btn-sm">
+                    Atrás
+                </a>
+
+            </div>
         </div>
 
+        
         <div class="p-4">
 
             <div class="table-responsive">
@@ -61,17 +80,47 @@
 
                     <thead>
                         <tr>
-                            <th>Nombre</th>
+                            <th>#</th>
+                            <th>Nombre del empleado</th>
                             <th>DNI</th>
                             <th>Días disponibles</th>
-                            <th>Semáforo</th>
-                            <th>Acciones</th>
+                            <th>Ver por riesgo de vencimiento
+                                <div class="mb-3 text-center">
+
+    <a href="{{ route('empleados.index') }}"
+       class="btn btn-outline-dark btn-sm">
+        Ver todos
+    </a>
+
+    <a href="{{ route('empleados.index', ['estado' => 'rojo']) }}"
+       class="btn btn-danger btn-sm">
+        🔴 Alto
+    </a>
+
+    <a href="{{ route('empleados.index', ['estado' => 'amarillo']) }}"
+       class="btn btn-warning btn-sm">
+        🟡 Medio
+    </a>
+
+    <a href="{{ route('empleados.index', ['estado' => 'verde']) }}"
+       class="btn btn-success btn-sm">
+        🟢 Bajo
+    </a>
+
+</div>
+                            </th>
+                            <th>Más</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        @foreach($empleados as $empleado)
-                        <tr>
+                        @foreach($empleados as $index => $empleado)
+                            <tr>
+
+                            <td>
+                        {{ ($empleados->currentPage() - 1) * $empleados->perPage() + $index + 1 }}
+                            </td>
+
 
                             <td>
                                 {{ $empleado->primer_nombre }}
@@ -93,7 +142,7 @@
                             <td>
                                 <a href="{{ route('empleados.show', $empleado->DNI) }}"
                                    class="btn btn-sm btn-dark">
-                                    Más
+                                    Ver
                                 </a>
                             </td>
 
@@ -102,6 +151,10 @@
                     </tbody>
 
                 </table>
+
+                 <div class="mt-3 d-flex justify-content-center">
+                {{ $empleados->links() }}
+            </div>
             </div>
 
         </div>

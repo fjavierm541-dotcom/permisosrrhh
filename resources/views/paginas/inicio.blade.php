@@ -3,91 +3,117 @@
 @section('title', 'Inicio - Administrador')
 
 @section('content')
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio - Administrador</title>
-    <!-- Bootstrap CSS desde CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container mt-5">
-        <h1 class="mb-4 text-center">Panel de Administrador</h1>
 
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            <!-- Gestión de empleados -->
-            <div class="col">
-                <div class="card h-100 text-center shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Gestión de Empleados</h5>
-                        <p class="card-text">Crear, editar y administrar información de los empleados.</p>
-                        <a href="#" class="btn btn-primary">Ir</a>
-                    </div>
-                </div>
-            </div>
+<style>
+    .dashboard-container {
+        background: rgba(255,255,255,0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 45px rgba(0,0,0,0.25);
+        padding: 40px;
+    }
 
-            <!-- Días acumulados -->
-            <div class="col">
-                <div class="card h-100 text-center shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Días Acumulados</h5>
-                        <p class="card-text">Visualizar y actualizar los días de permiso acumulados.</p>
-                        <a href="#" class="btn btn-primary">Ir</a>
-                    </div>
-                </div>
-            </div>
+    .dashboard-title {
+        font-weight: 700;
+        color: #1f3a56;
+        letter-spacing: 1px;
+    }
 
-            <!-- Solicitudes de permiso -->
-            <div class="col">
-                <div class="card h-100 text-center shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Solicitudes de Permiso</h5>
-                        <p class="card-text">Revisar, aprobar o rechazar permisos solicitados por los empleados.</p>
-                        <a href="#" class="btn btn-primary">Ir</a>
-                    </div>
-                </div>
-            </div>
+    .dashboard-subtitle {
+        color: #6c757d;
+        font-size: 15px;
+    }
 
-            <!-- Aprobación de permisos -->
-            <div class="col">
-                <div class="card h-100 text-center shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Aprobación de Permisos</h5>
-                        <p class="card-text">Gestionar aprobaciones pendientes y mantener control de permisos.</p>
-                        <a href="#" class="btn btn-primary">Ir</a>
-                    </div>
-                </div>
-            </div>
+    .dashboard-card {
+        background: linear-gradient(135deg, #ffffff, #f1f4f8);
+        border-radius: 16px;
+        border: none;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
 
-            <!-- Reportes -->
-            <div class="col">
-                <div class="card h-100 text-center shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Reportes</h5>
-                        <p class="card-text">Ver reportes generales o individuales sobre permisos y días acumulados.</p>
-                        <a href="#" class="btn btn-primary">Ir</a>
-                    </div>
-                </div>
-            </div>
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+    }
 
-            <!-- Configuración del sistema -->
-            <div class="col">
-                <div class="card h-100 text-center shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Configuración del Sistema</h5>
-                        <p class="card-text">Modificar parámetros generales, usuarios y roles del sistema.</p>
-                        <a href="#" class="btn btn-primary">Ir</a>
-                    </div>
-                </div>
-            </div>
+    .dashboard-icon {
+        font-size: 28px;
+        color: #2d4f73;
+        margin-bottom: 15px;
+    }
+
+    .btn-dashboard {
+        background-color: #d4b06a;
+        border: none;
+        color: #1f3a56;
+        font-weight: 600;
+    }
+
+    .btn-dashboard:hover {
+        background-color: #c39a4f;
+        color: #1f3a56;
+    }
+</style>
+
+<div class="container py-5">
+
+    <div class="dashboard-container">
+
+        <div class="text-center mb-5">
+            <h2 class="dashboard-title">Panel de Administración</h2>
+            <p class="dashboard-subtitle">
+                Gestiona empleados, permisos y configuraciones del sistema
+            </p>
         </div>
+
+        <div class="row g-4">
+
+            <!-- Empleados -->
+            <div class="col-md-4">
+                <div class="card dashboard-card text-center p-4">
+                    <div class="dashboard-icon">👥</div>
+                    <h5>Empleados</h5>
+                    <p class="text-muted small">
+                        Visualizar y administrar información del personal.
+                    </p>
+                    <a href="{{ route('empleados.index') }}" class="btn btn-dashboard btn-sm">
+                        Ingresar
+                    </a>
+                </div>
+            </div>
+
+            <!-- Permisos -->
+            <div class="col-md-4">
+                <div class="card dashboard-card text-center p-4">
+                    <div class="dashboard-icon">📅</div>
+                    <h5>Permisos</h5>
+                    <p class="text-muted small">
+                        Crear, revisar y aprobar solicitudes.
+                    </p>
+                    <a href="{{ route('permisos.index') }}" class="btn btn-dashboard btn-sm">
+                        Ingresar
+                    </a>
+                </div>
+            </div>
+
+            <!-- Carga Histórica -->
+            <div class="col-md-4">
+                <div class="card dashboard-card text-center p-4">
+                    <div class="dashboard-icon">🗂</div>
+                    <h5>Períodos de Vacaciones</h5>
+                    <p class="text-muted small">
+                        Administrar períodos históricos y vencimientos.
+                    </p>
+                    <a href="{{ route('periodos.create') }}" class="btn btn-dashboard btn-sm">
+                        Ingresar
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
     </div>
 
-    <!-- Bootstrap JS desde CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</div>
 
 @endsection
