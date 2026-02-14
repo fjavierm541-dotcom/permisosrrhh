@@ -5,6 +5,7 @@ use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\PeriodoVacacionesController;
 use App\Http\Controllers\EmpleadoController;
     use App\Http\Controllers\DashboardController;
+        use Illuminate\Support\Facades\Auth;
 
 
     
@@ -37,9 +38,11 @@ Route::get('/db-test', function() {
     }
 });
 
+
 Route::get('/inicio', function () {
     return view('paginas.inicio');
-});
+})->name('paginas.inicio');
+
 
 
 
@@ -90,3 +93,12 @@ Route::get('/empleados/{dni}', [EmpleadoController::class, 'show'])
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
+
+
+
+
+//autenticacion de usuario
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect('/');
+})->name('logout');

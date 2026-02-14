@@ -12,10 +12,11 @@
         body {
             background: linear-gradient(135deg, #1f3a56, #2d4f73);
             min-height: 100vh;
+            padding-top: 75px; /* 👈 Espacio para navbar fijo */
         }
 
         .navbar-custom {
-            background-color: #274769;
+            background: linear-gradient(90deg, #1f3a56, #2d4f73);
         }
 
         .navbar-custom .navbar-brand,
@@ -48,8 +49,8 @@
 
 <body>
 
-<!-- NAVBAR SUPERIOR -->
-<nav class="navbar navbar-expand-lg navbar-custom shadow">
+<!-- NAVBAR SUPERIOR FIJO -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top shadow">
     <div class="container-fluid px-4">
 
         <!-- Nombre del sistema -->
@@ -68,15 +69,27 @@
             <!-- Links izquierda -->
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('dashboard') }}">Inicio</a>
+                    <a class="nav-link {{ request()->routeIs('paginas.inicio') ? 'active fw-bold text-warning' : '' }}"
+   href="{{ route('paginas.inicio') }}">
+   Inicio
+</a>
+
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('empleados.index') }}">Empleados</a>
+                    <a class="nav-link {{ request()->routeIs('empleados.*') ? 'active fw-bold text-warning' : '' }}"
+   href="{{ route('empleados.index') }}">
+   Empleados
+</a>
+
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('permisos.index') }}">Permisos</a>
+                    <a class="nav-link {{ request()->routeIs('permisos.*') ? 'active fw-bold text-warning' : '' }}"
+   href="{{ route('permisos.index') }}">
+   Permisos
+</a>
+
                 </li>
             </ul>
 
@@ -89,22 +102,32 @@
                     </a>
 
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item" href="#">
-                                Ajustes
-                            </a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                                @csrf
-                                <a href="#" class="dropdown-item text-danger">
-                                Cerrar sesión
-                                </a>
 
-                        </li>
-                    </ul>
+    <li>
+        <a class="dropdown-item" href="{{ route('dashboard') }}">
+            📊 Monitoreo de Días Disponibles
+        </a>
+    </li>
+
+    <li>
+        <a class="dropdown-item" href="#">
+            ⚙ Ajustes
+        </a>
+    </li>
+
+    <li><hr class="dropdown-divider"></li>
+
+    <li>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="dropdown-item text-danger">
+                Cerrar sesión
+            </button>
+        </form>
+    </li>
+
+</ul>
+
                 </li>
 
             </ul>
