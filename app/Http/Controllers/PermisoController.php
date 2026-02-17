@@ -9,6 +9,8 @@ use App\Models\EstadoPermisoSistema;
 use Illuminate\Http\Request;
 use App\Models\DiasAcumuladosSistema;
 use App\Models\PeriodoVacacionesSistema;
+use App\Models\MovimientoPermisoSistema;
+use Carbon\Carbon;
 
 class PermisoController extends Controller
 {
@@ -83,7 +85,7 @@ public function aprobar($id)
 
     $estadoAprobado = EstadoPermisoSistema::whereRaw('LOWER(nombre) = ?', ['aprobado'])->firstOrFail();
 
-    // ===== SOLO SI RESTA DÍAS (VACACIONES) =====
+    // ===== SOLO SI RESTA DÍAS =====
     if ($permiso->tipo->resta_dias) {
 
         $horasARestar = 0;
@@ -102,8 +104,8 @@ public function aprobar($id)
                 break;
 
             case 'varios_dias':
-                $dias = \Carbon\Carbon::parse($permiso->fecha_inicio)
-                    ->diffInDays(\Carbon\Carbon::parse($permiso->fecha_fin)) + 1;
+                $dias = Carbon::parse($permiso->fecha_inicio)
+                    ->diffInDays(Carbon::parse($permiso->fecha_fin)) + 1;
                 $horasARestar = $dias * 8;
                 break;
         }
@@ -112,11 +114,11 @@ public function aprobar($id)
         $horasExtras = $horasARestar % 8;
 
         // 🔎 TRAER PERÍODOS FIFO
-       $periodos = PeriodoVacacionesSistema::where('dni_empleado', $permiso->dni_empleado)
-    ->where('estado', 'activo')
-    ->whereRaw('(dias_otorgados - dias_usados) > 0')
-    ->orderBy('fecha_vencimiento', 'asc')
-    ->get();
+        $periodos = PeriodoVacacionesSistema::where('dni_empleado', $permiso->dni_empleado)
+            ->where('estado', 'activo')
+            ->whereRaw('(dias_otorgados - dias_usados) > 0')
+            ->orderByRaw('COALESCE(extension_hasta, fecha_vencimiento) asc')
+            ->get();
 
         $diasPendientes = $diasARestar;
 
@@ -145,7 +147,7 @@ public function aprobar($id)
             return back()->with('error', 'Saldo insuficiente de vacaciones.');
         }
 
-        // ===== MANEJO DE HORAS ACUMULADAS =====
+        // ===== HORAS ACUMULADAS =====
         $acumulado = DiasAcumuladosSistema::firstOrCreate(
             ['dni_empleado' => $permiso->dni_empleado],
             [
@@ -164,6 +166,21 @@ public function aprobar($id)
             $acumulado->horas_acumuladas -= $horasExtras;
             $acumulado->save();
         }
+
+       // 📌 REGISTRAR MOVIMIENTO
+MovimientoPermisoSistema::create([
+    'dni_empleado' => $permiso->dni_empleado,
+    'permiso_id' => $permiso->id,
+    'tipo_movimiento' => 'aprobacion_permiso',
+    'categoria' => strtolower($permiso->tipo->nombre),
+    'descripcion' => 'Se aprobaron ' . $diasARestar . ' días y ' . $horasExtras . ' horas.',
+    'dias_afectados' => $diasARestar,
+    'horas_afectadas' => $horasExtras,
+    'usuario_responsable' => auth()->user()->name ?? 'Sistema',
+    'fecha' => now() // si tienes campo fecha en la tabla
+]);
+
+        
     }
 
     // ===== COMPENSATORIOS =====
@@ -184,6 +201,17 @@ public function aprobar($id)
 
         $acumulado->dias_compensatorios -= 1;
         $acumulado->save();
+
+        // 📌 REGISTRAR MOVIMIENTO
+        MovimientoPermisoSistema::create([
+            'dni_empleado' => $permiso->dni_empleado,
+            'permiso_id' => $permiso->id,
+            'tipo_movimiento' => 'permiso_compensatorio',
+            'descripcion' => 'Se descontó 1 día compensatorio.',
+            'dias_afectados' => 1,
+            'horas_afectadas' => 0,
+            'usuario_responsable' => auth()->user()->name ?? 'Sistema'
+        ]);
     }
 
     // ✅ ACTUALIZAR ESTADO

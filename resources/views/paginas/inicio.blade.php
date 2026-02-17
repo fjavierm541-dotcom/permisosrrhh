@@ -74,7 +74,7 @@
                     <div class="dashboard-icon">👥</div>
                     <h5>Empleados</h5>
                     <p class="text-muted small">
-                        Visualizar y administrar información del personal.
+                        Visualizar y información del personal.
                     </p>
                     <a href="{{ route('empleados.index') }}" class="btn btn-dashboard btn-sm">
                         Ingresar

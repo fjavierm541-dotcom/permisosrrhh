@@ -98,20 +98,20 @@
 
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                        👤 {{ auth()->user()->name ?? 'Usuario' }}
+                        {{ auth()->user()->name ?? 'Usuario' }}
                     </a>
 
                     <ul class="dropdown-menu dropdown-menu-end">
 
     <li>
         <a class="dropdown-item" href="{{ route('dashboard') }}">
-            📊 Monitoreo de Días Disponibles
+            Monitoreo de Días Disponibles
         </a>
     </li>
 
     <li>
         <a class="dropdown-item" href="#">
-            ⚙ Ajustes
+            Ajustes
         </a>
     </li>
 

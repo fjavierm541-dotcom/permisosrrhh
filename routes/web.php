@@ -81,6 +81,10 @@ Route::post('periodos/store', [PeriodoVacacionesController::class, 'store'])
 
 Route::get('/empleados/{dni}', [EmpleadoController::class, 'show'])
     ->name('empleados.show');
+//imprimir reprte individual de empleado  
+Route::get('/empleados/{dni}/reporte', [EmpleadoController::class, 'reporte'])
+    ->name('empleados.reporte');
+
 
 
 

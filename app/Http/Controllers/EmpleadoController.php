@@ -7,6 +7,9 @@ use App\Models\Empleado;
 use App\Models\DiasAcumuladosSistema;
 use App\Models\PeriodoVacacionesSistema;
 use Carbon\Carbon;
+use App\Models\MovimientoPermisoSistema;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class EmpleadoController extends Controller
 {
@@ -177,10 +180,86 @@ public function generarVacaciones()
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
+public function show($dni)
+{
+    $empleado = Empleado::where('DNI', $dni)->firstOrFail();
+
+    // Períodos activos
+    $periodosActivos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
+        ->where('estado', 'activo')
+        ->orderByDesc('anio_laboral')
+        ->get();
+
+    // Períodos vencidos
+    $periodosVencidos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
+        ->where('estado', 'vencido')
+        ->orderByDesc('anio_laboral')
+        ->get();
+
+    // Movimientos
+    $movimientos = MovimientoPermisoSistema::where('dni_empleado', $dni)
+        ->orderByDesc('created_at')
+        ->get();
+
+    // Calcular días disponibles SOLO activos
+    $totalDiasDisponibles = $periodosActivos->sum(function ($periodo) {
+        return max(0, $periodo->dias_otorgados - $periodo->dias_usados);
+    });
+
+    return view('empleados.show', compact(
+        'empleado',
+        'periodosActivos',
+        'periodosVencidos',
+        'movimientos',
+        'totalDiasDisponibles'
+    ));
+}
+
+
+
+
+public function reporte($dni)
+{
+    $empleado = Empleado::where('DNI', $dni)->firstOrFail();
+
+    $periodosActivos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
+        ->where('estado', 'activo')
+        ->orderByDesc('anio_laboral')
+        ->get();
+
+    $periodosVencidos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
+        ->where('estado', 'vencido')
+        ->orderByDesc('anio_laboral')
+        ->get();
+
+    $movimientos = MovimientoPermisoSistema::where('dni_empleado', $dni)
+        ->orderByDesc('created_at')
+        ->get();
+
+    $totalDiasDisponibles = 0;
+
+    foreach ($periodosActivos as $periodo) {
+        $totalDiasDisponibles += max(0, $periodo->dias_otorgados - $periodo->dias_usados);
     }
+
+    // 📅 Fecha y hora de generación
+    $fechaGeneracion = Carbon::now()
+        ->locale('es')
+        ->translatedFormat('d \d\e F \d\e\l Y H:i');
+
+    $pdf = Pdf::loadView('empleados.reporte', compact(
+        'empleado',
+        'periodosActivos',
+        'periodosVencidos',
+        'movimientos',
+        'totalDiasDisponibles',
+        'fechaGeneracion'
+    ));
+
+    return $pdf->stream('reporte_empleado_'.$empleado->DNI.'.pdf');
+}
+
+
 
     /**
      * Show the form for editing the specified resource.
