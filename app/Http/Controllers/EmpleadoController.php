@@ -217,7 +217,6 @@ public function show($dni)
 
 
 
-
 public function reporte($dni)
 {
     $empleado = Empleado::where('DNI', $dni)->firstOrFail();
@@ -242,8 +241,8 @@ public function reporte($dni)
         $totalDiasDisponibles += max(0, $periodo->dias_otorgados - $periodo->dias_usados);
     }
 
-    // 📅 Fecha y hora de generación
-    $fechaGeneracion = Carbon::now()
+    // 🔥 IMPORTANTE: usar timezone correcto
+    $fechaGeneracion = Carbon::now('America/Tegucigalpa')
         ->locale('es')
         ->translatedFormat('d \d\e F \d\e\l Y H:i');
 
@@ -256,7 +255,14 @@ public function reporte($dni)
         'fechaGeneracion'
     ));
 
-    return $pdf->stream('reporte_empleado_'.$empleado->DNI.'.pdf');
+    $pdf->setPaper('a4', 'portrait');
+
+    // 🔥 Renderizar primero para que calcule páginas
+    $pdf->render();
+
+    return $pdf->stream('reporte_empleado_'.$empleado->DNI.'.pdf', [
+        'Attachment' => false // 👈 abre en nueva pestaña
+    ]);
 }
 
 
