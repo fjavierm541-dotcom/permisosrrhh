@@ -62,13 +62,18 @@
                         Generar Vacaciones Año Actual
                     </button>
                 </form>
-
-                <!-- BOTÓN ATRÁS -->
-                <a href="{{ url()->previous() }}" class="btn btn-light btn-sm">
-                    Atrás
+                <!-- BOTÓN CREAER -->
+                <a href="{{ route('empleados.create') }}"
+                class="btn btn-primary-custom btn-sm">
+                Registrar Empleado
                 </a>
 
+                <!-- BOTÓN ATRÁS -->
+                <a href="{{ url()->previous() }}" class="btn btn-primary-custom btn-sm">
+                    Atrás
+                </a>
             </div>
+            
         </div>
 
         
@@ -108,8 +113,10 @@
 
 </div>
                             </th>
-                            <th>Más</th>
+                            <th>Historial</th>
+                            <th>Registro</th>
                         </tr>
+                        
                     </thead>
 
                     <tbody>
@@ -142,6 +149,12 @@
                                 <a href="{{ route('empleados.show', $empleado->DNI) }}"
                                    class="btn btn-sm btn-dark">
                                     Ver
+                                </a>
+                            </td>
+                             <td>
+                                <a href="{{ route('empleados.verRegistro', $empleado->DNI) }}"
+                                 class="btn btn-sm btn-dark">
+                                Ver 
                                 </a>
                             </td>
 

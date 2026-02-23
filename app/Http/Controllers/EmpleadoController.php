@@ -162,20 +162,65 @@ public function generarVacaciones()
 
 
     /**
-     * Show the form for creating a new resource.
+     *CREAR EMPLEADOS
      */
     public function create()
-    {
-        //
-    }
+{
+    return view('empleados.create');
+}
 
     /**
-     * Store a newly created resource in storage.
+     * GUARDAR INFORMACIÓN DE LOS EMPLEADOS
      */
-    public function store(Request $request)
-    {
-        //
+public function store(Request $request)
+{
+    $request->validate([
+        'DNI' => 'required|unique:empleados,DNI',
+        'primer_nombre' => 'required',
+        'primer_apellido' => 'required',
+    ]);
+
+    $data = $request->all();
+    $data['usuario_crea'] = auth()->user()->name ?? 'Sistema';
+
+    // Crear empleado primero
+    $empleado = Empleado::create($data);
+
+    // ================================
+    // Guardar documentos en tabla aparte
+    // ================================
+
+    $documentos = [
+        'copia_dni' => 'Copia DNI',
+        'acuerdo' => 'Acuerdo',
+        'nota_traslado' => 'Nota Traslado'
+    ];
+
+    foreach ($documentos as $campo => $tipo) {
+
+        if ($request->hasFile($campo)) {
+
+            $ruta = $request->file($campo)
+                ->store("empleados/{$empleado->DNI}/documentos", 'public');
+
+            DocumentoEmpleado::create([
+                'dni_empleado' => $empleado->DNI,
+                'tipo_documento' => $tipo,
+                'ruta_archivo' => $ruta
+            ]);
+        }
     }
+
+    return redirect()
+        ->route('empleados.index')
+        ->with('success', 'Empleado creado correctamente.');
+}
+
+
+
+
+
+
 
     /**
      * Display the specified resource.
@@ -266,6 +311,38 @@ public function reporte($dni)
 }
 
 
+
+
+
+public function expediente($dni)
+{
+    $empleado = Empleado::with('documentos')
+        ->where('DNI', $dni)
+        ->firstOrFail();
+
+    return view('empleados.expediente', compact('empleado'));
+}
+
+
+
+public function verRegistro($dni)
+{
+    $empleado = Empleado::with('documentos')
+        ->where('DNI', $dni)
+        ->firstOrFail();
+
+    return view('empleados.verRegistro', compact('empleado'));
+}
+
+
+public function imprimirRegistro($dni)
+{
+    $empleado = Empleado::with('documentos')
+        ->where('DNI', $dni)
+        ->firstOrFail();
+
+    return view('empleados.verRegistroImprimir', compact('empleado'));
+}
 
     /**
      * Show the form for editing the specified resource.

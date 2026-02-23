@@ -52,9 +52,6 @@ Route::get('/permisos/crear', [PermisoController::class, 'create'])
     ->name('permisos.create');
 Route::post('/permisos', [PermisoController::class, 'store'])
     ->name('permisos.store');
-
-
-
     Route::get('permisos/{id}/aprobar', [PermisoController::class, 'aprobar'])
     ->name('permisos.aprobar');
     Route::get('permisos/{id}/rechazar', [PermisoController::class, 'rechazar'])
@@ -75,10 +72,26 @@ Route::post('periodos/store', [PeriodoVacacionesController::class, 'store'])
 
 
 
+// crear/registrar nuevos empleados en el sistema
+Route::get('empleados/create', [EmpleadoController::class, 'create'])
+    ->name('empleados.create');
+//GUARDAR EMPLEADOS
+Route::post('empleados', [EmpleadoController::class, 'store'])
+    ->name('empleados.store');
+
+    // ver expediente
+Route::get('empleados/{dni}/expediente', [EmpleadoController::class, 'expediente'])
+    ->name('empleados.expediente');
+
+    // ver registro de empleado individual 
+Route::get('empleados/{dni}/ver-registro', [EmpleadoController::class, 'verRegistro'])
+    ->name('empleados.verRegistro');
+
+Route::get('empleados/{dni}/ver-registro/imprimir', [EmpleadoController::class, 'imprimirRegistro'])
+    ->name('empleados.verRegistro.imprimir');
 
     Route::get('/empleados', [EmpleadoController::class, 'index'])
     ->name('empleados.index');
-
 Route::get('/empleados/{dni}', [EmpleadoController::class, 'show'])
     ->name('empleados.show');
 //imprimir reprte individual de empleado  

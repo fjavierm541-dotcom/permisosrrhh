@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'Nombre de la Vista')
+@section('title', 'Registro historico de días')
 
 @section('content')
 
@@ -93,7 +93,7 @@
                             </div>
 
                             <div class="col-md-3 mb-3">
-                                <label>Fecha inicio período</label>
+                                <label>Fecha exacta que obtuvo estos días</label>
                                 <input type="date" name="fecha_inicio_periodo[]" class="form-control" required>
                             </div>
 

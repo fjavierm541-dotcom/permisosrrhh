@@ -1,0 +1,436 @@
+@extends('layouts.master')
+
+@section('title', 'Registrar Empleado')
+
+@section('content')
+
+<div class="glass-card p-4">
+
+    <h4 class="mb-4 fw-bold">Crear Empleado</h4>
+
+    @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+    <form method="POST" action="{{ route('empleados.store') }}" enctype="multipart/form-data">
+        @csrf
+        
+
+        <div class="accordion" id="empleadoAccordion">
+
+            {{-- ============================= --}}
+            {{-- 1️⃣ DATOS GENERALES --}}
+            {{-- ============================= --}}
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button fw-bold"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#datosGenerales">
+                        Datos Generales
+                    </button>
+                </h2>
+
+                <div id="datosGenerales"
+                     class="accordion-collapse collapse show"
+                     data-bs-parent="#empleadoAccordion">
+
+                    <div class="accordion-body">
+
+                        <div class="row">
+
+                            <div class="col-md-3 mb-3">
+                                <label>Código</label>
+                                <input type="text" name="codigo" class="form-control">
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label>DNI *</label>
+                                <input type="text" name="DNI" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label>RTN</label>
+                                <input type="text" name="RTN" class="form-control">
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label>Sexo</label>
+                                <select name="sexo" class="form-control">
+                                    <option value="">Seleccione</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Femenino">Femenino</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-3 mb-3">
+                                <label>Primer Nombre *</label>
+                                <input type="text" name="primer_nombre" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label>Segundo Nombre</label>
+                                <input type="text" name="segundo_nombre" class="form-control">
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label>Primer Apellido *</label>
+                                <input type="text" name="primer_apellido" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label>Segundo Apellido</label>
+                                <input type="text" name="segundo_apellido" class="form-control">
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-2 mb-3">
+                                <label>Día</label>
+                                <input type="number" name="dia_nacimiento" class="form-control">
+                            </div>
+
+                            <div class="col-md-2 mb-3">
+                                <label>Mes</label>
+                                <input type="number" name="mes_nacimiento" class="form-control">
+                            </div>
+
+                            <div class="col-md-2 mb-3">
+                                <label>Año</label>
+                                <input type="number" name="anio_nacimiento" class="form-control">
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label>Estado Civil</label>
+                                <select name="estado_civil" class="form-control">
+                                    <option value="">Seleccione</option>
+                                    <option value="Soltero(a)">Soltero(a)</option>
+                                    <option value="Casado(a)">Casado(a)</option>
+                                    <option value="Unión Libre">Unión Libre</option>
+                                    <option value="Divorciado(a)">Divorciado(a)</option>
+                                    <option value="Viudo(a)">Viudo(a)</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label>Nacionalidad</label>
+                                <input type="text" name="nacionalidad" class="form-control">
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label>Tipo de Sangre</label>
+                                <select name="tipo_sangre" class="form-control">
+                                    <option value="">Seleccione</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            {{-- ============================= --}}
+            {{-- 2️⃣ DIRECCIÓN Y CONTACTO --}}
+            {{-- ============================= --}}
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button fw-bold collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#contacto">
+                        Información de Contacto
+                    </button>
+                </h2>
+
+                <div id="contacto"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#empleadoAccordion">
+
+                    <div class="accordion-body">
+
+                        <div class="mb-3">
+                            <label>Dirección</label>
+                            <textarea name="direccion_domicilio" class="form-control"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Referencia Domicilio</label>
+                            <textarea name="referencia_domicilio" class="form-control"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label>Teléfono Celular</label>
+                                <input type="text" name="telefono_celular" class="form-control">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label>Teléfono Fijo</label>
+                                <input type="text" name="telefono_fijo" class="form-control">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label>Nivel Educativo</label>
+                                <select name="nivel_educativo" class="form-control">
+                                    <option value="">Seleccione</option>
+                                    <option value="Nivel Primario">Nivel Primario</option>
+                                    <option value="Nivel Secundario">Nivel Secundario</option>
+                                    <option value="Nivel Superior">Nivel Superior</option>
+                                    <option value="Postgrado">Postgrado</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            {{-- ============================= --}}
+            {{-- 3️⃣ CONTACTOS DE EMERGENCIA --}}
+            {{-- ============================= --}}
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button fw-bold collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#emergencia">
+                        Contactos de Emergencia
+                    </button>
+                </h2>
+
+                <div id="emergencia"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#empleadoAccordion">
+
+                    <div class="accordion-body">
+
+                        <p class="text-muted fw-bold">
+                            En caso de emergencia se autoriza llamar a las personas en el siguiente orden:
+                        </p>
+
+                        <h6>Contacto 1</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <input type="text" name="nombre_contacto1" placeholder="Nombre" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" name="telefono_contacto1" placeholder="Teléfono" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" name="parentezco_contacto1" placeholder="Parentezco" class="form-control">
+                            </div>
+                        </div>
+
+                        <h6>Contacto 2</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <input type="text" name="nombre_contacto2" placeholder="Nombre" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" name="telefono_contacto2" placeholder="Teléfono" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" name="parentezco_contacto2" placeholder="Parentezco" class="form-control">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+{{-- ============================= --}}
+{{-- 4️⃣ BENEFICIARIOS (OPCIONAL) --}}
+{{-- ============================= --}}
+<div class="accordion-item">
+    <h2 class="accordion-header">
+        <button class="accordion-button fw-bold collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#beneficiarios">
+            Beneficiarios en caso de muerte
+        </button>
+    </h2>
+
+    <div id="beneficiarios"
+         class="accordion-collapse collapse"
+         data-bs-parent="#empleadoAccordion">
+
+        <div class="accordion-body">
+
+            <p class="text-muted fw-bold">
+                Complete únicamente si el empleado desea registrar beneficiarios.
+            </p>
+
+            @for ($i = 1; $i <= 7; $i++)
+                <hr>
+                <h6 class="fw-bold">Beneficiario {{ $i }}</h6>
+
+                <div class="row mb-3">
+
+                    <div class="col-md-4">
+                        <label>Nombre</label>
+                        <input type="text"
+                               name="nombre_beneficiario{{ $i }}"
+                               class="form-control">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>Porcentaje</label>
+                        <input type="number"
+                               name="porcentaje_beneficiario{{ $i }}"
+                               class="form-control"
+                               min="0"
+                               max="100">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Parentezco</label>
+                        <input type="text"
+                               name="parentezco_beneficiario{{ $i }}"
+                               class="form-control">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>DNI</label>
+                        <input type="text"
+                               name="DNI_beneficiario{{ $i }}"
+                               class="form-control">
+                    </div>
+
+                </div>
+            @endfor
+
+        </div>
+    </div>
+</div>
+
+
+
+            {{-- ============================= --}}
+            {{-- 4️⃣ INFORMACIÓN LABORAL --}}
+            {{-- ============================= --}}
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button fw-bold collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#laboral">
+                        Información Laboral
+                    </button>
+                </h2>
+
+                <div id="laboral"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#empleadoAccordion">
+
+                    <div class="accordion-body">
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label>Puesto de Nombramiento</label>
+                                <input type="text" name="puesto" class="form-control">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label>Fecha de Nombramiento</label>
+                                <input type="date" name="fecha_nombramiento" class="form-control">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label>Tipo</label>
+                                <select name="tipo" class="form-control">
+                                    <option value="">Seleccione</option>
+                                    <option value="Acuerdo">Acuerdo</option>
+                                    <option value="Contrato">Contrato</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label>Salario Inicial</label>
+                                <input type="number" step="0.01" name="salario_inicial" class="form-control">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            {{-- ============================= --}}
+            {{-- 5️⃣ DOCUMENTACIÓN --}}
+            {{-- ============================= --}}
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button fw-bold collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#documentos">
+                        Documentación
+                    </button>
+                </h2>
+
+                <div id="documentos"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#empleadoAccordion">
+
+                    <div class="accordion-body">
+
+                        <div class="row">
+
+                            <div class="col-md-4 mb-3">
+                                <label>Copia DNI</label>
+                                <input type="file" name="copia_dni" class="form-control">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label>Acuerdo / Contrato</label>
+                                <input type="file" name="acuerdo" class="form-control">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label>Nota de Traslado (si es necesario)</label>
+                                <input type="file" name="nota_traslado" class="form-control">
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="mt-4 text-end">
+            <button type="submit" class="btn btn-primary-custom">
+                Guardar Empleado
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+@endsection
