@@ -167,6 +167,7 @@ public function generarVacaciones()
     public function create()
 {
     return view('empleados.create');
+    
 }
 
     /**
@@ -175,10 +176,68 @@ public function generarVacaciones()
 public function store(Request $request)
 {
     $request->validate([
-        'DNI' => 'required|unique:empleados,DNI',
-        'primer_nombre' => 'required',
-        'primer_apellido' => 'required',
-    ]);
+
+    // NOMBRES (solo letras y espacios)
+    'primer_nombre' => ['required','regex:/^[\pL\s]+$/u','max:50'],
+    'segundo_nombre' => ['nullable','regex:/^[\pL\s]+$/u','max:50'],
+    'primer_apellido' => ['required','regex:/^[\pL\s]+$/u','max:50'],
+    'segundo_apellido' => ['nullable','regex:/^[\pL\s]+$/u','max:50'],
+
+    // DNI
+    'DNI' => ['required','unique:empleados,DNI','regex:/^[0-9]{13}$/'],
+
+    // SEXO
+    'sexo' => 'required|in:Masculino,Femenino',
+
+    // ESTADO CIVIL
+    'estado_civil' => 'nullable|in:Soltero(a),Casado(a),Unión Libre,Divorciado(a),Viudo(a)',
+
+    // TIPO SANGRE
+    'tipo_sangre' => 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
+
+    // TELÉFONOS
+    'telefono_celular' => ['nullable','regex:/^(3|8|9)[0-9]{7}$/'],
+    'telefono_fijo' => ['nullable','regex:/^2[0-9]{7}$/'],
+
+    // DIRECCIÓN
+    'direccion_domicilio' => 'nullable|string|max:255',
+
+    // SALARIO
+    'salario_inicial' => ['nullable','regex:/^L\.?\s?[0-9]{1,3}(,[0-9]{3})*(\.[0-9]{2})?$/'],
+
+], [
+
+    // NOMBRES
+    'primer_nombre.required' => 'El primer nombre es obligatorio.',
+    'primer_nombre.regex' => 'El nombre no debe aceptar números ni caracteres especiales.',
+    'primer_nombre.max' => 'El nombre no debe exceder 50 caracteres.',
+
+    'segundo_nombre.regex' => 'El segundo nombre no debe aceptar números.',
+    'segundo_nombre.max' => 'Máximo 50 caracteres.',
+
+    'primer_apellido.required' => 'El primer apellido es obligatorio.',
+    'primer_apellido.regex' => 'El apellido no debe aceptar números.',
+    'primer_apellido.max' => 'Máximo 50 caracteres.',
+
+    'segundo_apellido.regex' => 'El segundo apellido no debe aceptar números.',
+    'segundo_apellido.max' => 'Máximo 50 caracteres.',
+
+    // DNI
+    'DNI.required' => 'El DNI es obligatorio.',
+    'DNI.unique' => 'Este DNI ya está registrado.',
+    'DNI.regex' => 'El DNI debe contener exactamente 13 números.',
+
+    // SEXO
+    'sexo.required' => 'Debe seleccionar el sexo.',
+
+    // TELÉFONOS
+    'telefono_celular.regex' => 'El celular debe iniciar con 3, 8 o 9 y tener 8 dígitos.',
+    'telefono_fijo.regex' => 'El teléfono fijo debe iniciar con 2 y tener 8 dígitos.',
+
+    // SALARIO
+    'salario_inicial.regex' => 'El salario debe tener formato: L. 12,000.00',
+
+]);
 
     $data = $request->all();
     $data['usuario_crea'] = auth()->user()->name ?? 'Sistema';
@@ -367,6 +426,10 @@ public function imprimirRegistro($dni)
     {
         //
     }
+
+
+
+    
 
 
 }
