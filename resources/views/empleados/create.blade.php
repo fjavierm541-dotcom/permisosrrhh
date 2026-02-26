@@ -217,117 +217,191 @@
 
 </div>
 </div>
+</div>{{-- ============================= --}}
+{{-- 2️⃣ DIRECCIÓN Y CONTACTO --}}
+{{-- ============================= --}}
+<div class="accordion-item">
+<h2 class="accordion-header">
+<button class="accordion-button fw-bold collapsed"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#contacto">
+    Información de Contacto
+</button>
+</h2>
+
+<div id="contacto"
+     class="accordion-collapse collapse"
+     data-bs-parent="#empleadoAccordion">
+
+<div class="accordion-body">
+
+<div class="mb-3">
+<label>Dirección</label>
+<textarea name="direccion_domicilio"
+          class="form-control @error('direccion_domicilio') is-invalid @enderror">{{ old('direccion_domicilio') }}</textarea>
+@error('direccion_domicilio')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
 </div>
-            {{-- ============================= --}}
-            {{-- 2️⃣ DIRECCIÓN Y CONTACTO --}}
-            {{-- ============================= --}}
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button fw-bold collapsed"
-                            type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#contacto">
-                        Información de Contacto
-                    </button>
-                </h2>
 
-                <div id="contacto"
-                     class="accordion-collapse collapse"
-                     data-bs-parent="#empleadoAccordion">
+<div class="mb-3">
+<label>Referencia Domicilio</label>
+<textarea name="referencia_domicilio"
+          class="form-control @error('referencia_domicilio') is-invalid @enderror">{{ old('referencia_domicilio') }}</textarea>
+@error('referencia_domicilio')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                    <div class="accordion-body">
+<div class="row">
 
-                        <div class="mb-3">
-                            <label>Dirección</label>
-                            <textarea name="direccion_domicilio" class="form-control"></textarea>
-                        </div>
+<div class="col-md-4 mb-3">
+<label>Teléfono Celular</label>
+<input type="text"
+       name="telefono_celular"
+       value="{{ old('telefono_celular') }}"
+       class="form-control @error('telefono_celular') is-invalid @enderror">
+@error('telefono_celular')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                        <div class="mb-3">
-                            <label>Referencia Domicilio</label>
-                            <textarea name="referencia_domicilio" class="form-control"></textarea>
-                        </div>
+<div class="col-md-4 mb-3">
+<label>Teléfono Fijo</label>
+<input type="text"
+       name="telefono_fijo"
+       value="{{ old('telefono_fijo') }}"
+       class="form-control @error('telefono_fijo') is-invalid @enderror">
+@error('telefono_fijo')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label>Teléfono Celular</label>
-                                <input type="text" name="telefono_celular" class="form-control">
-                            </div>
+<div class="col-md-4 mb-3">
+<label>Nivel Educativo</label>
+<select name="nivel_educativo"
+        class="form-control @error('nivel_educativo') is-invalid @enderror">
+    <option value="">Seleccione</option>
+    <option value="Nivel Primario" {{ old('nivel_educativo') == 'Nivel Primario' ? 'selected' : '' }}>Nivel Primario</option>
+    <option value="Nivel Secundario" {{ old('nivel_educativo') == 'Nivel Secundario' ? 'selected' : '' }}>Nivel Secundario</option>
+    <option value="Nivel Superior" {{ old('nivel_educativo') == 'Nivel Superior' ? 'selected' : '' }}>Nivel Superior</option>
+    <option value="Postgrado" {{ old('nivel_educativo') == 'Postgrado' ? 'selected' : '' }}>Postgrado</option>
+</select>
+@error('nivel_educativo')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                            <div class="col-md-4 mb-3">
-                                <label>Teléfono Fijo</label>
-                                <input type="text" name="telefono_fijo" class="form-control">
-                            </div>
+</div>
 
-                            <div class="col-md-4 mb-3">
-                                <label>Nivel Educativo</label>
-                                <select name="nivel_educativo" class="form-control">
-                                    <option value="">Seleccione</option>
-                                    <option value="Nivel Primario">Nivel Primario</option>
-                                    <option value="Nivel Secundario">Nivel Secundario</option>
-                                    <option value="Nivel Superior">Nivel Superior</option>
-                                    <option value="Postgrado">Postgrado</option>
-                                </select>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            {{-- ============================= --}}
-            {{-- 3️⃣ CONTACTOS DE EMERGENCIA --}}
-            {{-- ============================= --}}
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button fw-bold collapsed"
-                            type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#emergencia">
-                        Contactos de Emergencia
-                    </button>
-                </h2>
-
-                <div id="emergencia"
-                     class="accordion-collapse collapse"
-                     data-bs-parent="#empleadoAccordion">
-
-                    <div class="accordion-body">
-
-                        <p class="text-muted fw-bold">
-                            En caso de emergencia se autoriza llamar a las personas en el siguiente orden:
-                        </p>
-
-                        <h6>Contacto 1</h6>
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <input type="text" name="nombre_contacto1" placeholder="Nombre" class="form-control">
-                            </div>
-                            <div class="col-md-4">
-                                <input type="text" name="telefono_contacto1" placeholder="Teléfono" class="form-control">
-                            </div>
-                            <div class="col-md-4">
-                                <input type="text" name="parentezco_contacto1" placeholder="Parentezco" class="form-control">
-                            </div>
-                        </div>
-
-                        <h6>Contacto 2</h6>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <input type="text" name="nombre_contacto2" placeholder="Nombre" class="form-control">
-                            </div>
-                            <div class="col-md-4">
-                                <input type="text" name="telefono_contacto2" placeholder="Teléfono" class="form-control">
-                            </div>
-                            <div class="col-md-4">
-                                <input type="text" name="parentezco_contacto2" placeholder="Parentezco" class="form-control">
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
 
 
+{{-- ============================= --}}
+{{-- 3️⃣ CONTACTOS DE EMERGENCIA --}}
+{{-- ============================= --}}
+<div class="accordion-item">
+<h2 class="accordion-header">
+<button class="accordion-button fw-bold collapsed"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#emergencia">
+    Contactos de Emergencia
+</button>
+</h2>
+
+<div id="emergencia"
+     class="accordion-collapse collapse"
+     data-bs-parent="#empleadoAccordion">
+
+<div class="accordion-body">
+
+<p class="text-muted fw-bold">
+En caso de emergencia se autoriza llamar a las personas en el siguiente orden:
+</p>
+
+<h6>Contacto 1</h6>
+<div class="row mb-3">
+
+<div class="col-md-4">
+<input type="text"
+       name="nombre_contacto1"
+       placeholder="Nombre"
+       value="{{ old('nombre_contacto1') }}"
+       class="form-control @error('nombre_contacto1') is-invalid @enderror">
+@error('nombre_contacto1')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
+
+<div class="col-md-4">
+<input type="text"
+       name="telefono_contacto1"
+       placeholder="Teléfono"
+       value="{{ old('telefono_contacto1') }}"
+       class="form-control @error('telefono_contacto1') is-invalid @enderror">
+@error('telefono_contacto1')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
+
+<div class="col-md-4">
+<input type="text"
+       name="parentezco_contacto1"
+       placeholder="Parentezco"
+       value="{{ old('parentezco_contacto1') }}"
+       class="form-control @error('parentezco_contacto1') is-invalid @enderror">
+@error('parentezco_contacto1')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
+
+</div>
+
+<h6>Contacto 2</h6>
+<div class="row">
+
+<div class="col-md-4">
+<input type="text"
+       name="nombre_contacto2"
+       placeholder="Nombre"
+       value="{{ old('nombre_contacto2') }}"
+       class="form-control @error('nombre_contacto2') is-invalid @enderror">
+@error('nombre_contacto2')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
+
+<div class="col-md-4">
+<input type="text"
+       name="telefono_contacto2"
+       placeholder="Teléfono"
+       value="{{ old('telefono_contacto2') }}"
+       class="form-control @error('telefono_contacto2') is-invalid @enderror">
+@error('telefono_contacto2')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
+
+<div class="col-md-4">
+<input type="text"
+       name="parentezco_contacto2"
+       placeholder="Parentezco"
+       value="{{ old('parentezco_contacto2') }}"
+       class="form-control @error('parentezco_contacto2') is-invalid @enderror">
+@error('parentezco_contacto2')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
+
+</div>
+
+</div>
+</div>
+</div>
 {{-- ============================= --}}
 {{-- 4️⃣ BENEFICIARIOS (OPCIONAL) --}}
 {{-- ============================= --}}
