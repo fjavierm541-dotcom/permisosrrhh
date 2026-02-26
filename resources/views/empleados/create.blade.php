@@ -8,150 +8,216 @@
 
     <h4 class="mb-4 fw-bold">Crear Empleado</h4>
 
-    @if ($errors->any())
-    <div class="alert alert-danger">
-        <ul class="mb-0">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
+   
 
     <form method="POST" action="{{ route('empleados.store') }}" enctype="multipart/form-data">
         @csrf
         
 
-        <div class="accordion" id="empleadoAccordion">
+       <div class="accordion" id="empleadoAccordion">
 
-            {{-- ============================= --}}
-            {{-- 1️⃣ DATOS GENERALES --}}
-            {{-- ============================= --}}
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button fw-bold"
-                            type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#datosGenerales">
-                        Datos Generales
-                    </button>
-                </h2>
+{{-- ============================= --}}
+{{-- 1️⃣ DATOS GENERALES --}}
+{{-- ============================= --}}
+<div class="accordion-item">
+<h2 class="accordion-header">
+<button class="accordion-button fw-bold"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#datosGenerales">
+    Datos Generales
+</button>
+</h2>
 
-                <div id="datosGenerales"
-                     class="accordion-collapse collapse show"
-                     data-bs-parent="#empleadoAccordion">
+<div id="datosGenerales"
+     class="accordion-collapse collapse show"
+     data-bs-parent="#empleadoAccordion">
 
-                    <div class="accordion-body">
+<div class="accordion-body">
 
-                        <div class="row">
+<div class="row">
 
-                            <div class="col-md-3 mb-3">
-                                <label>Código</label>
-                                <input type="text" name="codigo" class="form-control">
-                            </div>
+<div class="col-md-3 mb-3">
+<label>Código</label>
+<input type="text"
+       name="codigo"
+       value="{{ old('codigo') }}"
+       class="form-control @error('codigo') is-invalid @enderror">
+@error('codigo')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                            <div class="col-md-3 mb-3">
-                                <label>DNI *</label>
-                                <input type="text" name="DNI" class="form-control" required>
-                            </div>
+<div class="col-md-3 mb-3">
+<label>DNI *</label>
+<input type="text"
+       name="DNI"
+       value="{{ old('DNI') }}"
+       class="form-control @error('DNI') is-invalid @enderror">
+@error('DNI')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                            <div class="col-md-3 mb-3">
-                                <label>RTN</label>
-                                <input type="text" name="RTN" class="form-control">
-                            </div>
+<div class="col-md-3 mb-3">
+<label>RTN</label>
+<input type="text"
+       name="RTN"
+       value="{{ old('RTN') }}"
+       class="form-control @error('RTN') is-invalid @enderror">
+@error('RTN')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                            <div class="col-md-3 mb-3">
-                                <label>Sexo</label>
-                                <select name="sexo" class="form-control">
-                                    <option value="">Seleccione</option>
-                                    <option value="Masculino">Masculino</option>
-                                    <option value="Femenino">Femenino</option>
-                                </select>
-                            </div>
+<div class="col-md-3 mb-3">
+<label>Sexo *</label>
+<select name="sexo"
+        class="form-control @error('sexo') is-invalid @enderror">
+    <option value="">Seleccione</option>
+    <option value="Masculino" {{ old('sexo') == 'Masculino' ? 'selected' : '' }}>Masculino</option>
+    <option value="Femenino" {{ old('sexo') == 'Femenino' ? 'selected' : '' }}>Femenino</option>
+</select>
+@error('sexo')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                        </div>
+</div>
 
-                        <div class="row">
+<div class="row">
 
-                            <div class="col-md-3 mb-3">
-                                <label>Primer Nombre *</label>
-                                <input type="text" name="primer_nombre" class="form-control" required>
-                            </div>
+<div class="col-md-3 mb-3">
+<label>Primer Nombre *</label>
+<input type="text"
+       name="primer_nombre"
+       value="{{ old('primer_nombre') }}"
+       class="form-control @error('primer_nombre') is-invalid @enderror">
+@error('primer_nombre')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                            <div class="col-md-3 mb-3">
-                                <label>Segundo Nombre</label>
-                                <input type="text" name="segundo_nombre" class="form-control">
-                            </div>
+<div class="col-md-3 mb-3">
+<label>Segundo Nombre</label>
+<input type="text"
+       name="segundo_nombre"
+       value="{{ old('segundo_nombre') }}"
+       class="form-control @error('segundo_nombre') is-invalid @enderror">
+@error('segundo_nombre')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                            <div class="col-md-3 mb-3">
-                                <label>Primer Apellido *</label>
-                                <input type="text" name="primer_apellido" class="form-control" required>
-                            </div>
+<div class="col-md-3 mb-3">
+<label>Primer Apellido *</label>
+<input type="text"
+       name="primer_apellido"
+       value="{{ old('primer_apellido') }}"
+       class="form-control @error('primer_apellido') is-invalid @enderror">
+@error('primer_apellido')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                            <div class="col-md-3 mb-3">
-                                <label>Segundo Apellido</label>
-                                <input type="text" name="segundo_apellido" class="form-control">
-                            </div>
+<div class="col-md-3 mb-3">
+<label>Segundo Apellido</label>
+<input type="text"
+       name="segundo_apellido"
+       value="{{ old('segundo_apellido') }}"
+       class="form-control @error('segundo_apellido') is-invalid @enderror">
+@error('segundo_apellido')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                        </div>
+</div>
 
-                        <div class="row">
+<div class="row">
 
-                            <div class="col-md-2 mb-3">
-                                <label>Día</label>
-                                <input type="number" name="dia_nacimiento" class="form-control">
-                            </div>
+<div class="col-md-2 mb-3">
+<label>Día</label>
+<input type="number"
+       name="dia_nacimiento"
+       value="{{ old('dia_nacimiento') }}"
+       class="form-control @error('dia_nacimiento') is-invalid @enderror">
+@error('dia_nacimiento')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                            <div class="col-md-2 mb-3">
-                                <label>Mes</label>
-                                <input type="number" name="mes_nacimiento" class="form-control">
-                            </div>
+<div class="col-md-2 mb-3">
+<label>Mes</label>
+<input type="number"
+       name="mes_nacimiento"
+       value="{{ old('mes_nacimiento') }}"
+       class="form-control @error('mes_nacimiento') is-invalid @enderror">
+@error('mes_nacimiento')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                            <div class="col-md-2 mb-3">
-                                <label>Año</label>
-                                <input type="number" name="anio_nacimiento" class="form-control">
-                            </div>
+<div class="col-md-2 mb-3">
+<label>Año</label>
+<input type="number"
+       name="anio_nacimiento"
+       value="{{ old('anio_nacimiento') }}"
+       class="form-control @error('anio_nacimiento') is-invalid @enderror">
+@error('anio_nacimiento')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                            <div class="col-md-3 mb-3">
-                                <label>Estado Civil</label>
-                                <select name="estado_civil" class="form-control">
-                                    <option value="">Seleccione</option>
-                                    <option value="Soltero(a)">Soltero(a)</option>
-                                    <option value="Casado(a)">Casado(a)</option>
-                                    <option value="Unión Libre">Unión Libre</option>
-                                    <option value="Divorciado(a)">Divorciado(a)</option>
-                                    <option value="Viudo(a)">Viudo(a)</option>
-                                </select>
-                            </div>
+<div class="col-md-3 mb-3">
+<label>Estado Civil</label>
+<select name="estado_civil"
+        class="form-control @error('estado_civil') is-invalid @enderror">
+    <option value="">Seleccione</option>
+    <option value="Soltero(a)" {{ old('estado_civil') == 'Soltero(a)' ? 'selected' : '' }}>Soltero(a)</option>
+    <option value="Casado(a)" {{ old('estado_civil') == 'Casado(a)' ? 'selected' : '' }}>Casado(a)</option>
+    <option value="Unión Libre" {{ old('estado_civil') == 'Unión Libre' ? 'selected' : '' }}>Unión Libre</option>
+    <option value="Divorciado(a)" {{ old('estado_civil') == 'Divorciado(a)' ? 'selected' : '' }}>Divorciado(a)</option>
+    <option value="Viudo(a)" {{ old('estado_civil') == 'Viudo(a)' ? 'selected' : '' }}>Viudo(a)</option>
+</select>
+@error('estado_civil')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                            <div class="col-md-3 mb-3">
-                                <label>Nacionalidad</label>
-                                <input type="text" name="nacionalidad" class="form-control">
-                            </div>
+<div class="col-md-3 mb-3">
+<label>Nacionalidad</label>
+<input type="text"
+       name="nacionalidad"
+       value="{{ old('nacionalidad') }}"
+       class="form-control @error('nacionalidad') is-invalid @enderror">
+@error('nacionalidad')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
 
-                        </div>
+</div>
 
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label>Tipo de Sangre</label>
-                                <select name="tipo_sangre" class="form-control">
-                                    <option value="">Seleccione</option>
-                                    <option value="A+">A+</option>
-                                    <option value="A-">A-</option>
-                                    <option value="B+">B+</option>
-                                    <option value="B-">B-</option>
-                                    <option value="AB+">AB+</option>
-                                    <option value="AB-">AB-</option>
-                                    <option value="O+">O+</option>
-                                    <option value="O-">O-</option>
-                                </select>
-                            </div>
-                        </div>
+<div class="row">
+<div class="col-md-4 mb-3">
+<label>Tipo de Sangre</label>
+<select name="tipo_sangre"
+        class="form-control @error('tipo_sangre') is-invalid @enderror">
+    <option value="">Seleccione</option>
+    @foreach(['A+','A-','B+','B-','AB+','AB-','O+','O-'] as $tipo)
+        <option value="{{ $tipo }}" {{ old('tipo_sangre') == $tipo ? 'selected' : '' }}>
+            {{ $tipo }}
+        </option>
+    @endforeach
+</select>
+@error('tipo_sangre')
+<div class="invalid-feedback d-block">{{ $message }}</div>
+@enderror
+</div>
+</div>
 
-                    </div>
-                </div>
-            </div>
-
+</div>
+</div>
+</div>
             {{-- ============================= --}}
             {{-- 2️⃣ DIRECCIÓN Y CONTACTO --}}
             {{-- ============================= --}}
