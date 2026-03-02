@@ -172,21 +172,71 @@
 <div class="row">
 
 <div class="col-md-4 mb-3">
-    <label>Fecha de nacimiento *</label>
-    <input type="date" lang="es"
-           id="fecha_nacimiento"
-           name="fecha_nacimiento"
-           value="{{ old('fecha_nacimiento') }}"
-           class="form-control @error('fecha_nacimiento') is-invalid @enderror"
-           required>
-    @error('fecha_nacimiento')
+         <label>Día de nacimiento *</label>
+        <select name="dia_nacimiento"
+                required
+                class="form-control @error('dia_nacimiento') is-invalid @enderror">
+            <option value="">Seleccione</option>
+            @for ($d = 1; $d <= 31; $d++)
+                <option value="{{ $d }}"
+                    {{ old('dia_nacimiento') == $d ? 'selected' : '' }}>
+                    {{ $d }}
+                </option>
+            @endfor
+        </select>
+        @error('dia_nacimiento')
         <div class="invalid-feedback d-block">{{ $message }}</div>
-    @enderror
-</div>
+        @enderror
+    </div>
+
+    {{-- Mes --}}
+    <div class="col-md-4 mb-3">
+         <label>Mes de nacimiento *</label>
+        <select name="mes_nacimiento"
+                required
+                class="form-control @error('mes_nacimiento') is-invalid @enderror">
+            <option value="">Seleccione</option>
+            @for ($m = 1; $m <= 12; $m++)
+                <option value="{{ $m }}"
+                    {{ old('mes_nacimiento') == $m ? 'selected' : '' }}>
+                    {{ $m }}
+                </option>
+            @endfor
+        </select>
+        @error('mes_nacimiento')
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+        @enderror
+    </div>
+
+      @php
+        $anioActual = date('Y');
+        $anioMaximo = $anioActual - 18; // mínimo 18 años
+    @endphp
+    {{-- Año --}}
+    <div class="col-md-4 mb-3">
+        <label>Año de nacimiento *</label>
+        <select name="anio_nacimiento"
+                required
+                class="form-control @error('anio_nacimiento') is-invalid @enderror">
+            <option value="">Seleccione</option>
+
+            @for ($a = $anioMaximo; $a >= 1940; $a--)
+                <option value="{{ $a }}"
+                    {{ old('anio_nacimiento') == $a ? 'selected' : '' }}>
+                    {{ $a }}
+                </option>
+            @endfor
+
+        </select>
+        @error('anio_nacimiento')
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+        @enderror
+    </div>
+    
 
 
 
-<div class="col-md-3 mb-3">
+<div class="col-md-4 mb-3">
 <label>Estado Civil</label>
 <select name="estado_civil"
         class="form-control @error('estado_civil') is-invalid @enderror">
@@ -202,7 +252,7 @@
 @enderror
 </div>
 
-<div class="col-md-3 mb-3">
+<div class="col-md-4 mb-3">
 <label>Nacionalidad</label>
 <input type="text" minlength="3" maxlength="20" required 
        name="nacionalidad"
