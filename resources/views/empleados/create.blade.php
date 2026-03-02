@@ -4,6 +4,19 @@
 
 @section('content')
 
+
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <strong>Hay errores en el formulario:</strong>
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+
 <div class="glass-card p-4">
 
     <h4 class="mb-4 fw-bold">Crear Empleado</h4>
@@ -38,9 +51,16 @@
 <div class="row">
 
 <div class="col-md-3 mb-3">
-<label>Código</label>
+<label>Código *</label>
 <input type="text"
        name="codigo"
+       minlength="1"
+       maxlength="4"
+       inputmode="numeric"
+       pattern="[0-9]{1,4}"
+       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+       placeholder="00000"
+       required
        value="{{ old('codigo') }}"
        class="form-control @error('codigo') is-invalid @enderror">
 @error('codigo')
@@ -52,6 +72,12 @@
 <label>DNI *</label>
 <input type="text"
        name="DNI"
+       id="dni"
+       maxlength="15"
+       pattern="^\d{4}-\d{4}-\d{5}$"
+       inputmode="numeric"
+       placeholder="0000-0000-00000"
+       required
        value="{{ old('DNI') }}"
        class="form-control @error('DNI') is-invalid @enderror">
 @error('DNI')
@@ -60,9 +86,15 @@
 </div>
 
 <div class="col-md-3 mb-3">
-<label>RTN</label>
+<label>RTN *</label>
 <input type="text"
        name="RTN"
+       id="rtn"
+       maxlength="16"
+       pattern="^\d{4}-\d{4}-\d{6}$"
+       inputmode="numeric"
+       placeholder="0000-00000-00000"
+       required
        value="{{ old('RTN') }}"
        class="form-control @error('RTN') is-invalid @enderror">
 @error('RTN')
@@ -89,8 +121,9 @@
 
 <div class="col-md-3 mb-3">
 <label>Primer Nombre *</label>
-<input type="text"
+<input type="text" minlength="3" maxlength="20" required 
        name="primer_nombre"
+        placeholder="Ingrese el primer nombre"
        value="{{ old('primer_nombre') }}"
        class="form-control @error('primer_nombre') is-invalid @enderror">
 @error('primer_nombre')
@@ -100,8 +133,9 @@
 
 <div class="col-md-3 mb-3">
 <label>Segundo Nombre</label>
-<input type="text"
+<input type="text" minlength="3" maxlength="20"  
        name="segundo_nombre"
+        placeholder="Ingrese el segundo nombre"
        value="{{ old('segundo_nombre') }}"
        class="form-control @error('segundo_nombre') is-invalid @enderror">
 @error('segundo_nombre')
@@ -111,9 +145,10 @@
 
 <div class="col-md-3 mb-3">
 <label>Primer Apellido *</label>
-<input type="text"
+<input type="text" minlength="3" maxlength="20" required 
        name="primer_apellido"
        value="{{ old('primer_apellido') }}"
+       placeholder="Ingrese el primer apellido"
        class="form-control @error('primer_apellido') is-invalid @enderror">
 @error('primer_apellido')
 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -122,8 +157,9 @@
 
 <div class="col-md-3 mb-3">
 <label>Segundo Apellido</label>
-<input type="text"
+<input type="text" minlength="3" maxlength="20"  
        name="segundo_apellido"
+        placeholder="Ingrese el segundo apellido"
        value="{{ old('segundo_apellido') }}"
        class="form-control @error('segundo_apellido') is-invalid @enderror">
 @error('segundo_apellido')
@@ -135,38 +171,20 @@
 
 <div class="row">
 
-<div class="col-md-2 mb-3">
-<label>Día</label>
-<input type="number"
-       name="dia_nacimiento"
-       value="{{ old('dia_nacimiento') }}"
-       class="form-control @error('dia_nacimiento') is-invalid @enderror">
-@error('dia_nacimiento')
-<div class="invalid-feedback d-block">{{ $message }}</div>
-@enderror
+<div class="col-md-4 mb-3">
+    <label>Fecha de nacimiento *</label>
+    <input type="date" lang="es"
+           id="fecha_nacimiento"
+           name="fecha_nacimiento"
+           value="{{ old('fecha_nacimiento') }}"
+           class="form-control @error('fecha_nacimiento') is-invalid @enderror"
+           required>
+    @error('fecha_nacimiento')
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+    @enderror
 </div>
 
-<div class="col-md-2 mb-3">
-<label>Mes</label>
-<input type="number"
-       name="mes_nacimiento"
-       value="{{ old('mes_nacimiento') }}"
-       class="form-control @error('mes_nacimiento') is-invalid @enderror">
-@error('mes_nacimiento')
-<div class="invalid-feedback d-block">{{ $message }}</div>
-@enderror
-</div>
 
-<div class="col-md-2 mb-3">
-<label>Año</label>
-<input type="number"
-       name="anio_nacimiento"
-       value="{{ old('anio_nacimiento') }}"
-       class="form-control @error('anio_nacimiento') is-invalid @enderror">
-@error('anio_nacimiento')
-<div class="invalid-feedback d-block">{{ $message }}</div>
-@enderror
-</div>
 
 <div class="col-md-3 mb-3">
 <label>Estado Civil</label>
@@ -186,8 +204,9 @@
 
 <div class="col-md-3 mb-3">
 <label>Nacionalidad</label>
-<input type="text"
+<input type="text" minlength="3" maxlength="20" required 
        name="nacionalidad"
+        placeholder="Ingrese la nacionalidad del empleado"
        value="{{ old('nacionalidad') }}"
        class="form-control @error('nacionalidad') is-invalid @enderror">
 @error('nacionalidad')
@@ -217,7 +236,71 @@
 
 </div>
 </div>
-</div>{{-- ============================= --}}
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const fechaInput = document.getElementById('fecha_nacimiento');
+
+    fechaInput.addEventListener('change', function() {
+        let fecha = this.value; // YYYY-MM-DD
+        
+        if (fecha) {
+            let partes = fecha.split('-');
+            
+            document.getElementById('anio_nacimiento').value = partes[0];
+            document.getElementById('mes_nacimiento').value = partes[1];
+            document.getElementById('dia_nacimiento').value = partes[2];
+        }
+    });
+
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    function aplicarMascara(input, ultimoBloque) {
+        input.addEventListener('input', function () {
+
+            let value = this.value.replace(/[^0-9]/g, '');
+
+            if (value.length > 4) {
+                value = value.slice(0,4) + '-' + value.slice(4);
+            }
+
+            if (value.length > 9) {
+                value = value.slice(0,9) + '-' + value.slice(9, 9 + ultimoBloque);
+            }
+
+            this.value = value;
+        });
+    }
+
+    aplicarMascara(document.getElementById('dni'), 5);
+    aplicarMascara(document.getElementById('rtn'), 6);
+
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{{-- ============================= --}}
 {{-- 2️⃣ DIRECCIÓN Y CONTACTO --}}
 {{-- ============================= --}}
 <div class="accordion-item">
@@ -238,7 +321,8 @@
 
 <div class="mb-3">
 <label>Dirección</label>
-<textarea name="direccion_domicilio"
+<textarea name="direccion_domicilio"  minlength="3" maxlength="200" 
+placeholder="Ingrese la dirección del empleado" required 
           class="form-control @error('direccion_domicilio') is-invalid @enderror">{{ old('direccion_domicilio') }}</textarea>
 @error('direccion_domicilio')
 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -247,7 +331,7 @@
 
 <div class="mb-3">
 <label>Referencia Domicilio</label>
-<textarea name="referencia_domicilio"
+<textarea name="referencia_domicilio"  minlength="3" maxlength="150" placeholder="Ingrese una referencia de domicilio del empleado" required 
           class="form-control @error('referencia_domicilio') is-invalid @enderror">{{ old('referencia_domicilio') }}</textarea>
 @error('referencia_domicilio')
 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -258,8 +342,14 @@
 
 <div class="col-md-4 mb-3">
 <label>Teléfono Celular</label>
-<input type="text"
+<input type="text" required 
+    placeholder="Ingrese el número de teléfono celular"
        name="telefono_celular"
+       maxlength="8"
+       inputmode="numeric"
+       pattern="[0-9]{8}"
+       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+       required
        value="{{ old('telefono_celular') }}"
        class="form-control @error('telefono_celular') is-invalid @enderror">
 @error('telefono_celular')
@@ -271,6 +361,12 @@
 <label>Teléfono Fijo</label>
 <input type="text"
        name="telefono_fijo"
+       placeholder="Ingrese el número de teléfono fijo"
+       maxlength="8"
+       inputmode="numeric"
+       pattern="[0-9]{8}"
+       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+       required
        value="{{ old('telefono_fijo') }}"
        class="form-control @error('telefono_fijo') is-invalid @enderror">
 @error('telefono_fijo')
@@ -298,6 +394,10 @@
 </div>
 </div>
 </div>
+
+
+
+
 
 
 {{-- ============================= --}}
@@ -329,7 +429,10 @@ En caso de emergencia se autoriza llamar a las personas en el siguiente orden:
 <div class="col-md-4">
 <input type="text"
        name="nombre_contacto1"
-       placeholder="Nombre"
+       placeholder="Nombre del primer contacto de emergencia"
+       minlength="3"
+       maxlength="20"
+       required
        value="{{ old('nombre_contacto1') }}"
        class="form-control @error('nombre_contacto1') is-invalid @enderror">
 @error('nombre_contacto1')
@@ -341,6 +444,11 @@ En caso de emergencia se autoriza llamar a las personas en el siguiente orden:
 <input type="text"
        name="telefono_contacto1"
        placeholder="Teléfono"
+       maxlength="8"
+       pattern="[0-9]{8}"
+       inputmode="numeric"
+       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+       required
        value="{{ old('telefono_contacto1') }}"
        class="form-control @error('telefono_contacto1') is-invalid @enderror">
 @error('telefono_contacto1')
@@ -349,11 +457,30 @@ En caso de emergencia se autoriza llamar a las personas en el siguiente orden:
 </div>
 
 <div class="col-md-4">
-<input type="text"
-       name="parentezco_contacto1"
-       placeholder="Parentezco"
-       value="{{ old('parentezco_contacto1') }}"
-       class="form-control @error('parentezco_contacto1') is-invalid @enderror">
+<select name="parentezco_contacto1"
+        required
+        class="form-control @error('parentezco_contacto1') is-invalid @enderror">
+    <option value="">Seleccione Parentesco</option>
+    @foreach([
+        'Padre',
+        'Madre',
+        'Hermano(a)',
+        'Abuelo(a)',
+        'Tío(a)',
+        'Primo(a)',
+        'Esposo(a)',
+        'Pareja',
+        'Hijo(a)',
+        'Amigo(a)',
+        'Vecino(a)',
+        'Otro'
+    ] as $parentesco)
+        <option value="{{ $parentesco }}"
+            {{ old('parentezco_contacto1') == $parentesco ? 'selected' : '' }}>
+            {{ $parentesco }}
+        </option>
+    @endforeach
+</select>
 @error('parentezco_contacto1')
 <div class="invalid-feedback d-block">{{ $message }}</div>
 @enderror
@@ -367,7 +494,9 @@ En caso de emergencia se autoriza llamar a las personas en el siguiente orden:
 <div class="col-md-4">
 <input type="text"
        name="nombre_contacto2"
-       placeholder="Nombre"
+       placeholder="Nombre del segundo contacto de emergencia"
+       minlength="3"
+       maxlength="20"
        value="{{ old('nombre_contacto2') }}"
        class="form-control @error('nombre_contacto2') is-invalid @enderror">
 @error('nombre_contacto2')
@@ -379,6 +508,10 @@ En caso de emergencia se autoriza llamar a las personas en el siguiente orden:
 <input type="text"
        name="telefono_contacto2"
        placeholder="Teléfono"
+       maxlength="8"
+       pattern="[0-9]{8}"
+       inputmode="numeric"
+       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
        value="{{ old('telefono_contacto2') }}"
        class="form-control @error('telefono_contacto2') is-invalid @enderror">
 @error('telefono_contacto2')
@@ -387,11 +520,29 @@ En caso de emergencia se autoriza llamar a las personas en el siguiente orden:
 </div>
 
 <div class="col-md-4">
-<input type="text"
-       name="parentezco_contacto2"
-       placeholder="Parentezco"
-       value="{{ old('parentezco_contacto2') }}"
-       class="form-control @error('parentezco_contacto2') is-invalid @enderror">
+<select name="parentezco_contacto2"
+        class="form-control @error('parentezco_contacto2') is-invalid @enderror">
+    <option value="">Seleccione Parentesco</option>
+    @foreach([
+        'Padre',
+        'Madre',
+        'Hermano(a)',
+        'Abuelo(a)',
+        'Tío(a)',
+        'Primo(a)',
+        'Esposo(a)',
+        'Pareja',
+        'Hijo(a)',
+        'Amigo(a)',
+        'Vecino(a)',
+        'Otro'
+    ] as $parentesco)
+        <option value="{{ $parentesco }}"
+            {{ old('parentezco_contacto2') == $parentesco ? 'selected' : '' }}>
+            {{ $parentesco }}
+        </option>
+    @endforeach
+</select>
 @error('parentezco_contacto2')
 <div class="invalid-feedback d-block">{{ $message }}</div>
 @enderror
@@ -402,6 +553,17 @@ En caso de emergencia se autoriza llamar a las personas en el siguiente orden:
 </div>
 </div>
 </div>
+
+
+
+
+
+
+
+
+
+
+
 {{-- ============================= --}}
 {{-- 4️⃣ BENEFICIARIOS (OPCIONAL) --}}
 {{-- ============================= --}}
@@ -425,48 +587,117 @@ En caso de emergencia se autoriza llamar a las personas en el siguiente orden:
                 Complete únicamente si el empleado desea registrar beneficiarios.
             </p>
 
-            @for ($i = 1; $i <= 7; $i++)
-                <hr>
-                <h6 class="fw-bold">Beneficiario {{ $i }}</h6>
+           @for ($i = 1; $i <= 7; $i++)
+<hr>
+<h6 class="fw-bold">Beneficiario {{ $i }}</h6>
 
-                <div class="row mb-3">
+<div class="row mb-3">
 
-                    <div class="col-md-4">
-                        <label>Nombre</label>
-                        <input type="text"
-                               name="nombre_beneficiario{{ $i }}"
-                               class="form-control">
-                    </div>
+    {{-- Nombre --}}
+    <div class="col-md-4">
+        <label>Nombre</label>
+        <input type="text"
+                placeholder="Ingrese el nombre del beneficiario"
+               name="nombre_beneficiario{{ $i }}"
+               minlength="3"
+               maxlength="20"
+               value="{{ old('nombre_beneficiario'.$i) }}"
+               class="form-control @error('nombre_beneficiario'.$i) is-invalid @enderror">
+        @error('nombre_beneficiario'.$i)
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+        @enderror
+    </div>
 
-                    <div class="col-md-2">
-                        <label>Porcentaje</label>
-                        <input type="number"
-                               name="porcentaje_beneficiario{{ $i }}"
-                               class="form-control"
-                               min="0"
-                               max="100">
-                    </div>
+    {{-- Porcentaje --}}
+    <div class="col-md-2">
+        <label>Porcentaje</label>
+        <input type="text"
+               name="porcentaje_beneficiario{{ $i }}"
+               placeholder="00"
+               maxlength="2"
+               pattern="[0-9]{1,2}"
+               inputmode="numeric"
+               oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+               value="{{ old('porcentaje_beneficiario'.$i) }}"
+               class="form-control @error('porcentaje_beneficiario'.$i) is-invalid @enderror">
+        @error('porcentaje_beneficiario'.$i)
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+        @enderror
+    </div>
 
-                    <div class="col-md-3">
-                        <label>Parentezco</label>
-                        <input type="text"
-                               name="parentezco_beneficiario{{ $i }}"
-                               class="form-control">
-                    </div>
+    {{-- Parentezco --}}
+    <div class="col-md-3">
+        <label>Parentezco</label>
+        <input type="text"
+               name="parentezco_beneficiario{{ $i }}"
+               placeholder="escriba el parentezco"
+               minlength="3"
+               maxlength="20"
+               value="{{ old('parentezco_beneficiario'.$i) }}"
+               class="form-control @error('parentezco_beneficiario'.$i) is-invalid @enderror">
+        @error('parentezco_beneficiario'.$i)
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+        @enderror
+    </div>
 
-                    <div class="col-md-3">
-                        <label>DNI</label>
-                        <input type="text"
-                               name="DNI_beneficiario{{ $i }}"
-                               class="form-control">
-                    </div>
+    {{-- DNI --}}
+    <div class="col-md-3">
+        <label>DNI</label>
+        <input type="text"
+               name="DNI_beneficiario{{ $i }}"
+               id="dni_beneficiario{{ $i }}"
+               maxlength="15"
+               pattern="^\d{4}-\d{4}-\d{5}$"
+               inputmode="numeric"
+               placeholder="0000-0000-00000"
+               value="{{ old('DNI_beneficiario'.$i) }}"
+               class="form-control @error('DNI_beneficiario'.$i) is-invalid @enderror">
+        @error('DNI_beneficiario'.$i)
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+        @enderror
+    </div>
 
-                </div>
-            @endfor
-
+</div>
+@endfor
         </div>
     </div>
 </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    function aplicarMascaraDNI(input) {
+        input.addEventListener('input', function () {
+
+            let value = this.value.replace(/[^0-9]/g, '');
+
+            if (value.length > 4) {
+                value = value.slice(0,4) + '-' + value.slice(4);
+            }
+
+            if (value.length > 9) {
+                value = value.slice(0,9) + '-' + value.slice(9,14);
+            }
+
+            this.value = value;
+        });
+    }
+
+    for (let i = 1; i <= 7; i++) {
+        let input = document.getElementById('dni_beneficiario' + i);
+        if (input) {
+            aplicarMascaraDNI(input);
+        }
+    }
+
+});
+</script>
+
+
+
+
+
 
 
 
@@ -492,32 +723,81 @@ En caso de emergencia se autoriza llamar a las personas en el siguiente orden:
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label>Puesto de Nombramiento</label>
-                                <input type="text" name="puesto" class="form-control">
+                                <input type="text" name="puesto" class="form-control"
+                                placeholder="Ingrese el puesto de nombramiento" minlength="3" maxlength="20"
+                                value="{{ old('puesto') }}">
                             </div>
 
                             <div class="col-md-4 mb-3">
                                 <label>Fecha de Nombramiento</label>
                                 <input type="date" name="fecha_nombramiento" class="form-control">
+                                @error('fecha_nombramiento')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                             @enderror
                             </div>
 
                             <div class="col-md-4 mb-3">
                                 <label>Tipo</label>
                                 <select name="tipo" class="form-control">
                                     <option value="">Seleccione</option>
-                                    <option value="Acuerdo">Acuerdo</option>
-                                    <option value="Contrato">Contrato</option>
+                                    <option value="Acuerdo" {{ old('Acuerdo') == 'Acuerdo' ? 'selected' : '' }}>Acuerdo</option>
+                                    <option value="Contrato" {{ old('Contrato') == 'Contrato' ? 'selected' : '' }}>Contrato</option>
                                 </select>
+                                @error('tipo')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                             @enderror
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label>Salario Inicial</label>
-                                <input type="number" step="0.01" name="salario_inicial" class="form-control">
-                            </div>
-                        </div>
+    <label>Salario Inicial</label>
+    <input type="text"
+           name="salario_inicial"
+           id="salario_inicial"
+           inputmode="decimal"
+           placeholder="L. 0.00"
+           value="{{ old('salario_inicial') }}"
+           class="form-control @error('salario_inicial') is-invalid @enderror">
+</div>
 
                     </div>
                 </div>
             </div>
+
+
+           <script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const salarioInput = document.getElementById('salario_inicial');
+
+    // Limpiar mientras escribe (solo números y punto)
+    salarioInput.addEventListener('input', function () {
+        this.value = this.value.replace(/[^\d.]/g, '');
+    });
+
+    // Formatear cuando sale del campo
+    salarioInput.addEventListener('blur', function () {
+
+        if (this.value === '') return;
+
+        let number = parseFloat(this.value);
+
+        if (!isNaN(number)) {
+            this.value = 'L. ' + number.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+    });
+
+});
+</script>
+
+
+
+
+
+
+
 
             {{-- ============================= --}}
             {{-- 5️⃣ DOCUMENTACIÓN --}}
