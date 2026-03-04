@@ -282,6 +282,17 @@ $request->validate([
     'parentezco_beneficiario7' => 'nullable|string|max:50',
     'DNI_beneficiario7' => ['nullable','regex:/^[0-9]{4}-[0-9]{4}-[0-9]{5}$/'],
 
+    // INFORMACIÓN LABORAL
+    'puesto' => ['nullable','regex:/^[\pL\s]+$/u','min:3','max:20'],
+    'fecha_nombramiento' => ['required','date','before_or_equal:today'],
+    'tipo' => ['required','in:Acuerdo,Contrato'],
+    'salario_inicial' => ['nullable','regex:/^L\.?\s?[0-9]{1,3}(,[0-9]{3})*(\.[0-9]{2})?$/'],
+
+    // DOCUMENTOS
+    'copia_dni' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
+    'acuerdo' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
+    'nota_traslado' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
+
 ], [
 
     // NOMBRES
@@ -326,6 +337,39 @@ $request->validate([
     'DNI_beneficiario5.digits' => 'El DNI del beneficiario debe tener 13 números.',
     'DNI_beneficiario6.digits' => 'El DNI del beneficiario debe tener 13 números.',
     'DNI_beneficiario7.digits' => 'El DNI del beneficiario debe tener 13 números.',
+
+
+      /*
+    ===============================
+    INFORMACIÓN LABORAL
+    ===============================
+    */
+    // PUESTO
+        'puesto.regex' => 'El puesto solo debe contener letras.',
+        'puesto.min' => 'El puesto debe tener al menos 3 caracteres.',
+        'puesto.max' => 'El puesto no debe superar 20 caracteres.',
+
+        // FECHA
+        'fecha_nombramiento.required' => 'Debe ingresar la fecha de nombramiento.',
+        'fecha_nombramiento.date' => 'Debe ingresar una fecha válida.',
+        'fecha_nombramiento.before_or_equal' => 'La fecha de nombramiento no puede ser futura.',
+
+        // TIPO
+        'tipo.required' => 'Debe seleccionar el tipo de nombramiento.',
+        'tipo.in' => 'El tipo seleccionado no es válido.',
+
+        // SALARIO
+        'salario_inicial.regex' => 'El salario debe tener formato: L. 12,000.00',
+
+        // DOCUMENTOS
+        'copia_dni.mimes' => 'La copia del DNI debe ser PDF o imagen.',
+        'acuerdo.mimes' => 'El acuerdo o contrato debe ser PDF o imagen.',
+        'nota_traslado.mimes' => 'La nota de traslado debe ser PDF o imagen.',
+
+        'copia_dni.max' => 'El archivo no debe superar 5MB.',
+        'acuerdo.max' => 'El archivo no debe superar 5MB.',
+        'nota_traslado.max' => 'El archivo no debe superar 5MB.',
+
 
 ]);
 
