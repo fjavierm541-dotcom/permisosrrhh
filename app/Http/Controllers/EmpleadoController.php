@@ -175,9 +175,32 @@ public function generarVacaciones()
      */
 public function store(Request $request)
 {
-    $request->validate([
 
-    // NOMBRES (solo letras y espacios)
+$request->merge([
+    'DNI' => preg_replace('/\D+/', '', (string) $request->input('DNI', '')),
+    'RTN' => preg_replace('/\D+/', '', (string) $request->input('RTN', '')),
+
+]);
+
+for ($i = 1; $i <= 7; $i++) {
+
+    $request->merge([
+
+        "nombre_beneficiario$i" => $request->input("nombre_beneficiario$i") ?: 'Vacío',
+
+        "porcentaje_beneficiario$i" => $request->input("porcentaje_beneficiario$i") ?: 0,
+
+        "parentezco_beneficiario$i" => $request->input("parentezco_beneficiario$i") ?: 'Vacío',
+
+        "DNI_beneficiario$i" => $request->input("DNI_beneficiario$i") ?: '0000-0000-00000'
+
+    ]);
+
+}
+
+$request->validate([
+
+    // NOMBRES
     'primer_nombre' => ['required','regex:/^[\pL\s]+$/u','max:50'],
     'segundo_nombre' => ['nullable','regex:/^[\pL\s]+$/u','max:50'],
     'primer_apellido' => ['required','regex:/^[\pL\s]+$/u','max:50'],
@@ -186,13 +209,16 @@ public function store(Request $request)
     // DNI
     'DNI' => ['required','unique:empleados,DNI','regex:/^[0-9]{13}$/'],
 
+    // RTN
+    'RTN' => ['required','regex:/^[0-9]{14}$/'],
+
     // SEXO
     'sexo' => 'required|in:Masculino,Femenino',
 
     // ESTADO CIVIL
     'estado_civil' => 'nullable|in:Soltero(a),Casado(a),Unión Libre,Divorciado(a),Viudo(a)',
 
-    // TIPO SANGRE
+    // SANGRE
     'tipo_sangre' => 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
 
     // TELÉFONOS
@@ -201,9 +227,60 @@ public function store(Request $request)
 
     // DIRECCIÓN
     'direccion_domicilio' => 'nullable|string|max:255',
+    'referencia_domicilio' => 'nullable|string|max:255',
+
+    // EDUCACIÓN
+    'nivel_educativo' => 'nullable|in:Nivel Primario,Nivel Secundario,Nivel Superior,Postgrado',
+
+    // LABORAL
+    'puesto' => 'nullable|string|max:100',
+    'fecha_nombramiento' => 'nullable|date',
+    'tipo' => 'nullable|in:Acuerdo,Contrato',
 
     // SALARIO
     'salario_inicial' => ['nullable','regex:/^L\.?\s?[0-9]{1,3}(,[0-9]{3})*(\.[0-9]{2})?$/'],
+
+
+    /*
+    ===============================
+    BENEFICIARIOS (1-7)
+    ===============================
+    */
+
+    'nombre_beneficiario1' => 'nullable|string|max:100',
+    'porcentaje_beneficiario1' => 'nullable|numeric|min:0|max:100',
+    'parentezco_beneficiario1' => 'nullable|string|max:50',
+    'DNI_beneficiario1' => ['nullable','regex:/^[0-9]{4}-[0-9]{4}-[0-9]{5}$/'],
+
+    'nombre_beneficiario2' => 'nullable|string|max:100',
+    'porcentaje_beneficiario2' => 'nullable|numeric|min:0|max:100',
+    'parentezco_beneficiario2' => 'nullable|string|max:50',
+    'DNI_beneficiario2' => ['nullable','regex:/^[0-9]{4}-[0-9]{4}-[0-9]{5}$/'],
+
+    'nombre_beneficiario3' => 'nullable|string|max:100',
+    'porcentaje_beneficiario3' => 'nullable|numeric|min:0|max:100',
+    'parentezco_beneficiario3' => 'nullable|string|max:50',
+    'DNI_beneficiario3' => ['nullable','regex:/^[0-9]{4}-[0-9]{4}-[0-9]{5}$/'],
+
+    'nombre_beneficiario4' => 'nullable|string|max:100',
+    'porcentaje_beneficiario4' => 'nullable|numeric|min:0|max:100',
+    'parentezco_beneficiario4' => 'nullable|string|max:50',
+    'DNI_beneficiario4' => ['nullable','regex:/^[0-9]{4}-[0-9]{4}-[0-9]{5}$/'],
+
+    'nombre_beneficiario5' => 'nullable|string|max:100',
+    'porcentaje_beneficiario5' => 'nullable|numeric|min:0|max:100',
+    'parentezco_beneficiario5' => 'nullable|string|max:50',
+    'DNI_beneficiario5' => ['nullable','regex:/^[0-9]{4}-[0-9]{4}-[0-9]{5}$/'],
+
+    'nombre_beneficiario6' => 'nullable|string|max:100',
+    'porcentaje_beneficiario6' => 'nullable|numeric|min:0|max:100',
+    'parentezco_beneficiario6' => 'nullable|string|max:50',
+    'DNI_beneficiario6' => ['nullable','regex:/^[0-9]{4}-[0-9]{4}-[0-9]{5}$/'],
+
+    'nombre_beneficiario7' => 'nullable|string|max:100',
+    'porcentaje_beneficiario7' => 'nullable|numeric|min:0|max:100',
+    'parentezco_beneficiario7' => 'nullable|string|max:50',
+    'DNI_beneficiario7' => ['nullable','regex:/^[0-9]{4}-[0-9]{4}-[0-9]{5}$/'],
 
 ], [
 
@@ -227,6 +304,10 @@ public function store(Request $request)
     'DNI.unique' => 'Este DNI ya está registrado.',
     'DNI.regex' => 'El DNI debe contener exactamente 13 números.',
 
+    // RTN
+    'RTN.required' => 'El RTN es obligatorio.',
+    'RTN.regex' => 'El RTN debe contener exactamente 14 números.',
+
     // SEXO
     'sexo.required' => 'Debe seleccionar el sexo.',
 
@@ -237,7 +318,18 @@ public function store(Request $request)
     // SALARIO
     'salario_inicial.regex' => 'El salario debe tener formato: L. 12,000.00',
 
+    // BENEFICIARIOS
+    'DNI_beneficiario1.digits' => 'El DNI del beneficiario debe tener 13 números.',
+    'DNI_beneficiario2.digits' => 'El DNI del beneficiario debe tener 13 números.',
+    'DNI_beneficiario3.digits' => 'El DNI del beneficiario debe tener 13 números.',
+    'DNI_beneficiario4.digits' => 'El DNI del beneficiario debe tener 13 números.',
+    'DNI_beneficiario5.digits' => 'El DNI del beneficiario debe tener 13 números.',
+    'DNI_beneficiario6.digits' => 'El DNI del beneficiario debe tener 13 números.',
+    'DNI_beneficiario7.digits' => 'El DNI del beneficiario debe tener 13 números.',
+
 ]);
+
+
 
     $data = $request->all();
     $data['usuario_crea'] = auth()->user()->name ?? 'Sistema';
