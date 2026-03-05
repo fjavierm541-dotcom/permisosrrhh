@@ -85,48 +85,6 @@ class EmpleadoController extends Controller
         $empleados = $empleados->where('semaforo', $request->estado);
     }
 
-
-    // filtros
-    /* BUSCAR POR NOMBRE O DNI */
-$query = Empleado::query();
-if ($request->filled('buscar')) {
-
-$buscar = $request->buscar;
-
-$query->where(function($q) use ($buscar){
-
-$q->whereRaw("
-CONCAT(
-primer_nombre,' ',
-IFNULL(segundo_nombre,''),' ',
-primer_apellido,' ',
-IFNULL(segundo_apellido,'')
-) LIKE ?
-", ["%$buscar%"])
-
-->orWhere('DNI','like',"%$buscar%");
-
-});
-
-}
-
-
-/* FILTRO POR SEXO */
-
-if ($request->filled('sexo')) {
-
-$query->where('sexo',$request->sexo);
-
-}
-
-
-$empleados = $query->paginate(10)->withQueryString();
-
-
-return view('empleados.index', compact('empleados'));
-
-
-
     // 🔢 PAGINACIÓN MANUAL
     $page = $request->get('page', 1);
     $perPage = 15;

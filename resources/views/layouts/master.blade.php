@@ -44,64 +44,10 @@
         .btn-primary-custom:hover {
             background-color: #162a40;
         }
-
-
-
-        /* ---------- MICRO FEEDBACK INPUTS ---------- */
-
-input, select, textarea {
-    transition: border-color 0.25s ease, box-shadow 0.25s ease;
-}
-
-.field-valid {
-    border-color: #28a745 !important;
-    box-shadow: 0 0 0 0.15rem rgba(40,167,69,.15);
-}
-
-.field-invalid {
-    border-color: #dc3545 !important;
-}
-
-/* ---------- TRANSICIÓN DE PÁGINA ---------- */
-
-.page-enter {
-    animation: pageFade 0.25s ease;
-}
-
-@keyframes pageFade {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* LOADER DE PÁGINA */
-
-#page-loader{
-    position: fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:#1f3a56;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:9999;
-}
-
     </style>
 </head>
 
 <body>
-    
-<div id="page-loader">
-    <div class="spinner-border text-light" role="status"></div>
-</div>
 
 <!-- NAVBAR SUPERIOR FIJO -->
 <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top shadow">
@@ -190,51 +136,12 @@ input, select, textarea {
 </nav>
 
 <!-- CONTENIDO DINÁMICO -->
-<div class="container py-4 page-enter">
+<div class="container py-4">
     @yield('content')
 </div>
 
 <!-- Bootstrap JS -->
-<script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-document.addEventListener("input", function(e){
-
-    if(e.target.matches("input, select, textarea")){
-
-        const field = e.target
-
-        if(field.value.trim().length > 0){
-
-            field.classList.remove("field-invalid")
-            field.classList.add("field-valid")
-
-        }else{
-
-            field.classList.remove("field-valid")
-            field.classList.add("field-invalid")
-
-        }
-
-    }
-
-})
-
-</script>
-<!-- LOADER -->
-<script>
-
-window.addEventListener("load", function(){
-
-    const loader = document.getElementById("page-loader")
-
-    loader.style.opacity = "0"
-
-    setTimeout(function(){
-        loader.style.display = "none"
-    },300)
-
-})
-
-</script>
 </body>
 </html>
