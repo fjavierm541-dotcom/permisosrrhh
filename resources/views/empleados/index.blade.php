@@ -100,7 +100,7 @@
     </div>
 
     <div class="col-md-2">
-      <a href="{{ route('empleados.index') }}" class="btn btn-secondary w-100">
+      <a href="{{ route('empleados.index') }}" class="btn btn-secondary w-100"> 
         Limpiar
       </a>
     </div>
