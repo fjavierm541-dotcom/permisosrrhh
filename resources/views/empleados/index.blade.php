@@ -79,6 +79,35 @@
         
         <div class="p-4">
 
+<form id="formBusqueda" method="GET" action="{{ route('empleados.index') }}" class="mb-3">
+  <div class="row g-2">
+
+    <div class="col-md-8">
+      <input type="text"
+             id="buscarInput"
+             name="buscar"
+             class="form-control"
+             placeholder="Buscar por nombre o DNI"
+             value="{{ request('buscar') }}">
+    </div>
+
+    <div class="col-md-2">
+      <select id="sexoSelect" name="sexo" class="form-control">
+        <option value="">Sexo</option>
+        <option value="Masculino" {{ request('sexo') == 'Masculino' ? 'selected' : '' }}>Masculino</option>
+        <option value="Femenino" {{ request('sexo') == 'Femenino' ? 'selected' : '' }}>Femenino</option>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <a href="{{ route('empleados.index') }}" class="btn btn-secondary w-100">
+        Limpiar
+      </a>
+    </div>
+
+  </div>
+</form>
+
             <div class="table-responsive">
                 <table class="table table-hover align-middle text-center">
 
@@ -129,8 +158,8 @@
 
 
                             <td>
-                                {{ $empleado->primer_nombre }}
-                                {{ $empleado->primer_apellido }}
+                                {{ $empleado->primer_nombre }} {{ $empleado->segundo_nombre }}
+                                {{ $empleado->primer_apellido }} {{ $empleado->segundo_apellido }}
                             </td>
 
                             <td>{{ $empleado->DNI }}</td>
@@ -174,5 +203,35 @@
 
 </div>
 
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+const form = document.getElementById('formBusqueda');
+const input = document.getElementById('buscarInput');
+const sexo = document.getElementById('sexoSelect');
+
+let timer = null;
+
+function buscarAutomatico() {
+
+clearTimeout(timer);
+
+timer = setTimeout(() => {
+form.submit();
+}, 800); // ahora espera 800ms
+
+}
+
+input.addEventListener('keyup', buscarAutomatico);
+
+sexo.addEventListener('change', function(){
+form.submit();
+});
+
+});
+
+</script>
 
 @endsection
