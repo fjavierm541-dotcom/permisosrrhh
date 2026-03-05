@@ -16,8 +16,9 @@ class EmpleadoController extends Controller
     /**
      * Display a listing of the resource.
      */
-   public function index(Request $request)
+public function index(Request $request)
 {
+
     // 🔄 Marcar vencidos automáticamente
     PeriodoVacacionesSistema::where('estado', 'activo')
         ->where(function ($query) {
@@ -30,7 +31,9 @@ class EmpleadoController extends Controller
         })
         ->update(['estado' => 'vencido']);
 
-    $empleados = Empleado::all(); // ⚠ Traemos todos primero
+
+    $empleados = Empleado::all();
+
 
     foreach ($empleados as $empleado) {
 
@@ -52,6 +55,7 @@ class EmpleadoController extends Controller
 
         $acumulado = DiasAcumuladosSistema::where('dni_empleado', $empleado->DNI)->first();
         $empleado->horas_disponibles = $acumulado->horas_acumuladas ?? 0;
+
 
         // ===== SEMÁFORO =====
         $periodoProximo = PeriodoVacacionesSistema::where('dni_empleado', $empleado->DNI)
@@ -80,10 +84,38 @@ class EmpleadoController extends Controller
         }
     }
 
-    // 🔍 FILTRAR POR COLOR SI SE ENVÍA
+
+    // 🔍 BUSCADOR
+    if ($request->filled('buscar')) {
+
+        $buscar = strtolower($request->buscar);
+
+        $empleados = $empleados->filter(function ($empleado) use ($buscar) {
+
+            $nombreCompleto = strtolower(
+                $empleado->primer_nombre . ' ' .
+                $empleado->segundo_nombre . ' ' .
+                $empleado->primer_apellido . ' ' .
+                $empleado->segundo_apellido
+            );
+
+            return str_contains($nombreCompleto, $buscar)
+                || str_contains(strtolower($empleado->DNI), $buscar);
+        });
+    }
+
+
+    // 🔍 FILTRO POR SEXO
+    if ($request->sexo) {
+        $empleados = $empleados->where('sexo', $request->sexo);
+    }
+
+
+    // 🔍 FILTRO POR SEMÁFORO
     if ($request->estado) {
         $empleados = $empleados->where('semaforo', $request->estado);
     }
+
 
     // 🔢 PAGINACIÓN MANUAL
     $page = $request->get('page', 1);
