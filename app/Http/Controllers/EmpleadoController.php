@@ -170,9 +170,12 @@ public function generarVacaciones()
     
 }
 
-    /**
-     * GUARDAR INFORMACIÓN DE LOS EMPLEADOS
-     */
+
+
+
+
+
+
 public function store(Request $request)
 {
 
@@ -185,67 +188,48 @@ $request->merge([
 for ($i = 1; $i <= 7; $i++) {
 
     $request->merge([
-
         "nombre_beneficiario$i" => $request->input("nombre_beneficiario$i") ?: 'Vacío',
-
         "porcentaje_beneficiario$i" => $request->input("porcentaje_beneficiario$i") ?: 0,
-
         "parentezco_beneficiario$i" => $request->input("parentezco_beneficiario$i") ?: 'Vacío',
-
         "DNI_beneficiario$i" => $request->input("DNI_beneficiario$i") ?: '0000-0000-00000'
-
     ]);
 
 }
 
 $request->validate([
 
-    // NOMBRES
+    // DATOS GENERALES
     'primer_nombre' => ['required','regex:/^[\pL\s]+$/u','max:50'],
     'segundo_nombre' => ['nullable','regex:/^[\pL\s]+$/u','max:50'],
     'primer_apellido' => ['required','regex:/^[\pL\s]+$/u','max:50'],
     'segundo_apellido' => ['nullable','regex:/^[\pL\s]+$/u','max:50'],
-
-    // DNI
+    'codigo' => ['required','regex:/^[0-9]{1,4}$/'],
     'DNI' => ['required','unique:empleados,DNI','regex:/^[0-9]{13}$/'],
-
-    // RTN
     'RTN' => ['required','regex:/^[0-9]{14}$/'],
-
-    // SEXO
     'sexo' => 'required|in:Masculino,Femenino',
 
-    // ESTADO CIVIL
-    'estado_civil' => 'nullable|in:Soltero(a),Casado(a),Unión Libre,Divorciado(a),Viudo(a)',
-
-    // SANGRE
-    'tipo_sangre' => 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
-
-    // TELÉFONOS
-    'telefono_celular' => ['nullable','regex:/^(3|8|9)[0-9]{7}$/'],
+    'estado_civil' => 'required|in:Soltero(a),Casado(a),Unión Libre,Divorciado(a),Viudo(a)',
+    'nacionalidad' => ['required','regex:/^[\pL\s]+$/u','max:50'],
+    'tipo_sangre' => 'required|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
+    
+    //INFORMACION DE CONTACTO 
+    'telefono_celular' => ['required','regex:/^(3|8|9)[0-9]{7}$/'],
     'telefono_fijo' => ['nullable','regex:/^2[0-9]{7}$/'],
-
-    // DIRECCIÓN
-    'direccion_domicilio' => 'nullable|string|max:255',
-    'referencia_domicilio' => 'nullable|string|max:255',
+    'direccion_domicilio' => 'required|string|max:255',
+    'referencia_domicilio' => 'required|string|max:255', 
 
     // EDUCACIÓN
-    'nivel_educativo' => 'nullable|in:Nivel Primario,Nivel Secundario,Nivel Superior,Postgrado',
+    'nivel_educativo' => 'required|in:Nivel Primario,Nivel Secundario,Nivel Superior,Postgrado',
+    
+    //CONTACTOS DE EMERGENCIA
+    'nombre_contacto1' => ['required','regex:/^[\pL\s]+$/u','max:50'],
+    'telefono_contacto1' => ['required','regex:/^[0-9]{8}$/'],
+    'parentezco_contacto1' => 'required|in:Padre,Madre,Hermano(a),Abuelo(a),Tío(a),Primo(a),Esposo(a),Pareja,Hijo(a),Amigo(a),Vecino(a),Otro',
+    'nombre_contacto2' => ['required','regex:/^[\pL\s]+$/u','max:50'],
+    'telefono_contacto2' => ['required','regex:/^[0-9]{8}$/'],
+    'parentezco_contacto2' => 'required|in:Padre,Madre,Hermano(a),Abuelo(a),Tío(a),Primo(a),Esposo(a),Pareja,Hijo(a),Amigo(a),Vecino(a),Otro',
 
-    // LABORAL
-    'puesto' => 'nullable|string|max:100',
-    'fecha_nombramiento' => 'nullable|date',
-    'tipo' => 'nullable|in:Acuerdo,Contrato',
-
-    // SALARIO
-    'salario_inicial' => ['nullable','regex:/^L\.?\s?[0-9]{1,3}(,[0-9]{3})*(\.[0-9]{2})?$/'],
-
-
-    /*
-    ===============================
-    BENEFICIARIOS (1-7)
-    ===============================
-    */
+    //BENEFICIARIOS
 
     'nombre_beneficiario1' => 'nullable|string|max:100',
     'porcentaje_beneficiario1' => 'nullable|numeric|min:0|max:100',
@@ -283,19 +267,23 @@ $request->validate([
     'DNI_beneficiario7' => ['nullable','regex:/^[0-9]{4}-[0-9]{4}-[0-9]{5}$/'],
 
     // INFORMACIÓN LABORAL
-    'puesto' => ['nullable','regex:/^[\pL\s]+$/u','min:3','max:20'],
+    'puesto' => ['required','regex:/^[\pL\s]+$/u','min:3','max:20'],
     'fecha_nombramiento' => ['required','date','before_or_equal:today'],
     'tipo' => ['required','in:Acuerdo,Contrato'],
-    'salario_inicial' => ['nullable','regex:/^L\.?\s?[0-9]{1,3}(,[0-9]{3})*(\.[0-9]{2})?$/'],
+    'salario_inicial' => ['required','regex:/^L\.?\s?[0-9]{1,3}(,[0-9]{3})*(\.[0-9]{2})?$/'],
 
     // DOCUMENTOS
     'copia_dni' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
     'acuerdo' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
     'nota_traslado' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
 
+    
 ], [
 
-    // NOMBRES
+    //DATOS GENERALES
+    'codigo.required' => 'El código es obligatorio.',
+    'codigo.regex' => 'El código debe contener entre 1 y 4 dígitos.',
+    
     'primer_nombre.required' => 'El primer nombre es obligatorio.',
     'primer_nombre.regex' => 'El nombre no debe aceptar números ni caracteres especiales.',
     'primer_nombre.max' => 'El nombre no debe exceder 50 caracteres.',
@@ -310,24 +298,42 @@ $request->validate([
     'segundo_apellido.regex' => 'El segundo apellido no debe aceptar números.',
     'segundo_apellido.max' => 'Máximo 50 caracteres.',
 
-    // DNI
     'DNI.required' => 'El DNI es obligatorio.',
     'DNI.unique' => 'Este DNI ya está registrado.',
     'DNI.regex' => 'El DNI debe contener exactamente 13 números.',
-
-    // RTN
     'RTN.required' => 'El RTN es obligatorio.',
     'RTN.regex' => 'El RTN debe contener exactamente 14 números.',
 
-    // SEXO
+    'fecha_nacimiento.required' => 'La fecha de nacimiento es obligatoria.',
+    'fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
+    'fecha_nacimiento.date' => 'La fecha de nacimiento no es válida.',
+
     'sexo.required' => 'Debe seleccionar el sexo.',
 
-    // TELÉFONOS
-    'telefono_celular.regex' => 'El celular debe iniciar con 3, 8 o 9 y tener 8 dígitos.',
-    'telefono_fijo.regex' => 'El teléfono fijo debe iniciar con 2 y tener 8 dígitos.',
+    'telefono_celular.regex' => 'El celular del empleado debe iniciar con 3, 8 o 9 y tener 8 dígitos.',
+    'telefono_celular.required' => 'El teléfono celular es obligatorio.',
+    'telefono_fijo.regex' => 'El teléfono fijo del empleado debe iniciar con 2 y tener 8 dígitos.',
 
-    // SALARIO
     'salario_inicial.regex' => 'El salario debe tener formato: L. 12,000.00',
+    'salario_inicial.required' => 'Ingresar el salario es obligatori.',
+    'referencia_domicilio.required' => 'La referencia del domicilio es obligatoria.',
+    'direccion_domicilio.required' => 'La dirección es obligatoria.',
+
+    //CONTACTOS DE EMERGENCIA
+    'nombre_contacto1.required' => 'El nombre del primer contacto es obligatorio.',
+    'nombre_contacto1.regex' => 'El nombre del primer contacto solo puede contener letras y espacios.',
+    'nombre_contacto1.max' => 'El nombre del primer contacto no puede tener más de 50 caracteres.',
+    'telefono_contacto1.required' => 'El teléfono del primer contacto es obligatorio.',
+    'telefono_contacto1.regex' => 'El teléfono del primer contacto debe contener exactamente 8 números.',
+    'parentezco_contacto1.required' => 'Debe seleccionar el parentesco del primer contacto.',
+    'parentezco_contacto1.in' => 'El parentesco del primer contacto no es válido.',
+    'nombre_contacto2.required' => 'El nombre del segundo contacto es obligatorio.',
+    'nombre_contacto2.regex' => 'El nombre del segundo contacto solo puede contener letras y espacios.',
+    'nombre_contacto2.max' => 'El nombre del segundo contacto no puede tener más de 50 caracteres.',
+    'telefono_contacto2.required' => 'El teléfono del segundo contacto es obligatorio.',
+    'telefono_contacto2.regex' => 'El teléfono del segundo contacto debe contener exactamente 8 números.',
+    'parentezco_contacto2.required' => 'Debe seleccionar el parentesco del segundo contacto.',
+    'parentezco_contacto2.in' => 'El parentesco del segundo contacto no es válido.',
 
     // BENEFICIARIOS
     'DNI_beneficiario1.digits' => 'El DNI del beneficiario debe tener 13 números.',
@@ -338,13 +344,8 @@ $request->validate([
     'DNI_beneficiario6.digits' => 'El DNI del beneficiario debe tener 13 números.',
     'DNI_beneficiario7.digits' => 'El DNI del beneficiario debe tener 13 números.',
 
-
-      /*
-    ===============================
-    INFORMACIÓN LABORAL
-    ===============================
-    */
     // PUESTO
+        'puesto.required' => 'El ingreso del puesto es obligatorio.',
         'puesto.regex' => 'El puesto solo debe contener letras.',
         'puesto.min' => 'El puesto debe tener al menos 3 caracteres.',
         'puesto.max' => 'El puesto no debe superar 20 caracteres.',
@@ -356,9 +357,10 @@ $request->validate([
 
         // TIPO
         'tipo.required' => 'Debe seleccionar el tipo de nombramiento.',
-        'tipo.in' => 'El tipo seleccionado no es válido.',
+        'tipo.in' => 'El tipo de nombramientoi seleccionado no es válido.',
 
         // SALARIO
+        'salario_inicial.required' => 'El ingreso del salario es obligatorio.',
         'salario_inicial.regex' => 'El salario debe tener formato: L. 12,000.00',
 
         // DOCUMENTOS
@@ -374,9 +376,27 @@ $request->validate([
 ]);
 
 
+ $fechaNacimiento = \Carbon\Carbon::parse($request->fecha_nacimiento);
+    $data['anio_nacimiento'] = $fechaNacimiento->format('Y');
+    $data['mes_nacimiento'] = $fechaNacimiento->format('m');
+    $data['dia_nacimiento'] = $fechaNacimiento->format('d');
+
+    //SALARIO
+    if ($request->filled('salario_inicial')) {
+    $salario = $request->salario_inicial;
+    // quitar L. y espacios
+    $salario = str_replace('L.', '', $salario);
+    $salario = str_replace(' ', '', $salario);
+    // quitar comas de miles
+    $salario = str_replace(',', '', $salario);
+
+    $request->merge([
+        'salario_inicial' => $salario
+    ]);
+}
 
     $data = $request->all();
-    $data['usuario_crea'] = auth()->user()->name ?? 'Sistema';
+    $data['usuario_crea'] = auth()->user()->name ?? 'Sistema';;
 
     // Crear empleado primero
     $empleado = Empleado::create($data);
@@ -416,10 +436,6 @@ $request->validate([
 
 
 
-
-    /**
-     * Display the specified resource.
-     */
 public function show($dni)
 {
     $empleado = Empleado::where('DNI', $dni)->firstOrFail();
