@@ -210,14 +210,17 @@ window.addEventListener("load", function(){
 
     const loader = document.getElementById("page-loader")
 
-    loader.style.opacity = "0"
+   if (loader) {
+        loader.style.opacity = "0"
 
-    setTimeout(function(){
-        loader.style.display = "none"
-    },300)
+     setTimeout(function(){
+            loader.style.display = "none"
+        },300)
+    }
 
 })
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

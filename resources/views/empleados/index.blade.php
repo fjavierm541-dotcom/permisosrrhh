@@ -114,7 +114,7 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Nombre del empleado</th>
+                            <th style="text-align: left;">Nombre del empleado</th>
                             <th>DNI</th>
                             <th>Días disponibles</th>
                             <th>Ver por riesgo de vencimiento
@@ -157,10 +157,10 @@
                             </td>
 
 
-                            <td>
-                                {{ $empleado->primer_nombre }}
-                                {{ $empleado->primer_apellido }}
-                            </td>
+                            <td style="text-align: left;">
+    {{ $empleado->primer_nombre }} {{ $empleado->segundo_nombre }}
+    {{ $empleado->primer_apellido }} {{ $empleado->segundo_apellido }}
+</td>
 
                             <td>{{ $empleado->DNI }}</td>
 
