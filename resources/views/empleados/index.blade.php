@@ -229,9 +229,6 @@ sexo.addEventListener('change', function(){
 form.submit();
 });
 
-
-
-
 });
 
 </script>
