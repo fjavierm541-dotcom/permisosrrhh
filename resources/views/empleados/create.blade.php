@@ -416,7 +416,6 @@ placeholder="Ingrese la dirección del empleado" required
        inputmode="numeric"
        pattern="[0-9]{8}"
        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-       required
        value="{{ old('telefono_fijo') }}"
        class="form-control @error('telefono_fijo') is-invalid @enderror">
 @error('telefono_fijo')
@@ -664,10 +663,10 @@ En caso de emergencia se autoriza llamar a las personas en el siguiente orden:
         <input type="text"
                name="porcentaje_beneficiario{{ $i }}"
                placeholder="00"
-               maxlength="2"
-               pattern="[0-9]{1,2}"
+               maxlength="3" 
+               pattern="^(100|[0-9]{1,2})$"
                inputmode="numeric"
-               oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                oninput="this.value = this.value.replace(/[^0-9]/g, ''); if (parseInt(this.value || 0) > 100) this.value = '100';"
                value="{{ old('porcentaje_beneficiario'.$i) }}"
                class="form-control @error('porcentaje_beneficiario'.$i) is-invalid @enderror">
         @error('porcentaje_beneficiario'.$i)
@@ -743,9 +742,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 </script>
-
-
-
 
 
 
@@ -873,16 +869,33 @@ document.addEventListener('DOMContentLoaded', function () {
                             <div class="col-md-4 mb-3">
                                 <label>Copia DNI</label>
                                 <input type="file" name="copia_dni" class="form-control">
+                                @error('copia_dni')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                             @enderror
                             </div>
 
                             <div class="col-md-4 mb-3">
                                 <label>Acuerdo / Contrato</label>
                                 <input type="file" name="acuerdo" class="form-control">
+                                @error('acuerdo')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                             @enderror
                             </div>
 
                             <div class="col-md-4 mb-3">
                                 <label>Nota de Traslado (si es necesario)</label>
                                 <input type="file" name="nota_traslado" class="form-control">
+                                @error('nota_traslado')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                             @enderror
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label>Copìa RTN</label>
+                                <input type="file" name="copia_rtn" class="form-control">
+                                @error('copia_rtn')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                             @enderror
                             </div>
 
                         </div>
