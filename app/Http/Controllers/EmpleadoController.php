@@ -220,10 +220,10 @@ $request->merge([
 for ($i = 1; $i <= 7; $i++) {
 
     $request->merge([
-        "nombre_beneficiario$i" => $request->input("nombre_beneficiario$i") ?: 'Vacío',
-        "porcentaje_beneficiario$i" => $request->input("porcentaje_beneficiario$i") ?: 0,
-        "parentezco_beneficiario$i" => $request->input("parentezco_beneficiario$i") ?: 'Vacío',
-        "DNI_beneficiario$i" => $request->input("DNI_beneficiario$i") ?: '0000-0000-00000'
+        "nombre_beneficiario$i" => trim((string) $request->input("nombre_beneficiario$i", '')),
+        "porcentaje_beneficiario$i" => $request->input("porcentaje_beneficiario$i"),
+        "parentezco_beneficiario$i" => trim((string) $request->input("parentezco_beneficiario$i", '')),
+        "DNI_beneficiario$i" => trim((string) $request->input("DNI_beneficiario$i", '')),
     ]);
 
 }
@@ -308,48 +308,42 @@ $request->validate([
     'copia_dni' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
     'acuerdo' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
     'nota_traslado' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
+    'copia_rtn' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
 
     
 ], [
 
     //DATOS GENERALES
-    'codigo.required' => 'El código es obligatorio.',
-    'codigo.regex' => 'El código debe contener entre 1 y 4 dígitos.',
+    'codigo.required' => 'El código del empelado es obligatorio.',
+    'codigo.regex' => 'El código del empleado debe contener entre 1 y 4 dígitos.',
     
-    'primer_nombre.required' => 'El primer nombre es obligatorio.',
-    'primer_nombre.regex' => 'El nombre no debe aceptar números ni caracteres especiales.',
-    'primer_nombre.max' => 'El nombre no debe exceder 50 caracteres.',
+    'primer_nombre.required' => 'El primer nombre del empleado es obligatorio.',
+    'primer_nombre.regex' => 'El nombre del empleado no debe aceptar números ni caracteres especiales.',
+    'primer_nombre.max' => 'El nombre del empleado no debe exceder 50 caracteres.',
 
-    'segundo_nombre.regex' => 'El segundo nombre no debe aceptar números.',
-    'segundo_nombre.max' => 'Máximo 50 caracteres.',
+    'segundo_nombre.regex' => 'El segundo nombre del empleado no debe aceptar números.',
+    'segundo_nombre.max' => 'EL segundo nombre debe tener un máximo 50 de caracteres.',
 
-    'primer_apellido.required' => 'El primer apellido es obligatorio.',
-    'primer_apellido.regex' => 'El apellido no debe aceptar números.',
-    'primer_apellido.max' => 'Máximo 50 caracteres.',
+    'DNI.required' => 'El DNI  del empleado es obligatorio.',
+    'DNI.unique' => 'Este DNI de empleado ya está registrado.',
+    'DNI.regex' => 'El DNI del empleado debe contener exactamente 13 números.',
+    'RTN.required' => 'El RTN del empleado es obligatorio.',
+    'RTN.regex' => 'El RTN del empleado debe contener exactamente 14 números.',
 
-    'segundo_apellido.regex' => 'El segundo apellido no debe aceptar números.',
-    'segundo_apellido.max' => 'Máximo 50 caracteres.',
-
-    'DNI.required' => 'El DNI es obligatorio.',
-    'DNI.unique' => 'Este DNI ya está registrado.',
-    'DNI.regex' => 'El DNI debe contener exactamente 13 números.',
-    'RTN.required' => 'El RTN es obligatorio.',
-    'RTN.regex' => 'El RTN debe contener exactamente 14 números.',
-
-    'fecha_nacimiento.required' => 'La fecha de nacimiento es obligatoria.',
-    'fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
-    'fecha_nacimiento.date' => 'La fecha de nacimiento no es válida.',
+    'fecha_nacimiento.required' => 'La fecha de nacimiento del empleado es obligatoria.',
+    'fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento del empleado no puede ser futura.',
+    'fecha_nacimiento.date' => 'La fecha de nacimiento del empleado no es válida.',
 
     'sexo.required' => 'Debe seleccionar el sexo.',
 
     'telefono_celular.regex' => 'El celular del empleado debe iniciar con 3, 8 o 9 y tener 8 dígitos.',
-    'telefono_celular.required' => 'El teléfono celular es obligatorio.',
+    'telefono_celular.required' => 'El teléfono celular  del empleado es obligatorio.',
     'telefono_fijo.regex' => 'El teléfono fijo del empleado debe iniciar con 2 y tener 8 dígitos.',
 
-    'salario_inicial.regex' => 'El salario debe tener formato: L. 12,000.00',
-    'salario_inicial.required' => 'Ingresar el salario es obligatori.',
-    'referencia_domicilio.required' => 'La referencia del domicilio es obligatoria.',
-    'direccion_domicilio.required' => 'La dirección es obligatoria.',
+    'salario_inicial.regex' => 'El salario del empleado debe tener formato: L. 12,000.00',
+    'salario_inicial.required' => 'Ingresar el salario del empleado es obligatorio.',
+    'referencia_domicilio.required' => 'La referencia del domicilio del empleado es obligatoria.',
+    'direccion_domicilio.required' => 'La dirección del empleado es obligatoria.',
 
     //CONTACTOS DE EMERGENCIA
     'nombre_contacto1.required' => 'El nombre del primer contacto es obligatorio.',
@@ -377,10 +371,10 @@ $request->validate([
     'DNI_beneficiario7.digits' => 'El DNI del beneficiario debe tener 13 números.',
 
     // PUESTO
-        'puesto.required' => 'El ingreso del puesto es obligatorio.',
-        'puesto.regex' => 'El puesto solo debe contener letras.',
-        'puesto.min' => 'El puesto debe tener al menos 3 caracteres.',
-        'puesto.max' => 'El puesto no debe superar 20 caracteres.',
+        'puesto.required' => 'El puesto de nombramiento  del empleado es obligatorio.',
+        'puesto.regex' => 'El puesto de nombramiento  del empleado solo debe contener letras.',
+        'puesto.min' => 'El puesto de nombramiento  del empleado debe tener al menos 3 caracteres.',
+        'puesto.max' => 'El puesto de nombramiento  del empleado no debe superar 20 caracteres.',
 
         // FECHA
         'fecha_nombramiento.required' => 'Debe ingresar la fecha de nombramiento.',
@@ -392,8 +386,8 @@ $request->validate([
         'tipo.in' => 'El tipo de nombramientoi seleccionado no es válido.',
 
         // SALARIO
-        'salario_inicial.required' => 'El ingreso del salario es obligatorio.',
-        'salario_inicial.regex' => 'El salario debe tener formato: L. 12,000.00',
+        'salario_inicial.required' => 'El ingreso del salario del empleado es obligatorio.',
+        'salario_inicial.regex' => 'El salario debe tener formato: L. 14,000.00',
 
         // DOCUMENTOS
         'copia_dni.mimes' => 'La copia del DNI debe ser PDF o imagen.',
@@ -406,7 +400,60 @@ $request->validate([
 
 
 ]);
+// se valida consistencia por beneficiario (si llenan uno, 
+// deben llenar todos los campos clave), se exige nombre/parentesco solo letras,
+//  DNI con formato correcto y suma total de porcentajes exactamente en 100%
+$validator->after(function ($validator) use ($request) {
+    $porcentajesBeneficiarios = [];
+    $hayBeneficiarios = false;
 
+    for ($i = 1; $i <= 7; $i++) {
+        $nombre = trim((string) $request->input("nombre_beneficiario$i", ''));
+        $porcentaje = $request->input("porcentaje_beneficiario$i");
+        $parentezco = trim((string) $request->input("parentezco_beneficiario$i", ''));
+        $dniBeneficiario = trim((string) $request->input("DNI_beneficiario$i", ''));
+
+        $hayDato = $nombre !== '' || $parentezco !== '' || $dniBeneficiario !== '' || ($porcentaje !== null && $porcentaje !== '');
+
+        if ($hayDato) {
+            $hayBeneficiarios = true;
+            if ($nombre === '') {
+                $validator->errors()->add("nombre_beneficiario$i", "El nombre del beneficiario $i es obligatorio cuando registra beneficiarios.");
+            } elseif (!preg_match('/^[\pL\s]+$/u', $nombre)) {
+                $validator->errors()->add("nombre_beneficiario$i", "El nombre del beneficiario $i solo debe llevar letras y espacios.");
+            } elseif (mb_strlen($nombre) > 50) {
+                $validator->errors()->add("nombre_beneficiario$i", "El nombre del beneficiario $i no debe superar 50 caracteres.");
+            }
+
+            if ($parentezco === '') {
+                $validator->errors()->add("parentezco_beneficiario$i", "El parentesco del beneficiario $i es obligatorio cuando registra beneficiarios.");
+            } elseif (!preg_match('/^[\pL\s]+$/u', $parentezco)) {
+                $validator->errors()->add("parentezco_beneficiario$i", "El parentesco del beneficiario $i solo debe llevar letras y espacios.");
+            } elseif (mb_strlen($parentezco) > 20) {
+                $validator->errors()->add("parentezco_beneficiario$i", "El parentesco del beneficiario $i no debe superar 20 caracteres.");
+            }
+
+            if ($dniBeneficiario === '') {
+                $validator->errors()->add("DNI_beneficiario$i", "El DNI del beneficiario $i es obligatorio cuando registra beneficiarios.");
+            } elseif (!preg_match('/^[0-9]{4}-[0-9]{4}-[0-9]{5}$/', $dniBeneficiario)) {
+                $validator->errors()->add("DNI_beneficiario$i", "El DNI del beneficiario $i debe tener formato 0000-0000-00000.");
+            }
+
+            if ($porcentaje === null || $porcentaje === '') {
+                $validator->errors()->add("porcentaje_beneficiario$i", "El porcentaje del beneficiario $i es obligatorio cuando registra beneficiarios.");
+            } elseif (!is_numeric($porcentaje) || (int) $porcentaje < 0 || (int) $porcentaje > 100) {
+                $validator->errors()->add("porcentaje_beneficiario$i", "El porcentaje del beneficiario $i debe estar entre 0 y 100.");
+            } else {
+                $porcentajesBeneficiarios[] = (int) $porcentaje;
+            }
+        }
+    }
+
+    if ($hayBeneficiarios && array_sum($porcentajesBeneficiarios) !== 100) {
+        $validator->errors()->add('porcentaje_total_beneficiarios', 'La suma de porcentajes de beneficiarios debe ser exactamente 100%.');
+
+
+        
 
  $fechaNacimiento = \Carbon\Carbon::parse($request->fecha_nacimiento);
     $data['anio_nacimiento'] = $fechaNacimiento->format('Y');
@@ -440,7 +487,8 @@ $request->validate([
     $documentos = [
         'copia_dni' => 'Copia DNI',
         'acuerdo' => 'Acuerdo',
-        'nota_traslado' => 'Nota Traslado'
+        'nota_traslado' => 'Nota Traslado',
+        'copia_rtn' => 'Copia RTN'
     ];
 
     foreach ($documentos as $campo => $tipo) {
