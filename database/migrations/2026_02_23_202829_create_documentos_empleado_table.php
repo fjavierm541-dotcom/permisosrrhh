@@ -9,8 +9,6 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
 public function up()
 {

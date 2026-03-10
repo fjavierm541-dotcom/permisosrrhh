@@ -790,11 +790,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <option value="009 Catastro">009 - Catastro</option>
                                 <option value="010 Compras y suministros">010 - Compras y suministros</option>
                                 <option value="011 Unidad municipal de informática">011 - Unidad municipal de informática</option>
-
                                 <option value="012 Justicia municipal">012 - Justicia municipal</option>
-                                <option value="027 Conciliación">(Dep. Justicia) 027 - Conciliación</option>
-                                <option value="028 Alcaldes auxiliares">(Dep. Justicia) 028 - Alcaldes auxiliares</option>
-
                                 <option value="013 Unidad municipal ambiental">013 - Unidad municipal ambiental (UMA)</option>
                                 <option value="014 Unidad técnica municipal">014 - Unidad técnica municipal (UTM)</option>
                                 <option value="015 Recursos humanos">015 - Recursos humanos</option>
@@ -806,16 +802,17 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <option value="021 Programa de la niñez adolescencia y juventud">021 - Programa de la niñez adolescencia y juventud</option>
                                 <option value="022 Unidad desarrollo económico local">022 - Unidad desarrollo económico local (UDEL)</option>
                                 <option value="023 Oficina de la mujer municipal">023 - Oficina de la mujer municipal</option>
-
+                                <option value="024 Centro de atención integral a la niñez">033 - Centro de atención integral a la niñez (CAIN)</option>
                                 <option value="025 Departamento legal municipal">025 - Departamento legal municipal</option>
                                 <option value="026 Obras y vías de comunicación">026 - Obras y vías de comunicación / plantel</option>
-
+                                <option value="027 Conciliación">(Dep. Justicia) 027 - Conciliación</option>
+                                <option value="028 Alcaldes auxiliares">(Dep. Justicia) 028 - Alcaldes auxiliares</option>
                                 <option value="029 Clínica médica municipal">029 - Clínica médica municipal</option>
                                 <option value="030 Oficina municipal atención personas con discapacidad">030 - Oficina municipal atención personas con discapacidad</option>
                                 <option value="031 Observatorio municipal">031 - Observatorio municipal</option>
                                 <option value="032 Unidad de higiene y aseo">032 - Unidad de higiene y aseo</option>
 
-                                <option value="033 Centro de atención integral a la niñez">033 - Centro de atención integral a la niñez (CAIN)</option>
+                               
 
                                 </select>
 

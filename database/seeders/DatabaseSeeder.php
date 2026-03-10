@@ -15,8 +15,8 @@ public function run(): void
     $this->call([
         EstadoPermisoSistemaSeeder::class,
         TipoPermisoSistemaSeeder::class,
-        DepartamentoSeeder::class,
         CategoriaMovimientoSeeder::class,
+        DepartamentosMuniSeeder::class,
     ]);
 }
 }

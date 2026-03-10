@@ -4,8 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\PeriodoVacacionesController;
 use App\Http\Controllers\EmpleadoController;
-    use App\Http\Controllers\DashboardController;
-        use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\DashboardController;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\DepartamentoMuniController;
 
 
     
@@ -119,3 +120,12 @@ Route::post('/logout', function () {
     Auth::logout();
     return redirect('/');
 })->name('logout');
+
+
+
+//DEPTOS RUTAS
+Route::resource('departamentos', DepartamentoMuniController::class);
+
+Route::patch('departamentos/{id}/toggle',
+    [DepartamentoMuniController::class,'toggle']
+)->name('departamentos.toggle'); 

@@ -97,4 +97,8 @@ class Empleado extends Model
     {
     return $this->hasMany(DocumentoEmpleado::class, 'dni_empleado', 'DNI');
     }
+    public function departamento()
+    {
+    return $this->belongsTo(\App\Models\DepartamentoMuni::class, 'departamento_id', 'id');
+    }
 }
