@@ -51,7 +51,7 @@
                 id="buscarInput"
                 name="buscar"
                 class="form-control"
-                placeholder="Buscar por nombre o código"
+                placeholder="Buscar por nombre de depto. o código"
                 value="{{ $buscar ?? '' }}">
 
             </div>

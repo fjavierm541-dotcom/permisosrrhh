@@ -21,7 +21,7 @@ class DepartamentosMuniSeeder extends Seeder
             ['codigo'=>'008','nombre'=>'Control Tributario','departamento_padre_id'=>null],
             ['codigo'=>'009','nombre'=>'Catastro','departamento_padre_id'=>null],
             ['codigo'=>'010','nombre'=>'Compras y Suministros','departamento_padre_id'=>null],
-            ['codigo'=>'011','nombre'=>'Unidad Municipal de Informática','departamento_padre_id'=>null],
+            ['codigo'=>'011','nombre'=>'Unidad Municipal de Informática (UMI)','departamento_padre_id'=>null],
             ['codigo'=>'012','nombre'=>'Justicia Municipal','departamento_padre_id'=>null],
             ['codigo'=>'013','nombre'=>'Unidad Municipal Ambiental (UMA)','departamento_padre_id'=>null],
             ['codigo'=>'014','nombre'=>'Unidad Técnica Municipal (UTM)','departamento_padre_id'=>null],
@@ -29,7 +29,7 @@ class DepartamentosMuniSeeder extends Seeder
             ['codigo'=>'016','nombre'=>'Terminal Municipal de Transporte','departamento_padre_id'=>null],
             ['codigo'=>'017','nombre'=>'Ingeniería Municipal','departamento_padre_id'=>null],
             ['codigo'=>'018','nombre'=>'Desarrollo Comunitario','departamento_padre_id'=>null],
-            ['codigo'=>'019','nombre'=>'Relaciones Públicas','departamento_padre_id'=>null],
+            ['codigo'=>'019','nombre'=>'Relaciones Públicas (RRHH)','departamento_padre_id'=>null],
             ['codigo'=>'020','nombre'=>'Bienes y Proveeduría','departamento_padre_id'=>null],
             ['codigo'=>'021','nombre'=>'Programa de la Niñez Adolescencia y Juventud','departamento_padre_id'=>null],
             ['codigo'=>'022','nombre'=>'Unidad Desarrollo Económico Local (UDEL)','departamento_padre_id'=>null],
@@ -41,7 +41,7 @@ class DepartamentosMuniSeeder extends Seeder
             ['codigo'=>'028','nombre'=>'Alcaldes Auxiliares','departamento_padre_id'=>12],
             ['codigo'=>'029','nombre'=>'Escuela Taller','departamento_padre_id'=>null],
             ['codigo'=>'030','nombre'=>'Clínica Médica Municipal','departamento_padre_id'=>null],
-            ['codigo'=>'031','nombre'=>'Oficina Municipal de Atención a Personas con Discapacidad','departamento_padre_id'=>null],
+            ['codigo'=>'031','nombre'=>'Oficina Municipal de Atención a Personas con Discapacidad (OMAPED)','departamento_padre_id'=>null],
             ['codigo'=>'032','nombre'=>'Unidad de Higiene y Aseo','departamento_padre_id'=>null],
 
 

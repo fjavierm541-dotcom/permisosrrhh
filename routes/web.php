@@ -133,3 +133,10 @@ Route::patch('departamentos/{id}/toggle',
 //buscar en listado de deptos
 Route::get('/departamentos/buscar',[DepartamentoMuniController::class,'buscar'])
 ->name('departamentos.buscar'); 
+
+Route::get('/departamentos/{id}/asignar',[DepartamentoMuniController::class,'asignar'])
+->name('departamentos.asignar');
+
+Route::post('/departamentos/{id}/asignar',[DepartamentoMuniController::class,'guardarAsignacion'])
+->name('departamentos.asignar.guardar');
+

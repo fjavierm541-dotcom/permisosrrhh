@@ -4,81 +4,129 @@
 
 @section('content')
 
-<div class="glass-card p-4">
+<div class="glass-card">
 
-<h5>
+    <!-- HEADER -->
+    <div class="p-3 text-white"
+        style="background:#2f4f6f;border-top-left-radius:18px;border-top-right-radius:18px;">
 
-Departamento {{ $departamento->codigo }}
+        <div class="d-flex justify-content-between">
 
-</h5>
+            <h5 class="mb-0">
+                Departamento {{ $departamento->codigo }}
+            </h5>
 
-<p>
+            <div>
 
-<strong>Nombre:</strong>
-{{ $departamento->nombre }}
+                <a href="{{ route('departamentos.asignar',$departamento->id) }}"
+                    class="btn btn-primary-custom btn-sm">
 
-</p>
+                    Agregar empleados
 
-<hr>
+                </a>
 
-<h6>
+                <a href="{{ route('departamentos.index') }}"
+                    class="btn btn-secondary btn-sm">
 
-Empleados del departamento
+                    Volver
 
-</h6>
+                </a>
 
-@if($departamento->empleados->count())
+            </div>
 
-<table class="table">
+        </div>
 
-<thead>
+    </div>
 
-<tr>
-<th>DNI</th>
-<th>Nombre</th>
-<th>Puesto</th>
-</tr>
 
-</thead>
+    <!-- INFO -->
+    <div class="p-3">
 
-<tbody>
+        <p>
+            <strong>Nombre:</strong>
+            {{ $departamento->nombre }}
+        </p>
 
-@foreach($departamento->empleados as $emp)
+        <p>
+            <strong>Jefe de departamento:</strong>
 
-<tr>
+            @if($departamento->jefe_dni)
+                {{ $departamento->jefe->primer_nombre ?? '' }}
+                {{ $departamento->jefe->primer_apellido ?? '' }}
+            @else
+                <span class="text-muted">No asignado</span>
+            @endif
+        </p>
 
-<td>{{ $emp->DNI }}</td>
+        <hr>
 
-<td>
+        <h6>
+            Empleados asignados
+        </h6>
 
-{{ $emp->primer_nombre }}
-{{ $emp->primer_apellido }}
+    </div>
 
-</td>
 
-<td>
+    <!-- TABLA EMPLEADOS -->
+    <div class="table-responsive">
 
-{{ $emp->puesto }}
+        <table class="table align-middle">
 
-</td>
+            <thead style="background:#3a5a7c;color:white">
 
-</tr>
+                <tr>
 
-@endforeach
+                    <th>DNI</th>
 
-</tbody>
+                    <th>Nombre</th>
 
-</table>
+                    <th>Puesto</th>
 
-@else
+                </tr>
 
-<div class="alert alert-info">
+            </thead>
 
-Este departamento aún no tiene empleados asignados.
+            <tbody>
 
-</div>
+                @forelse($departamento->empleados as $emp)
 
-@endif
+                    <tr>
+
+                        <td>
+                            {{ $emp->DNI }}
+                        </td>
+
+                        <td>
+                            {{ $emp->primer_nombre }}
+                            {{ $emp->primer_apellido }}
+                        </td>
+
+                        <td>
+                            {{ $emp->puesto }}
+                        </td>
+
+                    </tr>
+
+                @empty
+
+                    <tr>
+
+                        <td colspan="3"
+                            class="text-center text-muted">
+
+                            Este departamento aún no tiene empleados asignados.
+
+                        </td>
+
+                    </tr>
+
+                @endforelse
+
+            </tbody>
+
+        </table>
+
+    </div>
 
 </div>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\DepartamentoMuni;
+use App\Models\Empleado;
 
 class DepartamentoMuniController extends Controller
 {
@@ -115,6 +116,33 @@ public function show($id)
 
         return back();
     }
+
+
+
+
+//asoiganr o agregar deptos
+   public function asignar($id)
+{
+    $departamento = DepartamentoMuni::findOrFail($id);
+
+    $empleados = Empleado::with('departamento')
+        ->orderBy('primer_nombre')
+        ->get();
+
+    return view('departamentos.asignar', compact('departamento','empleados'));
+}
+
+public function guardarAsignacion(Request $request, $id)
+{
+    $empleados = $request->empleados ?? [];
+
+    Empleado::whereIn('DNI', $empleados)
+        ->update(['departamento_id' => $id]);
+
+    return redirect()
+        ->route('departamentos.show', $id)
+        ->with('success','Empleados asignados correctamente');
+}
 }
 
 
