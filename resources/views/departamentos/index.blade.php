@@ -37,7 +37,10 @@
 
     <!-- BUSCADOR -->
 
-    <div class="p-3">
+   <!-- BUSCADOR -->
+<div class="p-3">
+
+    <form id="formBusqueda" method="GET" action="{{ route('departamentos.index') }}" class="mb-3">
 
         <div class="row g-2">
 
@@ -45,7 +48,8 @@
 
                 <input
                 type="text"
-                id="buscarDepto"
+                id="buscarInput"
+                name="buscar"
                 class="form-control"
                 placeholder="Buscar por nombre o código"
                 value="{{ $buscar ?? '' }}">
@@ -54,19 +58,20 @@
 
             <div class="col-md-2">
 
-                <button
-                id="limpiarBusqueda"
+                <a href="{{ route('departamentos.index') }}"
                 class="btn btn-secondary w-100">
 
                 Limpiar
 
-                </button>
+                </a>
 
             </div>
 
         </div>
 
-    </div>
+    </form>
+
+</div>
 
 
     <!-- TABLA -->
@@ -193,41 +198,7 @@
 </div>
 
 
-<!-- BUSCADOR -->
-<div class="p-3">
 
-    <form id="formBusqueda" method="GET" action="{{ route('departamentos.index') }}" class="mb-3">
-
-        <div class="row g-2">
-
-            <div class="col-md-10">
-
-                <input
-                type="text"
-                id="buscarInput"
-                name="buscar"
-                class="form-control"
-                placeholder="Buscar por nombre o código"
-                value="{{ $buscar ?? '' }}">
-
-            </div>
-
-            <div class="col-md-2">
-
-                <a href="{{ route('departamentos.index') }}"
-                class="btn btn-secondary w-100">
-
-                Limpiar
-
-                </a>
-
-            </div>
-
-        </div>
-
-    </form>
-
-</div>
 
 
 <!-- TABLA -->
