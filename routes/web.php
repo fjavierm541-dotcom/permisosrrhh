@@ -129,3 +129,7 @@ Route::resource('departamentos', DepartamentoMuniController::class);
 Route::patch('departamentos/{id}/toggle',
     [DepartamentoMuniController::class,'toggle']
 )->name('departamentos.toggle'); 
+
+//buscar en listado de deptos
+Route::get('/departamentos/buscar',[DepartamentoMuniController::class,'buscar'])
+->name('departamentos.buscar'); 

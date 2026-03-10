@@ -7,23 +7,31 @@ use App\Models\DepartamentoMuni;
 
 class DepartamentoMuniController extends Controller
 {
-        public function index(Request $request)
+public function index(Request $request)
 {
     $buscar = $request->buscar;
 
-    $departamentos = DepartamentoMuni::when($buscar, function ($query,$buscar){
+    $departamentos = DepartamentoMuni::query()
 
-        $query->where('nombre','like',"%$buscar%")
-              ->orWhere('codigo','like',"%$buscar%");
+        ->when($buscar, function ($query) use ($buscar) {
 
-    })
-    ->orderBy('codigo')
-    ->paginate(15)
-    ->withQueryString();
+            $query->where(function ($q) use ($buscar) {
 
-    return view('departamentos.index', compact('departamentos','buscar'));
+                $q->where('nombre', 'like', "%{$buscar}%")
+                  ->orWhere('codigo', 'like', "%{$buscar}%");
+
+            });
+
+        })
+
+        ->orderBy('codigo')
+
+        ->paginate(15)
+
+        ->withQueryString();
+
+    return view('departamentos.index', compact('departamentos', 'buscar'));
 }
-
 
 
 

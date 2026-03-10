@@ -193,53 +193,69 @@
 </div>
 
 
-<!-- BUSCADOR EN TIEMPO REAL -->
+<!-- BUSCADOR -->
+<div class="p-3">
+
+    <form id="formBusqueda" method="GET" action="{{ route('departamentos.index') }}" class="mb-3">
+
+        <div class="row g-2">
+
+            <div class="col-md-10">
+
+                <input
+                type="text"
+                id="buscarInput"
+                name="buscar"
+                class="form-control"
+                placeholder="Buscar por nombre o código"
+                value="{{ $buscar ?? '' }}">
+
+            </div>
+
+            <div class="col-md-2">
+
+                <a href="{{ route('departamentos.index') }}"
+                class="btn btn-secondary w-100">
+
+                Limpiar
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- TABLA -->
+
 <script>
 
-function normalizarTexto(texto){
+document.addEventListener('DOMContentLoaded', function () {
 
-    return texto
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g,"")
+    const form = document.getElementById('formBusqueda')
+    const input = document.getElementById('buscarInput')
 
-}
+    let timer = null
 
-document.getElementById("buscarDepto")
-.addEventListener("keyup", function(){
+    input.addEventListener('keyup', function(){
 
-    const valor = normalizarTexto(this.value)
+        clearTimeout(timer)
 
-    const filas = document.querySelectorAll("#tablaDepartamentos tr")
+        timer = setTimeout(() => {
 
-    filas.forEach(function(fila){
+            form.submit()
 
-        const textoFila = normalizarTexto(fila.textContent)
-
-        fila.style.display = textoFila.includes(valor) ? "" : "none"
+        }, 600)
 
     })
 
 })
 
 
-// LIMPIAR
-
-document.getElementById("limpiarBusqueda")
-.addEventListener("click", function(){
-
-    const input = document.getElementById("buscarDepto")
-
-    input.value = ""
-
-    const filas = document.querySelectorAll("#tablaDepartamentos tr")
-
-    filas.forEach(f => f.style.display = "")
-
-})
-
 </script>
-
-
 
 @endsection
