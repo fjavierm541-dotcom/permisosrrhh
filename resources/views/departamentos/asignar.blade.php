@@ -63,15 +63,11 @@
         </div>
 
 
-
-
-        <form method="POST"
+        <form id="formAsignarEmpleados"
+            method="POST"
             action="{{ route('departamentos.asignar.guardar',$departamento->id) }}">
 
-
-
-    @csrf
-
+            @csrf
 
 
             <div class="table-responsive">
@@ -106,7 +102,8 @@
 
                                 <input type="checkbox"
                                     name="empleados[]"
-                                    value="{{ $emp->DNI }}">
+                                    value="{{ $emp->DNI }}"
+                                    data-depto="{{ $emp->departamento->nombre ?? '' }}">
 
                             </td>
 
@@ -116,8 +113,8 @@
 
                             <td>
 
-                                {{ $emp->primer_nombre }}
-                                {{ $emp->primer_apellido }}
+                                {{ $emp->primer_nombre }}  {{ $emp->segundo_nombre }}
+                                {{ $emp->primer_apellido }} {{ $emp->segundo_apellido }}
 
                             </td>
 
@@ -170,6 +167,8 @@
 
 </div>
 
+
+<!-- MODAL CONFIRMACIÓN -->
 <div class="modal fade" id="confirmarModal" tabindex="-1">
 
     <div class="modal-dialog">
@@ -211,7 +210,7 @@
                     id="confirmarAsignacion"
                     class="btn btn-warning">
 
-                    Sí, mover empleados
+                    Sí, mover empleado
 
                 </button>
 
@@ -223,46 +222,47 @@
 
 </div>
 
+
 <script>
 
 document.addEventListener("DOMContentLoaded", function(){
 
-    const form = document.querySelector("form")
-    const modal = new bootstrap.Modal(document.getElementById('confirmarModal'))
+    const form = document.getElementById("formAsignarEmpleados")
+    const modal = new bootstrap.Modal(document.getElementById("confirmarModal"))
     const mensaje = document.getElementById("mensajeConfirmacion")
+
+    let confirmarMovimiento = false
 
     form.addEventListener("submit", function(e){
 
-        const filas = document.querySelectorAll("#tablaEmpleados tr")
-        let empleadosConDepto = []
+        if(confirmarMovimiento) return
 
-        filas.forEach(function(fila){
+        const checks = document.querySelectorAll('input[name="empleados[]"]:checked')
 
-            const check = fila.querySelector("input[type=checkbox]")
+        let conflictos = []
 
-            if(check && check.checked){
+        checks.forEach(function(check){
 
-                const depto = fila.querySelector("td:last-child").innerText.trim()
+            const depto = check.dataset.depto
 
-                if(depto !== "Sin departamento"){
+            if(depto !== ""){
 
-                    const nombre = fila.children[2].innerText
+                const fila = check.closest("tr")
+                const nombre = fila.children[2].innerText
 
-                    empleadosConDepto.push(nombre + " (" + depto + ")")
-
-                }
+                conflictos.push(nombre + " (" + depto + ")")
 
             }
 
         })
 
-        if(empleadosConDepto.length > 0){
+        if(conflictos.length > 0){
 
             e.preventDefault()
 
             mensaje.innerHTML =
-            "Los siguientes empleados ya pertenecen a otro departamento:<br><br>"
-            + empleadosConDepto.join("<br>")
+            "Los siguientes empleados ya pertenecen a otro departamento:<br>"
+            + conflictos.join("<br>")
             + "<br><br>¿Desea moverlos al nuevo departamento?"
 
             modal.show()
@@ -271,9 +271,12 @@ document.addEventListener("DOMContentLoaded", function(){
 
     })
 
+
     document.getElementById("confirmarAsignacion")
     .addEventListener("click", function(){
 
+        confirmarMovimiento = true
+        modal.hide()
         form.submit()
 
     })
@@ -284,6 +287,8 @@ document.addEventListener("DOMContentLoaded", function(){
 
 
 <script>
+
+/* BUSCADOR */
 
 document.addEventListener("DOMContentLoaded", function(){
 

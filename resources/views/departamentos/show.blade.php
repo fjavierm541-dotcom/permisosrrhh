@@ -18,19 +18,22 @@
 
             <div>
 
+                <a href="{{ route('departamentos.jefe',$departamento->id) }}"
+                class="btn btn-primary-custom btn-sm">
+                Cambiar jefe
+                </a>    
+
                 <a href="{{ route('departamentos.asignar',$departamento->id) }}"
                     class="btn btn-primary-custom btn-sm">
-
                     Agregar empleados
-
                 </a>
 
                 <a href="{{ route('departamentos.index') }}"
                     class="btn btn-secondary btn-sm">
-
                     Volver
-
                 </a>
+
+    
 
             </div>
 
@@ -97,8 +100,8 @@
                         </td>
 
                         <td>
-                            {{ $emp->primer_nombre }}
-                            {{ $emp->primer_apellido }}
+                            {{ $emp->primer_nombre }} {{ $emp->segundo_nombre }}
+                            {{ $emp->primer_apellido }} {{ $emp->segundo_apellido }}
                         </td>
 
                         <td>

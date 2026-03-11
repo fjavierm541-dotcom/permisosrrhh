@@ -101,4 +101,13 @@ class Empleado extends Model
     {
     return $this->belongsTo(\App\Models\DepartamentoMuni::class, 'departamento_id', 'id');
     }
+    public function departamentoAdministrativo()
+{
+    return $this->belongsTo(DepartamentoMuni::class,'departamento_id');
+}
+
+public function departamentoFuncional()
+{
+    return $this->belongsTo(DepartamentoMuni::class,'departamento_funcional_id');
+}
 }

@@ -29,5 +29,9 @@ class DepartamentoMuni extends Model
     {
     return $this->hasMany(\App\Models\Empleado::class, 'departamento_id', 'id');
     }
+    public function jefe()
+{
+    return $this->belongsTo(\App\Models\Empleado::class,'jefe_dni','DNI');
+}
 
 }

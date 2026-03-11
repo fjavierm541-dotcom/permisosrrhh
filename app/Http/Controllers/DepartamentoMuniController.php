@@ -143,6 +143,61 @@ public function guardarAsignacion(Request $request, $id)
         ->route('departamentos.show', $id)
         ->with('success','Empleados asignados correctamente');
 }
+
+
+
+//JEFES DE DEPTOS
+//EDITAR JEFE
+public function editarJefe($id)
+{
+    $departamento = DepartamentoMuni::findOrFail($id);
+
+    $empleados = Empleado::where('departamento_id',$id)
+        ->orderBy('primer_nombre')
+        ->get();
+
+    return view('departamentos.jefe', compact('departamento','empleados'));
+}
+
+//GUARDAR JEFE 
+public function guardarJefe(Request $request,$id)
+{
+    $request->validate([
+        'jefe_dni' => 'nullable|exists:empleados,DNI'
+    ]);
+
+    $empleado = Empleado::where('DNI',$request->jefe_dni)->first();
+
+    if($empleado && $empleado->departamento_id != $id){
+
+        return back()->withErrors([
+            'jefe_dni' => 'El jefe debe pertenecer a este departamento.'
+        ]);
+
+    }
+
+    $existe = DepartamentoMuni::where('jefe_dni',$request->jefe_dni)
+        ->where('id','!=',$id)
+        ->exists();
+
+    if($existe){
+
+        return back()->withErrors([
+            'jefe_dni' => 'Este empleado ya es jefe de otro departamento.'
+        ]);
+
+    }
+
+    $departamento = DepartamentoMuni::findOrFail($id);
+
+    $departamento->jefe_dni = $request->jefe_dni;
+    $departamento->save();
+
+    return redirect()
+        ->route('departamentos.show',$id)
+        ->with('success','Jefe de departamento actualizado');
+}
+
 }
 
 

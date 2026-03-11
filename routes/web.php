@@ -140,3 +140,12 @@ Route::get('/departamentos/{id}/asignar',[DepartamentoMuniController::class,'asi
 Route::post('/departamentos/{id}/asignar',[DepartamentoMuniController::class,'guardarAsignacion'])
 ->name('departamentos.asignar.guardar');
 
+
+//RUTAS AGREGAR JEFES DE DEPTOS
+Route::get('/departamentos/{id}/jefe',
+    [DepartamentoMuniController::class,'editarJefe']
+)->name('departamentos.jefe');
+
+Route::post('/departamentos/{id}/jefe',
+    [DepartamentoMuniController::class,'guardarJefe']
+)->name('departamentos.jefe.guardar');

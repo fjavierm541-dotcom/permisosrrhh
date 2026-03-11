@@ -121,7 +121,7 @@
 
 <div class="col-md-3 mb-3">
 <label>Primer Nombre *</label>
-<input type="text" minlength="3" maxlength="20" required 
+<input type="text" minlength="3" maxlength="50" required 
        name="primer_nombre"
         placeholder="Ingrese el primer nombre"
        value="{{ old('primer_nombre') }}"
