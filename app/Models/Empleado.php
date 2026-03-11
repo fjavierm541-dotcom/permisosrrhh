@@ -110,4 +110,5 @@ public function departamentoFuncional()
 {
     return $this->belongsTo(DepartamentoMuni::class,'departamento_funcional_id');
 }
+
 }

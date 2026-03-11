@@ -47,26 +47,71 @@
         </tr>
     </table>
 
+
     <h5 class="fw-bold mt-4">Información Laboral</h5>
 
     <table class="table table-bordered">
+
         <tr>
             <th>Puesto</th>
             <td>{{ $empleado->puesto }}</td>
+
             <th>Tipo</th>
             <td>{{ $empleado->tipo }}</td>
         </tr>
+
         <tr>
             <th>Fecha Nombramiento</th>
             <td>{{ $empleado->fecha_nombramiento }}</td>
+
             <th>Salario Inicial</th>
             <td>L. {{ number_format($empleado->salario_inicial, 2) }}</td>
         </tr>
+
+        <tr>
+            <th>Departamento Administrativo</th>
+            <td>
+                {{ $empleado->departamento->nombre ?? 'No asignado' }}
+            </td>
+
+            <th>Departamento Funcional</th>
+            <td>
+
+                @if($empleado->departamentoFuncional)
+
+                    {{ $empleado->departamentoFuncional->nombre }}
+
+                @else
+
+                    <span class="text-muted">
+                        Sin asignación
+                    </span>
+
+                @endif
+
+            </td>
+        </tr>
+
     </table>
+
+
+    <div class="mb-4">
+
+        <a href="{{ route('empleados.funcion',$empleado->DNI) }}"
+           class="btn btn-warning btn-sm">
+
+            Cambiar asignación funcional
+
+        </a>
+
+    </div>
+
+
 
     <h5 class="fw-bold mt-4">Beneficiarios</h5>
 
     <table class="table table-bordered text-center">
+
         <thead>
             <tr>
                 <th>Nombre</th>
@@ -75,8 +120,11 @@
                 <th>DNI</th>
             </tr>
         </thead>
+
         <tbody>
+
         @for ($i = 1; $i <= 7; $i++)
+
             @php
                 $nombre = "nombre_beneficiario".$i;
                 $porcentaje = "porcentaje_beneficiario".$i;
@@ -84,25 +132,54 @@
                 $dni_b = "DNI_beneficiario".$i;
             @endphp
 
-            @if($empleado->$nombre)
+            @if($empleado->$nombre && $empleado->$nombre !== 'Vacío')
+
                 <tr>
-                    <td>{{ $empleado->$nombre }}</td>
-                    <td>{{ $empleado->$parentezco }}</td>
-                    <td>{{ $empleado->$porcentaje }}%</td>
-                    <td>{{ $empleado->$dni_b }}</td>
+
+                    <td>
+                        {{ $empleado->$nombre }}
+                    </td>
+
+                    <td>
+                        {{ $empleado->$parentezco }}
+                    </td>
+
+                    <td>
+                        {{ $empleado->$porcentaje }}%
+                    </td>
+
+                    <td>
+                        {{ $empleado->$dni_b }}
+                    </td>
+
                 </tr>
+
             @endif
+
         @endfor
+
         </tbody>
+
     </table>
 
+
     <div class="text-end mt-4">
-        <a href="{{ route('empleados.index') }}" class="btn btn-secondary">Volver</a>
+
+        <a href="{{ route('empleados.index') }}"
+           class="btn btn-secondary">
+
+            Volver
+
+        </a>
+
         <a href="{{ route('empleados.verRegistro.imprimir', $empleado->DNI) }}"
            class="btn btn-primary-custom"
            target="_blank">
+
             Imprimir
+
         </a>
+
     </div>
 
 </div>

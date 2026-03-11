@@ -9,7 +9,7 @@ use App\Models\PeriodoVacacionesSistema;
 use Carbon\Carbon;
 use App\Models\MovimientoPermisoSistema;
 use Barryvdh\DomPDF\Facade\Pdf;
-
+use App\Models\DepartamentoMuni;
 
 class EmpleadoController extends Controller
 {
@@ -615,5 +615,28 @@ public function imprimirRegistro($dni)
 
     
 
+public function editarFuncion($dni)
+{
+    $empleado = Empleado::findOrFail($dni);
 
+    $departamentos = DepartamentoMuni::where('activo',1)
+        ->orderBy('codigo')
+        ->get();
+
+    return view('empleados.funcion', compact('empleado','departamentos'));
+}
+
+public function guardarFuncion(Request $request, $dni)
+{
+    $empleado = Empleado::findOrFail($dni);
+
+    $empleado->departamento_funcional_id =
+        $request->departamento_funcional_id;
+
+    $empleado->save();
+
+    return redirect()
+        ->route('empleados.verRegistro',$dni)
+        ->with('success','Asignación funcional actualizada');
+}
 }

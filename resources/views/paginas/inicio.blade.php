@@ -110,10 +110,60 @@
                 </div>
             </div>
 
+
+            <div class="row g-4">
+
+            <!-- Empleados -->
+            <div class="col-md-4">
+                <div class="card dashboard-card text-center p-4">
+                    <div class="dashboard-icon">🏢</div>
+                    <h5>Departamentos</h5>
+                    <p class="text-muted small">
+                        Visualizar y información del personal.
+                    </p>
+                    <a href="{{ route('departamentos.index') }}" class="btn btn-dashboard btn-sm">
+                        Ingresar
+                    </a>
+                </div>
+            </div>
+
+            <!-- Permisos -->
+            <div class="col-md-4">
+                <div class="card dashboard-card text-center p-4">
+                    <div class="dashboard-icon">📄</div>
+                    <h5>Opción #5</h5>
+                    <p class="text-muted small">
+                        Texto de ejemplo.
+                    </p>
+                    <a href="{{ route('departamentos.index') }}" class="btn btn-dashboard btn-sm">
+                        Ingresar
+                    </a>
+                </div>
+            </div>
+
+            <!-- Carga Histórica -->
+            <div class="col-md-4">
+                <div class="card dashboard-card text-center p-4">
+                    <div class="dashboard-icon">⚙️</div>
+                    <h5>Opción #6</h5>
+                    <p class="text-muted small">
+                         Texto de ejemplo.
+                    </p>
+                    <a href="{{ route('periodos.create') }}" class="btn btn-dashboard btn-sm">
+                        Ingresar
+                    </a>
+                </div>
+            </div>
+
+            
+
         </div>
 
     </div>
 
 </div>
+
+
+
 
 @endsection

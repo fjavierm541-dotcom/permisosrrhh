@@ -99,6 +99,13 @@ Route::get('/empleados/{dni}', [EmpleadoController::class, 'show'])
 Route::get('/empleados/{dni}/reporte', [EmpleadoController::class, 'reporte'])
     ->name('empleados.reporte');
 
+    // editar departamento funcional
+Route::get('empleados/{dni}/funcion', [EmpleadoController::class, 'editarFuncion'])
+    ->name('empleados.funcion');
+
+// guardar departamento funcional
+Route::post('empleados/{dni}/funcion', [EmpleadoController::class, 'guardarFuncion'])
+    ->name('empleados.funcion.guardar');
 
 
 
@@ -124,7 +131,7 @@ Route::post('/logout', function () {
 
 
 //DEPTOS RUTAS
-Route::resource('departamentos', DepartamentoMuniController::class);
+Route::resource('departamentos', DepartamentoMuniController::class); 
 
 Route::patch('departamentos/{id}/toggle',
     [DepartamentoMuniController::class,'toggle']
