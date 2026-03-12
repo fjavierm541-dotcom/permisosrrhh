@@ -68,6 +68,7 @@ class Empleado extends Model
         "porcentaje_beneficiario7",
         "parentezco_beneficiario7",
         "DNI_beneficiario7",
+        "departamento_id",
         "foto",
         "firma",
         "huella",

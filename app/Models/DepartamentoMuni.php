@@ -25,13 +25,21 @@ class DepartamentoMuni extends Model
     {
         return $this->hasMany(DepartamentoMuni::class, 'departamento_padre_id');
     }
-    public function empleados()
+
+    public function empleadosAdministrativos()
     {
-    return $this->hasMany(\App\Models\Empleado::class, 'departamento_id', 'id');
+        return $this->hasMany(Empleado::class,'departamento_id');
     }
-    public function jefe()
+
+    public function empleadosFuncionales()
 {
-    return $this->belongsTo(\App\Models\Empleado::class,'jefe_dni','DNI');
+    return $this->hasMany(\App\Models\Empleado::class,'departamento_funcional_id');
 }
+
+        public function jefe()
+    {
+        return $this->belongsTo(\App\Models\Empleado::class,'jefe_dni','DNI');
+    }
+
 
 }

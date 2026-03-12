@@ -10,6 +10,8 @@ use Carbon\Carbon;
 use App\Models\MovimientoPermisoSistema;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\DepartamentoMuni;
+use App\Models\DocumentoEmpleado;
+
 
 class EmpleadoController extends Controller
 {
@@ -195,11 +197,16 @@ public function generarVacaciones()
 
     /**
      *CREAR EMPLEADOS
-     */
-    public function create()
+     
+   */
+
+public function create()
 {
-    return view('empleados.create');
-    
+
+$departamentos = DepartamentoMuni::orderBy('codigo')->get();
+
+return view('empleados.create', compact('departamentos'));
+
 }
 
 
@@ -303,6 +310,7 @@ $request->validate([
     'fecha_nombramiento' => ['required','date','before_or_equal:today'],
     'tipo' => ['required','in:Acuerdo,Contrato'],
     'salario_inicial' => ['required','regex:/^L\.?\s?[0-9]{1,3}(,[0-9]{3})*(\.[0-9]{2})?$/'],
+    'departamento_id' => 'required|exists:departamentos_muni,id',
 
     // DOCUMENTOS
     'copia_dni' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],

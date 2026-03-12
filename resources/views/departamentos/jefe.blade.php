@@ -44,26 +44,41 @@
 
                 </label>
 
-                <select name="jefe_dni"
-                        class="form-control">
+                @if($empleados->count() > 0)
 
-                    <option value="">
-                        Sin jefe
-                    </option>
+                    <select name="jefe_dni"
+                            class="form-control">
 
-                    @foreach($empleados as $emp)
-
-                        <option value="{{ $emp->DNI }}"
-                            @if($departamento->jefe_dni == $emp->DNI) selected @endif>
-
-                            {{ $emp->primer_nombre }}
-                            {{ $emp->primer_apellido }}
-
+                        <option value="">
+                            Sin jefe
                         </option>
 
-                    @endforeach
+                        @foreach($empleados as $emp)
 
-                </select>
+                            <option value="{{ $emp->DNI }}"
+                                @if($departamento->jefe_dni == $emp->DNI) selected @endif>
+
+                                {{ $emp->primer_nombre }} {{ $emp->segundo_nombre }}
+                                {{ $emp->primer_apellido }} {{ $emp->segundo_apellido }}
+                               
+
+                            </option>
+
+                        @endforeach
+
+                    </select>
+
+                @else
+
+                    <div class="alert alert-warning">
+
+                        Este departamento no tiene empleados funcionales.
+                        No se puede asignar un jefe.
+
+                    </div>
+
+                @endif
+
 
                 @error('jefe_dni')
 
@@ -78,11 +93,15 @@
             </div>
 
 
-            <button class="btn btn-primary-custom">
+            @if($empleados->count() > 0)
 
-                Guardar jefe
+                <button class="btn btn-primary-custom">
 
-            </button>
+                    Guardar jefe
+
+                </button>
+
+            @endif
 
 
             <a href="{{ route('departamentos.show',$departamento->id) }}"

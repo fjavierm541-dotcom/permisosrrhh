@@ -142,8 +142,8 @@
 
 </div>
                             </th>
-                            <th>Historial</th>
-                            <th>Registro</th>
+                            <th>Ver</th>
+                        
                         </tr>
                         
                     </thead>
@@ -175,17 +175,23 @@
                             </td>
 
                             <td>
-                                <a href="{{ route('empleados.show', $empleado->DNI) }}"
-                                   class="btn btn-sm btn-dark">
-                                    Ver
-                                </a>
-                            </td>
-                             <td>
-                                <a href="{{ route('empleados.verRegistro', $empleado->DNI) }}"
-                                 class="btn btn-sm btn-dark">
-                                Ver 
-                                </a>
-                            </td>
+    
+    <div class="btn-group btn-group-sm" role="group">
+        
+        <a href="{{ route('empleados.show', $empleado->DNI) }}"
+           class="btn btn-outline-dark">
+            Historial Hrs
+        </a>
+
+        <a href="{{ route('empleados.verRegistro', $empleado->DNI) }}"
+           class="btn btn-outline-secondary">
+            Registro
+        </a>
+
+
+    </div>
+
+</td>
 
                         </tr>
                         @endforeach

@@ -776,47 +776,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         <div class="col-md-4 mb-3">
                                 <label>Departamento</label>
-                                <select name="departamento"
-                                class="form-control @error('departamento') is-invalid @enderror">
-                                <option value="">Seleccione un departamento</option>
-                                <option value="001 Regidores">001 - Regidores</option>
-                                <option value="002 Alcalde municipal">002 - Alcalde municipal</option>
-                                <option value="003 Auditoría interna">003 - Auditoría interna</option>
-                                <option value="004 Secretaría municipal">004 - Secretaría municipal</option>
-                                <option value="005 Gerencia financiera administrativa">005 - Gerencia financiera administrativa</option>
-                                <option value="006 Tesorería municipal">006 - Tesorería municipal</option>
-                                <option value="007 Contabilidad y presupuesto">007 - Contabilidad y presupuesto</option>
-                                <option value="008 Control tributario">008 - Control tributario</option>
-                                <option value="009 Catastro">009 - Catastro</option>
-                                <option value="010 Compras y suministros">010 - Compras y suministros</option>
-                                <option value="011 Unidad municipal de informática">011 - Unidad municipal de informática</option>
-                                <option value="012 Justicia municipal">012 - Justicia municipal</option>
-                                <option value="013 Unidad municipal ambiental">013 - Unidad municipal ambiental (UMA)</option>
-                                <option value="014 Unidad técnica municipal">014 - Unidad técnica municipal (UTM)</option>
-                                <option value="015 Recursos humanos">015 - Recursos humanos</option>
-                                <option value="016 Terminal municipal de transporte">016 - Terminal municipal de transporte</option>
-                                <option value="017 Ingeniería municipal">017 - Ingeniería municipal</option>
-                                <option value="018 Desarrollo comunitario">018 - Desarrollo comunitario</option>
-                                <option value="019 Relaciones públicas">019 - Relaciones públicas</option>
-                                <option value="020 Bienes y proveeduría">020 - Bienes y proveeduría</option>
-                                <option value="021 Programa de la niñez adolescencia y juventud">021 - Programa de la niñez adolescencia y juventud</option>
-                                <option value="022 Unidad desarrollo económico local">022 - Unidad desarrollo económico local (UDEL)</option>
-                                <option value="023 Oficina de la mujer municipal">023 - Oficina de la mujer municipal</option>
-                                <option value="024 Centro de atención integral a la niñez">033 - Centro de atención integral a la niñez (CAIN)</option>
-                                <option value="025 Departamento legal municipal">025 - Departamento legal municipal</option>
-                                <option value="026 Obras y vías de comunicación">026 - Obras y vías de comunicación / plantel</option>
-                                <option value="027 Conciliación">(Dep. Justicia) 027 - Conciliación</option>
-                                <option value="028 Alcaldes auxiliares">(Dep. Justicia) 028 - Alcaldes auxiliares</option>
-                                <option value="029 Clínica médica municipal">029 - Clínica médica municipal</option>
-                                <option value="030 Oficina municipal atención personas con discapacidad">030 - Oficina municipal atención personas con discapacidad</option>
-                                <option value="031 Observatorio municipal">031 - Observatorio municipal</option>
-                                <option value="032 Unidad de higiene y aseo">032 - Unidad de higiene y aseo</option>
+                                <select name="departamento_id"
+class="form-control @error('departamento_id') is-invalid @enderror"
+required>
 
-                               
+<option value="">Seleccione un departamento</option>
 
-                                </select>
+@foreach($departamentos as $departamento)
 
-                                @error('departamento')
+<option value="{{ $departamento->id }}"
+{{ old('departamento_id') == $departamento->id ? 'selected' : '' }}>
+
+{{ $departamento->codigo }} - {{ $departamento->nombre }}
+
+</option>
+
+@endforeach
+
+</select>
+
+                                @error('departamento_id')
                                 <div class="invalid-feedback d-block">
                                 {{ $message }}
                                 </div>
@@ -833,7 +812,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 </div>
 
                             <div class="col-md-4 mb-3">
-                                <label>Tipo</label>
+                                <label>Tipo de contrato</label>
                                 <select name="tipo" class="form-control">
                                     <option value="">Seleccione</option>
                                     <option value="Acuerdo" {{ old('Acuerdo') == 'Acuerdo' ? 'selected' : '' }}>Acuerdo</option>
@@ -941,7 +920,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <label>Copìa RTN</label>
+                                <label>Copia RTN</label>
                                 <input type="file" name="copia_rtn" class="form-control">
                                 @error('copia_rtn')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>

@@ -63,9 +63,11 @@
 
         <hr>
 
-        <h6>
-            Empleados asignados
-        </h6>
+        
+            <p class="">
+Total empleados: {{ $departamento->empleadosFuncionales->count() }}
+</p>
+
 
     </div>
 
@@ -91,7 +93,7 @@
 
             <tbody>
 
-                @forelse($departamento->empleados as $emp)
+                @forelse($departamento->empleadosFuncionales as $emp)
 
                     <tr>
 

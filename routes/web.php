@@ -7,6 +7,7 @@ use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\DepartamentoMuniController;
+use App\Http\Controllers\DocumentoEmpleado;
 
 
     

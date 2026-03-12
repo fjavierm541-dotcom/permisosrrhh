@@ -38,7 +38,8 @@ public function index(Request $request)
 
 public function show($id)
 {
-    $departamento = DepartamentoMuni::with('empleados')->findOrFail($id);
+    $departamento = DepartamentoMuni::with('empleadosFuncionales')
+        ->findOrFail($id);
 
     return view('departamentos.show', compact('departamento'));
 }
@@ -120,7 +121,7 @@ public function show($id)
 
 
 
-//asoiganr o agregar deptos
+//asignar o agregar deptos
    public function asignar($id)
 {
     $departamento = DepartamentoMuni::findOrFail($id);
@@ -152,14 +153,13 @@ public function editarJefe($id)
 {
     $departamento = DepartamentoMuni::findOrFail($id);
 
-    $empleados = Empleado::where('departamento_id',$id)
+    $empleados = Empleado::where('departamento_funcional_id',$id)
         ->orderBy('primer_nombre')
         ->get();
 
     return view('departamentos.jefe', compact('departamento','empleados'));
 }
 
-//GUARDAR JEFE 
 public function guardarJefe(Request $request,$id)
 {
     $request->validate([
@@ -168,14 +168,16 @@ public function guardarJefe(Request $request,$id)
 
     $empleado = Empleado::where('DNI',$request->jefe_dni)->first();
 
-    if($empleado && $empleado->departamento_id != $id){
+    // Validar que el empleado pertenezca funcionalmente al departamento
+    if($empleado && $empleado->departamento_funcional_id != $id){
 
         return back()->withErrors([
-            'jefe_dni' => 'El jefe debe pertenecer a este departamento.'
+            'jefe_dni' => 'El jefe debe pertenecer funcionalmente a este departamento.'
         ]);
 
     }
 
+    // Validar que no sea jefe de otro departamento
     $existe = DepartamentoMuni::where('jefe_dni',$request->jefe_dni)
         ->where('id','!=',$id)
         ->exists();
