@@ -59,6 +59,11 @@ Route::post('/permisos', [PermisoController::class, 'store'])
     Route::get('permisos/{id}/rechazar', [PermisoController::class, 'rechazar'])
     ->name('permisos.rechazar');
 
+    //imprimir permisos 
+    Route::get('/permisos/{id}/imprimir',
+    [PermisoController::class,'imprimir'])
+->name('permisos.imprimir');
+
 
 
 

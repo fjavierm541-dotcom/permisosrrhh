@@ -768,11 +768,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label>Puesto de Nombramiento</label>
-                                <input type="text" name="puesto" class="form-control"
-                                placeholder="Ingrese el puesto de nombramiento" minlength="3" maxlength="20"
+                            <label>Puesto de Nombramiento</label>
+                            <input type="text" 
+                                name="puesto" 
+                                class="form-control @error('puesto') is-invalid @enderror"
+                                placeholder="Ingrese el puesto de nombramiento" 
+                                minlength="3" 
+                                maxlength="50"
                                 value="{{ old('puesto') }}">
-                            </div>
+
+                            @error('puesto')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
 
                         <div class="col-md-4 mb-3">
                                 <label>Departamento</label>
@@ -805,23 +813,28 @@ required>
 
                                 <div class="col-md-4 mb-3">
                                     <label>Fecha de Nombramiento</label>
-                                    <input type="date" name="fecha_nombramiento" class="form-control">
+                                    <input type="date" 
+                                        name="fecha_nombramiento" 
+                                        class="form-control @error('fecha_nombramiento') is-invalid @enderror"
+                                        value="{{ old('fecha_nombramiento') }}">
+
                                     @error('fecha_nombramiento')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
                                 </div>
 
                             <div class="col-md-4 mb-3">
-                                <label>Tipo de contrato</label>
-                                <select name="tipo" class="form-control">
-                                    <option value="">Seleccione</option>
-                                    <option value="Acuerdo" {{ old('Acuerdo') == 'Acuerdo' ? 'selected' : '' }}>Acuerdo</option>
-                                    <option value="Contrato" {{ old('Contrato') == 'Contrato' ? 'selected' : '' }}>Contrato</option>
-                                </select>
-                                @error('tipo')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                             @enderror
-                            </div>
+    <label>Tipo de contrato</label>
+    <select name="tipo" class="form-control @error('tipo') is-invalid @enderror">
+        <option value="">Seleccione</option>
+        <option value="Acuerdo" {{ old('tipo') == 'Acuerdo' ? 'selected' : '' }}>Acuerdo</option>
+        <option value="Contrato" {{ old('tipo') == 'Contrato' ? 'selected' : '' }}>Contrato</option>
+    </select>
+
+    @error('tipo')
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+    @enderror
+</div>
 
                             <div class="col-md-4 mb-3">
     <label>Salario Inicial</label>

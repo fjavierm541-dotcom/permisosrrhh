@@ -139,14 +139,21 @@
                 </div>
 
                 <div class="d-flex justify-content-end mt-4">
-                    <a href="{{ route('permisos.index') }}" class="btn btn-outline-secondary me-2">
-                        Cancelar
-                    </a>
-                    <button class="btn btn-gold px-4">
-                        Guardar Permiso
-                    </button>
-                </div>
 
+    <a href="{{ route('permisos.index') }}"
+        class="btn btn-outline-secondary me-2">
+
+        Cancelar
+
+    </a>
+
+    <button class="btn btn-gold px-4">
+
+        Enviar solicitud
+
+    </button>
+
+</div>
             </form>
 
         </div>

@@ -41,31 +41,47 @@ class PermisoController extends Controller
         return view('permisos.create', compact('empleados', 'tipos'));
     }
 
+
+
+
+
+
+
+
     /* ==========================
        GUARDAR PERMISO
     ========================== */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'dni_empleado' => 'required',
-            'tipo_permiso_id' => 'required',
-            'fecha_inicio' => 'required|date',
-        ]);
+   public function store(Request $request)
+{
+    $request->validate([
+        'dni_empleado' => 'required',
+        'tipo_permiso_id' => 'required',
+        'fecha_inicio' => 'required|date',
+    ]);
 
-        PermisoSistema::create([
-    'dni_empleado' => $request->dni_empleado,
-    'modalidad' => $request->modalidad,
-    'tipo_permiso_id' => $request->tipo_permiso_id,
-    'estado_permiso_id' => 1,
-    'fecha_inicio' => $request->fecha_inicio,
-    'fecha_fin' => $request->fecha_fin,
-    'horas' => $request->horas ?? 0,
-    'motivo' => $request->motivo,
-]);
+    $permiso = PermisoSistema::create([
+        'dni_empleado' => $request->dni_empleado,
+        'modalidad' => $request->modalidad,
+        'tipo_permiso_id' => $request->tipo_permiso_id,
+        'estado_permiso_id' => 1,
+        'fecha_inicio' => $request->fecha_inicio,
+        'fecha_fin' => $request->fecha_fin,
+        'horas' => $request->horas ?? 0,
+        'motivo' => $request->motivo,
+    ]);
 
-        return redirect()->route('permisos.index')
-            ->with('success', 'Permiso registrado correctamente');
-    }
+    return redirect()
+        ->route('permisos.index')
+        ->with('permiso_imprimir', $permiso->id);
+}
+
+
+
+
+
+
+
+
 
 
 
@@ -249,4 +265,31 @@ public function rechazar($id)
 
 
 
+
+
+//imprimir permisos
+public function imprimir($id)
+{
+    $permiso = PermisoSistema::with(
+        'empleado.departamentoFuncional'
+    )->findOrFail($id);
+
+    $empleado = $permiso->empleado;
+
+    $jefeDepto = $empleado->departamentoFuncional->jefe ?? null;
+
+    $rrhh = DepartamentoMuni::where('nombre','Recursos Humanos')->first();
+
+    $jefeRRHH = $rrhh->jefe ?? null;
+
+    return view(
+        'permisos.imprimir',
+        compact(
+            'permiso',
+            'empleado',
+            'jefeDepto',
+            'jefeRRHH'
+        )
+    );
+}
 }

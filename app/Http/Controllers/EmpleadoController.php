@@ -405,6 +405,7 @@ $request->validate([
 
         // DOCUMENTOS
         'copia_dni.mimes' => 'La copia del DNI debe ser PDF o imagen.',
+        'copia_rtn.mimes' => 'La copia del DNI debe ser PDF o imagen.',
         'acuerdo.mimes' => 'El acuerdo o contrato debe ser PDF o imagen.',
         'nota_traslado.mimes' => 'La nota de traslado debe ser PDF o imagen.',
 
