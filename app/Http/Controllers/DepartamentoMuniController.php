@@ -53,6 +53,8 @@ public function show($id)
         $padres = DepartamentoMuni::whereNull('departamento_padre_id')->get();
 
         return view('departamentos.create', compact('padres'));
+
+        
     }
 
 
@@ -60,20 +62,53 @@ public function show($id)
 
 
         public function store(Request $request)
-    {
-        DepartamentoMuni::create([
+{
 
-            'codigo' => $request->codigo,
-            'nombre' => $request->nombre,
-            'descripcion' => $request->descripcion,
-            'departamento_padre_id' => $request->departamento_padre_id,
-            'activo' => true
+    $request->validate(
 
-        ]);
+        [
 
-        return redirect()->route('departamentos.index')
-            ->with('success','Departamento creado correctamente');
-    }
+            'codigo' => 'required|digits:3|unique:departamentos_muni,codigo',
+            'nombre' => 'required|string|max:150',
+            'descripcion' => 'nullable|string|max:255',
+            'departamento_padre_id' => 'nullable|exists:departamentos_muni,id'
+
+        ],
+
+        [
+
+            'codigo.required' => 'Debe ingresar el código del departamento.',
+            'codigo.digits' => 'El código debe tener exactamente 3 dígitos.',
+            'codigo.unique' => 'Este código ya está registrado.',
+
+            'nombre.required' => 'Debe ingresar el nombre del departamento.',
+            'nombre.max' => 'El nombre no puede exceder 150 caracteres.',
+
+            'descripcion.max' => 'La descripción no puede exceder 255 caracteres.',
+
+            'departamento_padre_id.exists' => 'El departamento padre seleccionado no es válido.'
+
+        ]
+
+    );
+
+
+    DepartamentoMuni::create([
+
+        'codigo' => $request->codigo,
+        'nombre' => $request->nombre,
+        'descripcion' => $request->descripcion,
+        'departamento_padre_id' => $request->departamento_padre_id,
+        'activo' => true
+
+    ]);
+
+
+    return redirect()
+        ->route('departamentos.index')
+        ->with('success','Departamento creado correctamente');
+
+}
 
 
 
@@ -138,12 +173,15 @@ public function guardarAsignacion(Request $request, $id)
     $empleados = $request->empleados ?? [];
 
     Empleado::whereIn('DNI', $empleados)
-        ->update(['departamento_id' => $id]);
+    ->update(['departamento_funcional_id' => $id]);
 
     return redirect()
         ->route('departamentos.show', $id)
         ->with('success','Empleados asignados correctamente');
 }
+
+
+
 
 
 

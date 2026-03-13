@@ -6,6 +6,24 @@
 
 <div class="glass-card">
 
+@if($errors->any())
+
+    <div class="alert alert-danger">
+
+        <ul class="mb-0">
+
+            @foreach($errors->all() as $error)
+
+                <li>{{ $error }}</li>
+
+            @endforeach
+
+        </ul>
+
+    </div>
+
+@endif
+
     <!-- HEADER -->
     <div class="p-3 text-white"
     style="background:#2f4f6f;border-top-left-radius:18px;border-top-right-radius:18px;">
@@ -19,10 +37,9 @@
             <div>
 
                 <a href="{{ route('departamentos.create') }}"
-                class="btn btn-primary-custom btn-sm">
+                    class="btn btn-primary-custom btn-sm">
                     Registrar Departamento
                 </a>
-
                 <a href="{{ route('paginas.inicio') }}"
                 class="btn btn-secondary btn-sm">
                     Atrás

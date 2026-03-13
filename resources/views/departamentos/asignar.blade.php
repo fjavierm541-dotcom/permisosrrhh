@@ -14,6 +14,7 @@
 
             <h5 class="mb-0">
                 Asignar empleados a {{ $departamento->nombre }}
+                
             </h5>
 
             <a href="{{ route('departamentos.show',$departamento->id) }}"
@@ -103,7 +104,7 @@
                                 <input type="checkbox"
                                     name="empleados[]"
                                     value="{{ $emp->DNI }}"
-                                    data-depto="{{ $emp->departamento->nombre ?? '' }}">
+                                    data-depto="{{ $emp->departamentoFuncional->nombre ?? '' }}">
 
                             </td>
 
@@ -124,11 +125,11 @@
 
                             <td>
 
-                                @if($emp->departamento)
+                                @if($emp->departamentoFuncional)
 
                                     <span class="badge bg-info">
 
-                                        {{ $emp->departamento->nombre }}
+                                        {{ $emp->departamentoFuncional->nombre }}
 
                                     </span>
 
@@ -136,7 +137,7 @@
 
                                     <span class="text-muted">
 
-                                        Sin departamento
+                                        Sin departamento funcional
 
                                     </span>
 
@@ -261,7 +262,7 @@ document.addEventListener("DOMContentLoaded", function(){
             e.preventDefault()
 
             mensaje.innerHTML =
-            "Los siguientes empleados ya pertenecen a otro departamento:<br>"
+            "Los siguientes empleados ya trabajan en otro departamento funcional:<br>"
             + conflictos.join("<br>")
             + "<br><br>¿Desea moverlos al nuevo departamento?"
 
