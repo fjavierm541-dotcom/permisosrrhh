@@ -259,7 +259,7 @@ public function rechazar($id)
     $permiso->estado_permiso_id = $estadoRechazado->id;
     $permiso->save();
 
-    return redirect()->route('permisos.index')
+    return redirect()->route('empleados.verRegistro.imprimir', $request->dni_empleado)
         ->with('success', 'Permiso rechazado correctamente.');
 }
 
