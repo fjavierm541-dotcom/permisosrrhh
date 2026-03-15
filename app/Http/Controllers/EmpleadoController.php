@@ -306,7 +306,7 @@ $request->validate([
     'DNI_beneficiario7' => ['nullable','regex:/^[0-9]{4}-[0-9]{4}-[0-9]{5}$/'],
 
     // INFORMACIÓN LABORAL
-    'puesto' => ['required','regex:/^[\pL\s]+$/u','min:3','max:20'],
+    'puesto' => ['required','regex:/^[\pL\s]+$/u','min:3','max:100'],
     'fecha_nombramiento' => ['required','date','before_or_equal:today'],
     'tipo' => ['required','in:Acuerdo,Contrato'],
     'salario_inicial' => ['required','regex:/^L\.?\s?[0-9]{1,3}(,[0-9]{3})*(\.[0-9]{2})?$/'],

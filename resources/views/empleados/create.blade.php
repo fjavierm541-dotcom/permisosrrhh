@@ -649,7 +649,7 @@ En caso de emergencia se autoriza llamar a las personas en el siguiente orden:
                 placeholder="Ingrese el nombre del beneficiario"
                name="nombre_beneficiario{{ $i }}"
                minlength="3"
-               maxlength="20"
+               maxlength="100"
                value="{{ old('nombre_beneficiario'.$i) }}"
                class="form-control @error('nombre_beneficiario'.$i) is-invalid @enderror">
         @error('nombre_beneficiario'.$i)
