@@ -8,7 +8,7 @@ use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\DepartamentoMuniController;
 use App\Http\Controllers\DocumentoEmpleado;
-
+use App\Http\Controllers\CalendarioController;
 
     
 
@@ -162,3 +162,16 @@ Route::get('/departamentos/{id}/jefe',
 Route::post('/departamentos/{id}/jefe',
     [DepartamentoMuniController::class,'guardarJefe']
 )->name('departamentos.jefe.guardar');
+
+
+
+//CALENDAR
+
+
+Route::get('/calendario', [CalendarioController::class,'index'])->name('calendario.index');
+
+Route::get('/calendario/eventos', [CalendarioController::class,'eventos']);
+
+Route::post('/calendario/store', [CalendarioController::class,'store']);
+//agregar feriados
+Route::post('/calendario/importar-feriados', [CalendarioController::class,'importarFeriados']);

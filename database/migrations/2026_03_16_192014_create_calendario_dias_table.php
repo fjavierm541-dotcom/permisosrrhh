@@ -11,17 +11,30 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('calendario_institucional_sistema', function (Blueprint $table) {
+        Schema::create('calendario_dias', function (Blueprint $table) {
+
     $table->id();
-    $table->date('fecha');
-    $table->string('tipo'); // feriado | institucional | extraordinario
-    $table->string('descripcion')->nullable();
-    $table->integer('anio');
-    $table->boolean('activo')->default(true);
+
+    $table->string('titulo');
+
+    $table->date('fecha_inicio');
+
+    $table->date('fecha_fin')->nullable();
+
+    $table->enum('origen', [
+        'nacional',
+        'local',
+        'institucional'
+    ])->default('local');
+
+    $table->text('descripcion')->nullable();
+
     $table->timestamps();
+
 });
 
-        
+
+
     }
 
     /**
@@ -29,6 +42,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('calendario_institucional_sistema');
+        Schema::dropIfExists('calendario_dias');
     }
 };

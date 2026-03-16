@@ -85,7 +85,7 @@
             <!-- Permisos -->
             <div class="col-md-4">
                 <div class="card dashboard-card text-center p-4">
-                    <div class="dashboard-icon">📅</div>
+                    <div class="dashboard-icon">👤✔️</div>
                     <h5>Permisos</h5>
                     <p class="text-muted small">
                         Crear, revisar y aprobar solicitudes.
@@ -130,10 +130,10 @@
             <!-- Permisos -->
             <div class="col-md-4">
                 <div class="card dashboard-card text-center p-4">
-                    <div class="dashboard-icon">📄</div>
-                    <h5>Opción #5</h5>
+                    <div class="dashboard-icon">📆</div>
+                    <h5>Calendario</h5>
                     <p class="text-muted small">
-                        Texto de ejemplo.
+                        Agregar días hábiles e inhábiles.
                     </p>
                     <a href="{{ route('departamentos.index') }}" class="btn btn-dashboard btn-sm">
                         Ingresar
@@ -145,7 +145,7 @@
             <div class="col-md-4">
                 <div class="card dashboard-card text-center p-4">
                     <div class="dashboard-icon">⚙️</div>
-                    <h5>Opción #6</h5>
+                    <h5>Ajustes</h5>
                     <p class="text-muted small">
                          Texto de ejemplo.
                     </p>
