@@ -23,8 +23,7 @@ return new class extends Migration
 
     $table->enum('origen', [
         'nacional',
-        'local',
-        'institucional'
+        'local'
     ])->default('local');
 
     $table->text('descripcion')->nullable();

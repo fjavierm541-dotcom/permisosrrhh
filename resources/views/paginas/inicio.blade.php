@@ -74,7 +74,7 @@
                     <div class="dashboard-icon">👥</div>
                     <h5>Empleados</h5>
                     <p class="text-muted small">
-                        Visualizar y información del personal.
+                        Administrar la información del personal.
                     </p>
                     <a href="{{ route('empleados.index') }}" class="btn btn-dashboard btn-sm">
                         Ingresar
@@ -119,7 +119,7 @@
                     <div class="dashboard-icon">🏢</div>
                     <h5>Departamentos</h5>
                     <p class="text-muted small">
-                        Visualizar y información del personal.
+                        Visualizar la información de los departamentos.
                     </p>
                     <a href="{{ route('departamentos.index') }}" class="btn btn-dashboard btn-sm">
                         Ingresar
@@ -133,9 +133,9 @@
                     <div class="dashboard-icon">📆</div>
                     <h5>Calendario</h5>
                     <p class="text-muted small">
-                        Agregar días hábiles e inhábiles.
+                        Ver y agregar feriados nacionales y locales.
                     </p>
-                    <a href="{{ route('departamentos.index') }}" class="btn btn-dashboard btn-sm">
+                    <a href="{{ route('calendario.index') }}" class="btn btn-dashboard btn-sm">
                         Ingresar
                     </a>
                 </div>

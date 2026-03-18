@@ -8,40 +8,40 @@
 
         <div class="row g-0">
 
+            <!-- PANEL IZQUIERDO (FECHA ACTUAL FIJA) -->
+
             <div class="col-md-3 calendario-lateral d-flex flex-column justify-content-center align-items-center">
 
                 <div class="text-center">
 
-                    <div id="numeroDia" class="dia-grande">
-                        --
-                    </div>
+                    <div id="numeroDia" class="dia-grande"></div>
 
-                    <div id="mesActual" class="mes-texto">
-                        ---
-                    </div>
+                    <div id="mesActual" class="mes-texto"></div>
 
                 </div>
 
             </div>
 
 
+            <!-- CALENDARIO -->
+
             <div class="col-md-9 p-4">
 
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
 
                     <h4 class="mb-0">
                         Calendario Institucional
                     </h4>
 
-                    <div>
+                    <div class="d-flex gap-2">
 
-                        <button class="btn btn-outline-secondary me-2" onclick="importarFeriados()">
-                            Importar feriados nacionales
+                        <button class="btn btn-outline-secondary" onclick="importarFeriados()">
+                            Importar feriados
                         </button>
 
-                        <button class="btn btn-dorado" onclick="abrirModalCrear()">
-                            Agregar día inhábil
-                        </button>
+                        <a href="{{ route('calendario.create') }}" class="btn btn-outline-secondary">
+                            Ingresar feriado
+                        </a>
 
                     </div>
 
@@ -58,61 +58,58 @@
 </div>
 
 
-<!-- MODAL -->
 
-<div class="modal fade" id="modalCalendario">
+<!-- MODAL DETALLE DÍA -->
 
-<div class="modal-dialog">
+<div class="modal fade" id="modalDetalle">
 
-<div class="modal-content">
+    <div class="modal-dialog">
 
-<div class="modal-header">
+        <div class="modal-content">
 
-<h5>Día inhábil</h5>
+            <div class="modal-header">
 
-<button class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title">Eventos del día</h5>
 
-</div>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
 
+            </div>
 
-<div class="modal-body">
+            <div class="modal-body" id="contenidoDetalle">
 
-<input type="text" id="titulo" class="form-control mb-2" placeholder="Título">
+                Cargando...
 
-<input type="date" id="fecha_inicio" class="form-control mb-2">
+            </div>
 
-<input type="date" id="fecha_fin" class="form-control mb-2">
+        </div>
 
-<select id="origen" class="form-control mb-2">
-
-<option value="nacional">Feriado nacional</option>
-<option value="local">Feriado local</option>
-<option value="institucional">Institucional</option>
-
-</select>
-
-<textarea id="descripcion" class="form-control" placeholder="Descripción"></textarea>
+    </div>
 
 </div>
 
 
-<div class="modal-footer">
 
-<button class="btn btn-success" onclick="guardarEvento()">Guardar</button>
+<!-- MODAL MENSAJE -->
 
-</div>
+<div class="modal fade" id="modalMensaje">
 
-</div>
+    <div class="modal-dialog modal-sm">
 
-</div>
+        <div class="modal-content text-center p-3">
+
+            <div id="mensajeTexto"></div>
+
+        </div>
+
+    </div>
 
 </div>
 
 @endsection
 
 
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
 
@@ -120,78 +117,41 @@
 <style>
 
 .calendario-lateral {
-
     background: #1f3a5f;
     color: white;
     min-height: 420px;
-
 }
 
 .dia-grande {
-
     font-size: 90px;
     font-weight: 700;
-    line-height: 1;
-
 }
 
 .mes-texto {
-
-    font-size: 18px;
+    font-size: 16px;
     letter-spacing: 2px;
-    opacity: .85;
-
 }
 
 .btn-dorado {
-
     background: #c9a227;
     color: white;
-    border: none;
-
 }
 
-.btn-dorado:hover {
-
-    background: #b8951f;
-    color: white;
-
-}
-
-.fc .fc-daygrid-day-number {
-
-    color: #1f3a5f;
-    font-weight: 500;
-
+.fc-day-sat,
+.fc-day-sun {
+    background: #f1f1f1;
 }
 
 .fc .fc-day-today {
-
     background: rgba(201,162,39,0.15);
-
 }
 
 .fc-event {
-
     border-radius: 6px;
     border: none;
-
 }
 
-.fc-day-sat,
-.fc-day-sun {
-
-    background: rgba(0,0,0,0.03);
-
-}
-.fc-day-sat,
-.fc-day-sun {
-
-    background: #f1f1f1;
-
-}
 </style>
-
 
 
 
@@ -199,7 +159,17 @@
 
 let calendar;
 
+// 🔹 FECHA ACTUAL FIJA (NO CAMBIA)
 document.addEventListener('DOMContentLoaded', function () {
+
+    const hoy = new Date();
+
+    document.getElementById('numeroDia').innerText = hoy.getDate();
+
+    document.getElementById('mesActual').innerText =
+        hoy.toLocaleString('es-ES', { month: 'long', year: 'numeric' }).toUpperCase();
+
+
 
     const calendarEl = document.getElementById('calendar');
 
@@ -212,84 +182,54 @@ document.addEventListener('DOMContentLoaded', function () {
         height: 'auto',
 
         headerToolbar: {
-
             left: 'prev,next today',
-
             center: 'title',
-
             right: ''
-
-        },
-
-        buttonText: {
-
-            today: 'Hoy'
-
         },
 
         events: '/calendario/eventos',
 
-        // cuando cambias de mes
-        datesSet: function(info){
 
-            const fecha = new Date(info.start);
+        // CLICK EN DÍA → VER DETALLE
+        dateClick: function(info){
 
-            const dia = fecha.getDate();
+            fetch('/calendario/dia?fecha=' + info.dateStr)
 
-            const mes = fecha.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+            .then(res => res.json())
 
-            document.getElementById('numeroDia').innerText = dia;
+            .then(data => {
 
-            document.getElementById('mesActual').innerText = mes.toUpperCase();
+                let html = '';
+
+                if(data.length === 0){
+
+                    html = "<p class='text-center text-muted'>No hay feriados</p>";
+
+                }else{
+
+                    data.forEach(d => {
+
+                        html += `
+                            <div class="mb-2">
+                                <strong>${d.titulo}</strong><br>
+                                <small>${d.descripcion ?? ''}</small>
+                            </div>
+                        `;
+                    });
+
+                }
+
+                document.getElementById('contenidoDetalle').innerHTML = html;
+
+                new bootstrap.Modal(document.getElementById('modalDetalle')).show();
+
+            });
 
         },
 
-        // click en día
-        dateClick: function(info) {
-
-            const fecha = new Date(info.dateStr);
-
-            const dia = fecha.getDate();
-
-            const mes = fecha.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
-
-            document.getElementById('numeroDia').innerText = dia;
-
-            document.getElementById('mesActual').innerText = mes.toUpperCase();
-
-            document.getElementById('fecha_inicio').value = info.dateStr;
-
-            document.getElementById('fecha_fin').value = info.dateStr;
-
-            const modal = new bootstrap.Modal(document.getElementById('modalCalendario'));
-
-            modal.show();
-
-        },
-
-        // click en evento
+        // CLICK EVENTO → EDITAR
         eventClick: function(info){
-
-            const evento = info.event;
-
-            document.getElementById('titulo').value = evento.title;
-
-            document.getElementById('fecha_inicio').value = evento.startStr;
-
-            if(evento.end){
-
-                document.getElementById('fecha_fin').value = evento.endStr;
-
-            }else{
-
-                document.getElementById('fecha_fin').value = evento.startStr;
-
-            }
-
-            const modal = new bootstrap.Modal(document.getElementById('modalCalendario'));
-
-            modal.show();
-
+            window.location = '/calendario/' + info.event.id + '/edit';
         }
 
     });
@@ -300,64 +240,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-function abrirModalCrear(){
-
-    document.getElementById('titulo').value = '';
-
-    document.getElementById('descripcion').value = '';
-
-    document.getElementById('fecha_inicio').value = '';
-
-    document.getElementById('fecha_fin').value = '';
-
-    const modal = new bootstrap.Modal(document.getElementById('modalCalendario'));
-
-    modal.show();
-
-}
-
-
-
-function guardarEvento(){
-
-    const data = {
-
-        titulo: document.getElementById('titulo').value,
-        fecha_inicio: document.getElementById('fecha_inicio').value,
-        fecha_fin: document.getElementById('fecha_fin').value,
-        origen: document.getElementById('origen').value,
-        descripcion: document.getElementById('descripcion').value
-
-    };
-
-    fetch('/calendario/store', {
-
-        method: 'POST',
-
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-
-        body: JSON.stringify(data)
-
-    })
-    .then(res => res.json())
-    .then(data => {
-
-        location.reload();
-
-    });
-
-}
-
-
-
+// 🔹 IMPORTAR FERIADOS
 function importarFeriados(){
-
-    if(!confirm("Se importarán los feriados nacionales del año actual. ¿Continuar?")){
-        return;
-    }
 
     fetch('/calendario/importar-feriados',{
 
@@ -372,9 +256,19 @@ function importarFeriados(){
     .then(res=>res.json())
     .then(data=>{
 
-        alert("Feriados importados correctamente");
+        let mensaje = '';
 
-        location.reload();
+        if(data.status === 'exists'){
+            mensaje = "Los feriados nacionales de este año ya fueron agregados";
+        }else{
+            mensaje = "Feriados agregados correctamente";
+        }
+
+        document.getElementById('mensajeTexto').innerText = mensaje;
+
+        new bootstrap.Modal(document.getElementById('modalMensaje')).show();
+
+        setTimeout(()=>location.reload(),1500);
 
     });
 

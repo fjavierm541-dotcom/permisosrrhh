@@ -10,6 +10,7 @@ use App\Http\Controllers\DepartamentoMuniController;
 use App\Http\Controllers\DocumentoEmpleado;
 use App\Http\Controllers\CalendarioController;
 
+
     
 
 /*
@@ -167,11 +168,20 @@ Route::post('/departamentos/{id}/jefe',
 
 //CALENDAR
 
-
 Route::get('/calendario', [CalendarioController::class,'index'])->name('calendario.index');
+
+Route::get('/calendario/create', [CalendarioController::class,'create'])->name('calendario.create');
+
+Route::post('/calendario/store', [CalendarioController::class,'store'])->name('calendario.store');
+
+Route::get('/calendario/{id}/edit', [CalendarioController::class,'edit'])->name('calendario.edit');
+
+Route::put('/calendario/{id}', [CalendarioController::class,'update'])->name('calendario.update');
 
 Route::get('/calendario/eventos', [CalendarioController::class,'eventos']);
 
-Route::post('/calendario/store', [CalendarioController::class,'store']);
-//agregar feriados
-Route::post('/calendario/importar-feriados', [CalendarioController::class,'importarFeriados']);
+Route::get('/calendario/importar', [CalendarioController::class,'importarFeriados'])->name('calendario.importar');
+//
+Route::get('/calendario/dia', [CalendarioController::class,'dia']);
+//eliminar
+Route::delete('/calendario/{id}', [CalendarioController::class,'destroy'])->name('calendario.destroy');
