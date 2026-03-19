@@ -35,15 +35,15 @@
 
                     <div class="d-flex gap-2">
 
-                        <button class="btn btn-outline-secondary" onclick="importarFeriados()">
-                            Importar feriados
-                        </button>
+                    <button class="btn btn-outline-secondary" onclick="importarFeriados()">
+                        + Feriados nacionales autom.
+                    </button>
 
-                        <a href="{{ route('calendario.create') }}" class="btn btn-outline-secondary">
-                            Ingresar feriado
-                        </a>
+                    <a href="{{ route('calendario.create') }}" class="btn btn-dorado">
+                        + Agregar feriado
+                    </a>
 
-                    </div>
+                </div>
 
                 </div>
 
@@ -89,6 +89,53 @@
 
 
 
+<!-- MODAL SELECCIONAR AÑO -->
+<div class="modal fade" id="modalYear">
+
+    <div class="modal-dialog modal-sm">
+
+        <div class="modal-content p-3">
+
+            <div class="modal-header border-0 pb-0">
+
+                <h5 class="modal-title">
+                    Importar feriados
+                </h5>
+
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <label class="mb-2">Seleccionar año</label>
+
+                <select id="yearSelect" class="form-control">
+
+                    <!-- se llena con JS -->
+
+                </select>
+
+            </div>
+
+            <div class="modal-footer border-0">
+
+                <button class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button class="btn btn-dorado" onclick="confirmarImportacion()">
+                    Importar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 <!-- MODAL MENSAJE -->
 
 <div class="modal fade" id="modalMensaje">
@@ -104,6 +151,10 @@
     </div>
 
 </div>
+
+
+
+
 
 @endsection
 
@@ -150,7 +201,9 @@
     border-radius: 6px;
     border: none;
 }
-
+#modalYear .modal-content {
+    border-radius: 12px;
+}
 </style>
 
 
@@ -240,8 +293,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-// 🔹 IMPORTAR FERIADOS
+// 🔹 Confirmar año de diad feriados nacionales
 function importarFeriados(){
+
+    const yearActual = new Date().getFullYear();
+
+    const select = document.getElementById('yearSelect');
+
+    select.innerHTML = `
+        <option value="${yearActual}">${yearActual}</option>
+        <option value="${yearActual + 1}">${yearActual + 1}</option>
+    `;
+
+    new bootstrap.Modal(document.getElementById('modalYear')).show();
+
+
+}
+
+// Confirmar y agregar feriados al año seleccionado
+function confirmarImportacion(){
+
+    const year = document.getElementById('yearSelect').value;
 
     fetch('/calendario/importar-feriados',{
 
@@ -250,7 +322,9 @@ function importarFeriados(){
         headers:{
             'Content-Type':'application/json',
             'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content
-        }
+        },
+
+        body: JSON.stringify({ year })
 
     })
     .then(res=>res.json())
@@ -259,7 +333,7 @@ function importarFeriados(){
         let mensaje = '';
 
         if(data.status === 'exists'){
-            mensaje = "Los feriados nacionales de este año ya fueron agregados";
+            mensaje = "Los feriados de ese año ya fueron agregados";
         }else{
             mensaje = "Feriados agregados correctamente";
         }

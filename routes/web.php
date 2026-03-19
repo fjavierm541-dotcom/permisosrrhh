@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\DepartamentoMuniController;
 use App\Http\Controllers\DocumentoEmpleado;
 use App\Http\Controllers\CalendarioController;
+use Illuminate\Support\Facades\DB;
+
+
 
 
     
@@ -180,7 +183,8 @@ Route::put('/calendario/{id}', [CalendarioController::class,'update'])->name('ca
 
 Route::get('/calendario/eventos', [CalendarioController::class,'eventos']);
 
-Route::get('/calendario/importar', [CalendarioController::class,'importarFeriados'])->name('calendario.importar');
+Route::post('/calendario/importar-feriados', [CalendarioController::class,'importarFeriados'])
+    ->name('calendario.importar');
 //
 Route::get('/calendario/dia', [CalendarioController::class,'dia']);
 //eliminar

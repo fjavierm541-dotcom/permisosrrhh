@@ -15,22 +15,26 @@ return new class extends Migration
 
     $table->id();
 
-    $table->string('titulo');
+    $table->string('titulo', 150);
 
     $table->date('fecha_inicio');
 
     $table->date('fecha_fin')->nullable();
 
-    $table->enum('origen', [
-        'nacional',
-        'local'
-    ])->default('local');
+    $table->enum('origen', ['nacional','local']);
 
-    $table->text('descripcion')->nullable();
+    $table->enum('tipo_afectacion', [
+        'no_laborable',
+        'descuento'
+    ])->default('no_laborable');
+
+    $table->text('descripcion');
 
     $table->timestamps();
 
 });
+
+
 
 
 

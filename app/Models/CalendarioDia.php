@@ -10,11 +10,14 @@ class CalendarioDia extends Model
     protected $table = 'calendario_dias';
 
     protected $fillable = [
-        'titulo',
-        'fecha_inicio',
-        'fecha_fin',
-        'origen',
-        'descripcion'
-    ];
+    'titulo',
+    'fecha_inicio',
+    'fecha_fin',
+    'origen',
+    'tipo_afectacion',
+    'descripcion'
+];
+
+    
 
 }
