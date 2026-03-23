@@ -183,8 +183,6 @@ Route::put('/calendario/{id}', [CalendarioController::class,'update'])->name('ca
 
 Route::get('/calendario/eventos', [CalendarioController::class,'eventos']);
 
-Route::post('/calendario/importar-feriados', [CalendarioController::class,'importarFeriados'])
-    ->name('calendario.importar');
 //
 Route::get('/calendario/dia', [CalendarioController::class,'dia']);
 //eliminar
