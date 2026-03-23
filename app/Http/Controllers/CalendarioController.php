@@ -213,10 +213,8 @@ public function update(Request $request, $id)
 
     
     
-public function importarFeriados(Request $request)
+public function importarFeriados($year)
 {
-    $year = $request->year ?? date('Y');
-
     $feriadosClaves = [
         "$year-01-01",
         "$year-05-01",
@@ -229,9 +227,8 @@ public function importarFeriados(Request $request)
                     ->count();
 
     if($existentes >= count($feriadosClaves)){
-        return response()->json([
-            'status' => 'exists'
-        ]);
+        return redirect()->route('calendario.index')
+            ->with('error','Los feriados de ese año ya fueron agregados');
     }
 
     $feriados = [
@@ -259,9 +256,8 @@ public function importarFeriados(Request $request)
 
     }
 
-    return response()->json([
-        'status'=>'ok'
-    ]);
+    return redirect()->route('calendario.index')
+        ->with('success','Feriados agregados correctamente');
 }
 
 

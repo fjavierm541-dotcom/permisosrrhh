@@ -4,6 +4,18 @@
 
 <div class="container">
 
+@if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="alert alert-warning">
+        {{ session('error') }}
+    </div>
+@endif
+
     <div class="glass-card p-0 overflow-hidden">
 
         <div class="row g-0">
@@ -35,9 +47,19 @@
 
                     <div class="d-flex gap-2">
 
-                    <button class="btn btn-outline-secondary" onclick="importarFeriados()">
-                        + Feriados nacionales autom.
-                    </button>
+                    @php
+$yearActual = date('Y');
+@endphp
+
+<a href="{{ route('calendario.importar',$yearActual) }}" 
+   class="btn btn-outline-secondary">
+    + Feriados {{ $yearActual }}
+</a>
+
+<a href="{{ route('calendario.importar',$yearActual + 1) }}" 
+   class="btn btn-outline-secondary">
+    + Feriados {{ $yearActual + 1 }}
+</a>
 
                     <a href="{{ route('calendario.create') }}" class="btn btn-dorado">
                         + Agregar feriado
@@ -89,52 +111,7 @@
 
 
 
-<!-- MODAL SELECCIONAR AÑO -->
-<div class="modal fade" id="modalYear">
 
-    <div class="modal-dialog modal-sm">
-
-        <div class="modal-content p-3">
-
-            <div class="modal-header border-0 pb-0">
-
-                <h5 class="modal-title">
-                    Importar feriados
-                </h5>
-
-                <button class="btn-close" data-bs-dismiss="modal"></button>
-
-            </div>
-
-            <div class="modal-body">
-
-                <label class="mb-2">Seleccionar año</label>
-
-                <select id="yearSelect" class="form-control">
-
-                    <!-- se llena con JS -->
-
-                </select>
-
-            </div>
-
-            <div class="modal-footer border-0">
-
-                <button class="btn btn-secondary" data-bs-dismiss="modal">
-                    Cancelar
-                </button>
-
-                <button class="btn btn-dorado" onclick="confirmarImportacion()">
-                    Importar
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
 
 <!-- MODAL MENSAJE -->
 
@@ -292,60 +269,5 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-
-// 🔹 Confirmar año de diad feriados nacionales
-function importarFeriados(){
-
-    const yearActual = new Date().getFullYear();
-
-    const select = document.getElementById('yearSelect');
-
-    select.innerHTML = `
-        <option value="${yearActual}">${yearActual}</option>
-        <option value="${yearActual + 1}">${yearActual + 1}</option>
-    `;
-
-    new bootstrap.Modal(document.getElementById('modalYear')).show();
-
-
-}
-
-// Confirmar y agregar feriados al año seleccionado
-function confirmarImportacion(){
-
-    const year = document.getElementById('yearSelect').value;
-
-    fetch('/calendario/importar-feriados',{
-
-        method:'POST',
-
-        headers:{
-            'Content-Type':'application/json',
-            'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content
-        },
-
-        body: JSON.stringify({ year })
-
-    })
-    .then(res=>res.json())
-    .then(data=>{
-
-        let mensaje = '';
-
-        if(data.status === 'exists'){
-            mensaje = "Los feriados de ese año ya fueron agregados";
-        }else{
-            mensaje = "Feriados agregados correctamente";
-        }
-
-        document.getElementById('mensajeTexto').innerText = mensaje;
-
-        new bootstrap.Modal(document.getElementById('modalMensaje')).show();
-
-        setTimeout(()=>location.reload(),1500);
-
-    });
-
-}
 
 </script>
