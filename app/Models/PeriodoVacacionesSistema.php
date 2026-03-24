@@ -9,7 +9,7 @@ class PeriodoVacacionesSistema extends Model
 {
     use HasFactory;
 
-    protected $table = 'periodos_vacaciones_sistema';
+    protected $table = 'periodos_vacaciones_sistema'; 
 
     protected $fillable = [
         'dni_empleado',
@@ -29,21 +29,19 @@ class PeriodoVacacionesSistema extends Model
         'extension_hasta' => 'date'
     ];
 
-    /**
-     * 🔥 Calcular automáticamente días restantes
-     */
     protected static function boot()
-    {
-        parent::boot();
+{
+    parent::boot();
 
-        static::saving(function ($periodo) {
+    static::saving(function ($periodo) {
 
-            // Si dias_usados es null lo convertimos en 0
-            $usados = $periodo->dias_usados ?? 0;
-            $otorgados = $periodo->dias_otorgados ?? 0;
+        $usados = $periodo->dias_usados ?? 0;
+        $otorgados = $periodo->dias_otorgados ?? 0;
 
-            $periodo->dias_restantes = $otorgados - $usados;
+        $restantes = $otorgados - $usados;
 
-        });
-    }
+        // 🔥 evitar negativos
+        $periodo->dias_restantes = $restantes >= 0 ? $restantes : 0;
+    });
+}
 }

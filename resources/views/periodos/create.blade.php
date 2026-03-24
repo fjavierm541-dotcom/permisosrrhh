@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'Registro historico de días')
+@section('title', 'Registro historico de Vacaiones')
 
 @section('content')
 
@@ -39,12 +39,19 @@
 
 <body>
 
+@if(session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
+
 <div class="container py-5">
+
 
     <div class="glass-card">
 
         <div class="card-header-custom p-4">
-            <h4 class="mb-0">Registrar Períodos Vacacionales</h4>
+            <h4 class="mb-0">Registro histórico de vacaciones</h4>
         </div>
 
         <div class="p-4">
@@ -93,7 +100,7 @@
                             </div>
 
                             <div class="col-md-3 mb-3">
-                                <label>Fecha exacta que obtuvo estos días</label>
+                                <label>Fecha en que se generaron los días</label>
                                 <input type="date" name="fecha_inicio_periodo[]" class="form-control" required>
                             </div>
 
@@ -155,6 +162,27 @@ function agregarPeriodo() {
 
     contenedor.insertAdjacentHTML('beforeend', nuevo);
 }
+</script>
+
+
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+
+    let otorgados = document.querySelectorAll('[name="dias_otorgados[]"]');
+    let usados = document.querySelectorAll('[name="dias_usados[]"]');
+
+    for (let i = 0; i < otorgados.length; i++) {
+
+        let o = parseInt(otorgados[i].value) || 0;
+        let u = parseInt(usados[i].value) || 0;
+
+        if (u > o) {
+            alert('Los días usados no pueden ser mayores que los otorgados.');
+            e.preventDefault();
+            return;
+        }
+    }
+});
 </script>
 
 @endsection

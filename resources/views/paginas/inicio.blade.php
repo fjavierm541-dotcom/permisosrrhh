@@ -100,9 +100,9 @@
             <div class="col-md-4">
                 <div class="card dashboard-card text-center p-4">
                     <div class="dashboard-icon">🗂</div>
-                    <h5>Períodos de Vacaciones</h5>
+                    <h5>Registro histórico de vacaciones</h5>
                     <p class="text-muted small">
-                        Administrar períodos históricos y vencimientos.
+                        Carga de historial de vacaciones de empleados.
                     </p>
                     <a href="{{ route('periodos.create') }}" class="btn btn-dashboard btn-sm">
                         Ingresar
