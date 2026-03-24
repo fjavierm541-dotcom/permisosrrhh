@@ -51,6 +51,8 @@ class CalendarioController extends Controller
         'tipo_afectacion' => 'required|in:no_laborable,descuento',
         'descripcion' => 'required|string|max:500'
     ],[
+        'departamentos' => 'nullable|array',
+        'departamentos.*' => 'integer|distinct|exists:departamentos_muni,id',    
         'titulo.regex' => 'El título no debe contener caracteres especiales.',
         'fecha_fin.after_or_equal' => 'La fecha fin no puede ser menor que la fecha inicio.'
     ]);
@@ -91,7 +93,9 @@ class CalendarioController extends Controller
             DB::table('calendario_excepciones')->insert([
                 'calendario_dia_id' => $dia->id,
                 'departamento_id' => $dep,
-                'tipo' => 'trabaja'
+                'tipo' => 'trabaja',
+                    'created_at' => now(),
+                    'updated_at' => now()
             ]);
         }
     }
@@ -122,8 +126,11 @@ public function update(Request $request, $id)
         'descripcion' => 'required|string|max:500'
     ],[
         'titulo.regex' => 'El título no debe contener caracteres especiales.',
-        'fecha_fin.after_or_equal' => 'La fecha fin no puede ser menor que la fecha inicio.'
-    ]);
+        'fecha_fin.after_or_equal' => 'La fecha fin no puede ser menor que la fecha inicio.',
+        'departamentos' => 'nullable|array',
+        'departamentos.*' => 'integer|distinct|exists:departamentos_muni,id',
+        
+        ]);
 
     $inicio = $request->fecha_inicio;
     $fin = $request->fecha_fin ?? $inicio;

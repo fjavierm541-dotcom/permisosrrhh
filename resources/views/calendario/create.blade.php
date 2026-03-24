@@ -2,6 +2,16 @@
 
 @section('content')
 
+<style>
+    .form-check-input {
+    cursor: pointer;
+}
+
+.form-check-label {
+    cursor: pointer;
+}
+</style>
+
 <div class="container">
 
     <div class="glass-card p-4">
@@ -34,6 +44,7 @@
                     <label>Título</label>
                     <input type="text"
                            name="titulo"
+                           value="{{ old('titulo') }}"
                            class="form-control"
                            placeholder="Ingrese el nombre del feriado"
                            required
@@ -80,6 +91,36 @@
             </div>
 
         </div>
+
+        <div class="mb-3">
+    <label class="form-label">
+        <strong>Departamentos que SÍ trabajan (excepción)</strong>
+    </label>
+
+    <div class="border rounded p-3" style="max-height: 250px; overflow-y: auto; background: #f9f9f9;">
+
+        @foreach($departamentos as $dep)
+            <div class="form-check mb-1">
+                <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    name="departamentos[]" 
+                    value="{{ $dep->id }}" 
+                    id="dep{{ $dep->id }}"
+                >
+
+                <label class="form-check-label" for="dep{{ $dep->id }}">
+                    {{ $dep->nombre }}
+                </label>
+            </div>
+        @endforeach
+
+    </div>
+
+    <small class="text-muted">
+        Solo selecciona los departamentos que <strong>sí trabajarán</strong> en estos días.
+    </small>
+</div>
 
 
         {{-- 🔹 DESCRIPCIÓN --}}
