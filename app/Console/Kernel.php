@@ -4,6 +4,8 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\DB;
+use App\Models\CalendarioDia;
 
 class Kernel extends ConsoleKernel
 {
@@ -12,7 +14,147 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+
+        /**
+         * 🔹 1. ACTUALIZAR ESTADOS DE VACACIONES
+         */
+        $schedule->command('vacaciones:actualizar-estados')
+            ->hourly()
+            ->withoutOverlapping();
+
+
+
+        /**
+         * 🔹 2. CALCULAR SALDO DE VACACIONES (SIN SOBREESCRIBIR)
+         * ✔ evita que el scheduler borre descuentos
+         * ✔ solo suma lo nuevo
+         */
+        $schedule->call(function () {
+
+            $empleados = DB::table('periodos_vacaciones_sistema')
+                ->distinct()
+                ->pluck('dni_empleado');
+
+            foreach ($empleados as $dni) {
+
+                // 🔹 total real desde periodos
+                $totalPeriodos = DB::table('periodos_vacaciones_sistema')
+                    ->where('dni_empleado', $dni)
+                    ->whereIn('estado', ['activo', 'extendido'])
+                    ->sum('dias_restantes');
+
+                // 🔹 registro actual
+                $registro = DB::table('dias_acumulados_sistema')
+                    ->where('dni_empleado', $dni)
+                    ->first();
+
+                if ($registro) {
+
+                    $saldoActual = $registro->dias_vacacionales;
+
+                    // 🔥 diferencia
+                    $diferencia = $totalPeriodos - $saldoActual;
+
+                    // ✔ solo sumar (no sobrescribir)
+                    if ($diferencia > 0) {
+
+                        DB::table('dias_acumulados_sistema')
+                            ->where('dni_empleado', $dni)
+                            ->increment('dias_vacacionales', $diferencia, [
+                                'updated_at' => now()
+                            ]);
+                    }
+
+                } else {
+
+                    // 🔹 crear si no existe
+                    DB::table('dias_acumulados_sistema')->insert([
+                        'dni_empleado' => $dni,
+                        'dias_vacacionales' => $totalPeriodos,
+                        'dias_compensatorios' => 0,
+                        'horas_acumuladas' => 0,
+                        'updated_at' => now()
+                    ]);
+                }
+            }
+
+        })
+        ->name('calcular_saldo_vacaciones')
+        ->hourly()
+        ->withoutOverlapping();
+
+
+
+        /**
+         * 🔥 3. CALENDARIO AUTOMÁTICO (NO TOCAR)
+         */
+        $schedule->call(function () {
+
+            $hoy = date('Y-m-d');
+
+            $dias = CalendarioDia::where(function($q) use ($hoy){
+                $q->where('fecha_inicio','<=',$hoy)
+                  ->whereRaw('IFNULL(fecha_fin, fecha_inicio) >= ?', [$hoy]);
+            })
+            ->where('tipo_afectacion','descuento')
+            ->get();
+
+            foreach($dias as $dia){
+
+                $excepciones = DB::table('calendario_excepciones')
+                    ->where('calendario_dia_id',$dia->id)
+                    ->pluck('departamento_id');
+
+                $empleados = DB::table('empleados')
+                    ->whereNotIn('departamento_funcional_id', $excepciones)
+                    ->get();
+
+                foreach($empleados as $emp){
+
+                    $yaDescontado = DB::table('historial_descuentos')
+                        ->where('dni_empleado',$emp->DNI)
+                        ->where('fecha',$hoy)
+                        ->where('calendario_dia_id',$dia->id)
+                        ->exists();
+
+                    if(!$yaDescontado){
+
+                        $registro = DB::table('dias_acumulados_sistema')
+                            ->where('dni_empleado',$emp->DNI)
+                            ->first();
+
+                        if($registro){
+
+                            if($registro->dias_vacacionales > 0){
+
+                                DB::table('dias_acumulados_sistema')
+                                    ->where('dni_empleado',$emp->DNI)
+                                    ->decrement('dias_vacacionales', 1);
+
+                            }elseif($registro->dias_compensatorios > 0){
+
+                                DB::table('dias_acumulados_sistema')
+                                    ->where('dni_empleado',$emp->DNI)
+                                    ->decrement('dias_compensatorios', 1);
+                            }
+
+                            DB::table('historial_descuentos')->insert([
+                                'dni_empleado' => $emp->DNI,
+                                'fecha' => $hoy,
+                                'calendario_dia_id' => $dia->id,
+                                'tipo' => 'calendario',
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ]);
+                        }
+                    }
+                }
+            }
+
+        })
+        ->name('procesar_calendario_descuentos')
+        ->dailyAt('00:00')
+        ->withoutOverlapping();
     }
 
     /**
@@ -21,7 +163,6 @@ class Kernel extends ConsoleKernel
     protected function commands(): void
     {
         $this->load(__DIR__.'/Commands');
-
         require base_path('routes/console.php');
     }
 }
