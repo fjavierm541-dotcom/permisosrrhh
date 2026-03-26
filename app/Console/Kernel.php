@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
 
+        
         /**
          * 🔹 1. ACTUALIZAR ESTADOS DE VACACIONES
          */
@@ -25,9 +26,10 @@ class Kernel extends ConsoleKernel
 
 
         /**
-         * 🔹 2. CALCULAR SALDO DE VACACIONES (SIN SOBREESCRIBIR)
-         * ✔ evita que el scheduler borre descuentos
-         * ✔ solo suma lo nuevo
+         * 🔹 2. SINCRONIZAR SALDO DE VACACIONES
+         * ✔ SIEMPRE refleja la realidad de periodos
+         * ✔ incluye activos + extendidos
+         * ✔ elimina inconsistencias
          */
         $schedule->call(function () {
 
@@ -37,51 +39,25 @@ class Kernel extends ConsoleKernel
 
             foreach ($empleados as $dni) {
 
-                // 🔹 total real desde periodos
                 $totalPeriodos = DB::table('periodos_vacaciones_sistema')
                     ->where('dni_empleado', $dni)
                     ->whereIn('estado', ['activo', 'extendido'])
                     ->sum('dias_restantes');
 
-                // 🔹 registro actual
-                $registro = DB::table('dias_acumulados_sistema')
-                    ->where('dni_empleado', $dni)
-                    ->first();
-
-                if ($registro) {
-
-                    $saldoActual = $registro->dias_vacacionales;
-
-                    // 🔥 diferencia
-                    $diferencia = $totalPeriodos - $saldoActual;
-
-                    // ✔ solo sumar (no sobrescribir)
-                    if ($diferencia > 0) {
-
-                        DB::table('dias_acumulados_sistema')
-                            ->where('dni_empleado', $dni)
-                            ->increment('dias_vacacionales', $diferencia, [
-                                'updated_at' => now()
-                            ]);
-                    }
-
-                } else {
-
-                    // 🔹 crear si no existe
-                    DB::table('dias_acumulados_sistema')->insert([
-                        'dni_empleado' => $dni,
+                DB::table('dias_acumulados_sistema')->updateOrInsert(
+                    ['dni_empleado' => $dni],
+                    [
                         'dias_vacacionales' => $totalPeriodos,
-                        'dias_compensatorios' => 0,
-                        'horas_acumuladas' => 0,
                         'updated_at' => now()
-                    ]);
-                }
+                    ]
+                );
             }
 
         })
-        ->name('calcular_saldo_vacaciones')
+        ->name('sincronizar_saldo_vacaciones')
         ->hourly()
         ->withoutOverlapping();
+
 
 
 
