@@ -61,7 +61,7 @@
 
     <div class="col-md-4">
         <strong>Puesto actual:</strong><br>
-        <span class="text-muted">Pendiente de implementar</span>
+        <span class="text-muted">{{ $empleado->departamentoFuncional->nombre ?? 'Sin asignar' }}</span>
     </div>
 
 </div>
@@ -94,6 +94,7 @@
                     <th>Días usados</th>
                     <th>Días restantes</th>
                     <th>Vencimiento</th>
+                    <th>Detalle</th>
                 </tr>
             </thead>
             <tbody>
@@ -104,6 +105,11 @@
                         <td>{{ $periodo->dias_usados }}</td>
                         <td>{{ $periodo->dias_otorgados - $periodo->dias_usados }}</td>
                         <td>{{ \Carbon\Carbon::parse($periodo->extension_hasta ?? $periodo->fecha_vencimiento)->format('d-m-y') }}</td>
+                        <th>
+                            @if($periodo->estado == 'extendido')
+    <span class="badge bg-info">Extendido</span>
+@endif
+                        </th>
                     </tr>
                 @empty
                     <tr>
@@ -132,6 +138,7 @@
                     <th>Días otorgados</th>
                     <th>Días usados</th>
                     <th>Vencimiento</th>
+                    <th>Acción</th>
                 </tr>
             </thead>
             <tbody>
@@ -140,11 +147,21 @@
                         <td>{{ $periodo->anio_laboral }}</td>
                         <td>{{ $periodo->dias_otorgados }}</td>
                         <td>{{ $periodo->dias_usados }}</td>
-                        <td>{{ \Carbon\Carbon::parse($periodo->fecha_vencimiento)->format('d-m-y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($periodo->extension_hasta ?? $periodo->fecha_vencimiento)->format('d-m-Y') }}</td>
+                        <td>
+                            @if($periodo->estado == 'vencido')
+                                <button class="btn btn-sm btn-warning" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#modalReactivar"
+                                    data-id="{{ $periodo->id }}">
+                                    Reactivar
+                                </button>
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4">No hay períodos vencidos.</td>
+                        <td colspan="5">No hay períodos vencidos.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -172,23 +189,88 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($movimientos as $movimiento)
-                    <tr>
-                        <td>{{ \Carbon\Carbon::parse($movimiento->created_at)->format('d-m-y H:i') }}</td>
-                        <td>{{ $movimiento->tipo_movimiento }}</td>
-                        <td>{{ $movimiento->descripcion }}</td>
-                        <td>{{ $movimiento->dias_afectados ?? '-' }}</td>
-                        <td>{{ $movimiento->horas_afectadas ?? '-' }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5">No hay movimientos registrados.</td>
-                    </tr>
-                @endforelse
-            </tbody>
+    @forelse($movimientos as $movimiento)
+        <tr>
+            <!-- 📅 Fecha formateada -->
+            <td>{{ \Carbon\Carbon::parse($movimiento->created_at)->format('d-m-Y') }}</td>
+
+            <!-- 🔤 Tipo sin guiones -->
+            <td>{{ str_replace('_', ' ', ucfirst($movimiento->tipo_movimiento)) }}</td>
+
+            <!-- 📝 Descripción -->
+            <td>{{ $movimiento->descripcion }}</td>
+
+            <!-- 📊 Días -->
+            <td>{{ $movimiento->dias_afectados ?? '-' }}</td>
+
+            <!-- ⏱️ Horas -->
+            <td>{{ $movimiento->horas_afectadas ?? '-' }}</td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="5">No hay movimientos registrados.</td>
+        </tr>
+    @endforelse
+</tbody>
         </table>
     </div>
 
 </div>
+
+
+
+<!-- MODAL REACTIVAR -->
+<div class="modal fade" id="modalReactivar" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="POST" action="{{ route('periodos.reactivar') }}" enctype="multipart/form-data">
+            @csrf
+
+            <input type="hidden" name="periodo_id" id="periodo_id">
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reactivar período</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label>Justificación</label>
+                        <textarea name="motivo" class="form-control" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Documento (opcional)</label>
+                        <input type="file" name="documento" class="form-control">
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-gold">Confirmar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const modal = document.getElementById('modalReactivar');
+
+    modal.addEventListener('show.bs.modal', function (event) {
+
+        const button = event.relatedTarget;
+        const id = button.getAttribute('data-id');
+
+        document.getElementById('periodo_id').value = id;
+    });
+
+});
+</script>
 
 @endsection

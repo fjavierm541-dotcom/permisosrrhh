@@ -82,7 +82,7 @@
                             <div class="col-md-4 mb-3">
                                 <label>Año laboral</label>
                                 <input type="number" name="anio_laboral[]" class="form-control" 
-    min="2000" max="{{ date('Y') }}" required>
+                                min="2000" max="{{ date('Y') }}" required>
                             </div>
 
                             <div class="col-md-4 mb-3">

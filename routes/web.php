@@ -80,6 +80,9 @@ Route::get('periodos/create', [PeriodoVacacionesController::class, 'create'])
 Route::post('periodos/store', [PeriodoVacacionesController::class, 'store'])
     ->name('periodos.store');
 
+//reactivar periodos 
+Route::post('/periodos/reactivar', [PeriodoVacacionesController::class, 'reactivar'])
+    ->name('periodos.reactivar');
 
 
 

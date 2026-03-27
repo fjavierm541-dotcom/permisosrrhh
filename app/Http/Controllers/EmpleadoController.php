@@ -55,8 +55,7 @@ public function index(Request $request)
 
         $empleado->dias_disponibles = $totalDiasDisponibles;
 
-        $acumulado = DiasAcumuladosSistema::where('dni_empleado', $empleado->DNI)->first();
-        $empleado->horas_disponibles = $acumulado->horas_acumuladas ?? 0;
+        
 
 
         // ===== SEMÁFORO =====
@@ -481,24 +480,24 @@ public function show($dni)
 {
     $empleado = Empleado::where('DNI', $dni)->firstOrFail();
 
-    // Períodos activos
+    // 🔥 Activos + Extendidos
     $periodosActivos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
-        ->where('estado', 'activo')
+        ->whereIn('estado', ['activo', 'extendido'])
         ->orderByDesc('anio_laboral')
         ->get();
 
-    // Períodos vencidos
+    // 🔹 Vencidos
     $periodosVencidos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
         ->where('estado', 'vencido')
         ->orderByDesc('anio_laboral')
         ->get();
 
-    // Movimientos
+    // 🔹 Movimientos
     $movimientos = MovimientoPermisoSistema::where('dni_empleado', $dni)
         ->orderByDesc('created_at')
         ->get();
 
-    // Calcular días disponibles SOLO activos
+    // 🔥 Total (ya incluye extendidos)
     $totalDiasDisponibles = $periodosActivos->sum(function ($periodo) {
         return max(0, $periodo->dias_otorgados - $periodo->dias_usados);
     });
@@ -511,6 +510,8 @@ public function show($dni)
         'totalDiasDisponibles'
     ));
 }
+
+
 
 
 

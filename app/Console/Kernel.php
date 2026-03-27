@@ -25,44 +25,9 @@ class Kernel extends ConsoleKernel
 
 
 
-        /**
-         * 🔹 2. SINCRONIZAR SALDO DE VACACIONES
-         * ✔ SIEMPRE refleja la realidad de periodos
-         * ✔ incluye activos + extendidos
-         * ✔ elimina inconsistencias
-         */
-        $schedule->call(function () {
-
-            $empleados = DB::table('periodos_vacaciones_sistema')
-                ->distinct()
-                ->pluck('dni_empleado');
-
-            foreach ($empleados as $dni) {
-
-                $totalPeriodos = DB::table('periodos_vacaciones_sistema')
-                    ->where('dni_empleado', $dni)
-                    ->whereIn('estado', ['activo', 'extendido'])
-                    ->sum('dias_restantes');
-
-                DB::table('dias_acumulados_sistema')->updateOrInsert(
-                    ['dni_empleado' => $dni],
-                    [
-                        'dias_vacacionales' => $totalPeriodos,
-                        'updated_at' => now()
-                    ]
-                );
-            }
-
-        })
-        ->name('sincronizar_saldo_vacaciones')
-        ->hourly()
-        ->withoutOverlapping();
-
-
-
 
         /**
-         * 🔥 3. CALENDARIO AUTOMÁTICO (NO TOCAR)
+         * 2. CALENDARIO AUTOMÁTICO (NO TOCAR)
          */
         $schedule->call(function () {
 
