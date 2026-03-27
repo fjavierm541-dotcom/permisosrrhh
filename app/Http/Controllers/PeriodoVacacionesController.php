@@ -136,27 +136,37 @@ public function reactivar(Request $request)
 
         $periodo = PeriodoVacacionesSistema::findOrFail($request->periodo_id);
 
-        // 🔥 validar que esté vencido
         if ($periodo->estado !== 'vencido') {
             throw new \Exception("Solo se pueden reactivar períodos vencidos.");
         }
 
-        // 🔥 extender 1 año desde hoy o desde vencimiento
-        $nuevaFecha = \Carbon\Carbon::parse($periodo->fecha_vencimiento)->addYear();
+        // 🔥 FECHA NUEVA
+        $fechaNombramiento = Carbon::parse($periodo->empleado->fecha_nombramiento);
+        $hoy = now();
+        // 🔥 construir fecha aniversario este año
+        $fechaAniversario = $fechaNombramiento->copy()->setYear($hoy->year);
+        // 🔥 si ya pasó → usar siguiente año
+        if ($hoy->greaterThan($fechaAniversario)) {
+            $fechaAniversario->addYear();
+        }
+        $nuevaFecha = $fechaAniversario;
 
-        // 🔥 actualizar período
-        $periodo->update([
-            'estado' => 'extendido',
-            'extension_hasta' => $nuevaFecha
-        ]);
 
-        // 🔥 guardar documento (opcional)
+        
+        // 🔥 GUARDAR DOCUMENTO PRIMERO
+        $path = null;
+
         if ($request->hasFile('documento')) {
-            $ruta = $request->file('documento')->store('reactivaciones', 'public');
+            $path = $request->file('documento')->store('reactivaciones', 'public');
         }
 
-        // 🔥 (opcional futuro) guardar en historial
-        // puedes crear tabla luego si quieres auditoría
+        // 🔥 AHORA SÍ ACTUALIZAR
+        $periodo->update([
+            'estado' => 'extendido',
+            'extension_hasta' => $nuevaFecha,
+            'motivo_extension' => $request->motivo,
+            'documento_extension' => $path
+        ]);
 
     } catch (\Exception $e) {
         return back()->with('error', $e->getMessage());

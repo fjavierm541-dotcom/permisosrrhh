@@ -11,6 +11,7 @@ use App\Models\MovimientoPermisoSistema;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\DepartamentoMuni;
 use App\Models\DocumentoEmpleado;
+use Illuminate\Support\Facades\DB;
 
 
 class EmpleadoController extends Controller
@@ -482,10 +483,10 @@ public function show($dni)
 
     // 🔥 Activos + Extendidos
     $periodosActivos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
-        ->whereIn('estado', ['activo', 'extendido'])
-        ->orderByDesc('anio_laboral')
-        ->get();
-
+    ->whereIn('estado', ['activo', 'extendido'])
+    ->orderByDesc(DB::raw('COALESCE(extension_hasta, fecha_vencimiento)'))
+    ->get();
+    
     // 🔹 Vencidos
     $periodosVencidos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
         ->where('estado', 'vencido')

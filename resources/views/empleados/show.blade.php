@@ -106,14 +106,29 @@
                         <td>{{ $periodo->dias_otorgados - $periodo->dias_usados }}</td>
                         <td>{{ \Carbon\Carbon::parse($periodo->extension_hasta ?? $periodo->fecha_vencimiento)->format('d-m-y') }}</td>
                         <th>
+
                             @if($periodo->estado == 'extendido')
-    <span class="badge bg-info">Extendido</span>
-@endif
+                                <span class="badge bg-info">Extendido</span>
+                            @endif
+                            
+                            
+    @if($periodo->estado == 'extendido')
+        <button 
+            class="btn btn-sm btn-outline-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#modalDetalleExtension"
+            data-motivo="{{ $periodo->motivo_extension }}"
+            data-documento="{{ $periodo->documento_extension }}"
+        >
+            Ver detalle
+        </button>
+    @endif
+
                         </th>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5">No hay períodos activos.</td>
+                        <td colspan="6">No hay períodos activos.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -257,6 +272,38 @@
 
 
 
+
+<div class="modal fade" id="modalDetalleExtension" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Detalle de extensión</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label class="fw-bold">Motivo:</label>
+                    <p id="modalMotivo" class="text-muted"></p>
+                </div>
+
+                <div>
+                    <label class="fw-bold">Documento:</label><br>
+                    <a href="#" target="_blank" id="modalDocumento" class="btn btn-sm btn-outline-secondary">
+                        Ver documento
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -268,6 +315,39 @@ document.addEventListener('DOMContentLoaded', function () {
         const id = button.getAttribute('data-id');
 
         document.getElementById('periodo_id').value = id;
+    });
+
+});
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const modal = document.getElementById('modalDetalleExtension');
+
+    modal.addEventListener('show.bs.modal', function (event) {
+
+        let button = event.relatedTarget;
+
+        let motivo = button.getAttribute('data-motivo');
+        let documento = button.getAttribute('data-documento');
+
+        // 🔹 MOTIVO
+        document.getElementById('modalMotivo').textContent = motivo && motivo.trim() !== '' 
+            ? motivo 
+            : 'Sin motivo registrado';
+
+        // 🔹 DOCUMENTO
+        let link = document.getElementById('modalDocumento');
+
+        if (documento && documento.trim() !== '') {
+            link.href = '/storage/' + documento;
+            link.style.display = 'inline-block';
+        } else {
+            link.style.display = 'none';
+        }
+
     });
 
 });

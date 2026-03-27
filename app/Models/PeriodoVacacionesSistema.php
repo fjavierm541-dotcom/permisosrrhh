@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class PeriodoVacacionesSistema extends Model
 {
@@ -20,7 +21,9 @@ class PeriodoVacacionesSistema extends Model
         'fecha_inicio_periodo',
         'fecha_vencimiento',
         'extension_hasta',
-        'estado'
+        'estado',
+        'motivo_extension',     
+        'documento_extension'   
     ];
 
     protected $casts = [
@@ -43,5 +46,11 @@ class PeriodoVacacionesSistema extends Model
         // 🔥 evitar negativos
         $periodo->dias_restantes = $restantes >= 0 ? $restantes : 0;
     });
+    
+}
+
+public function empleado()
+{
+    return $this->belongsTo(Empleado::class, 'dni_empleado', 'DNI');
 }
 }
