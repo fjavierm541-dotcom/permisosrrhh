@@ -53,6 +53,18 @@
         background-color: #c39a4f;
         color: #1f3a56;
     }
+
+.icono-img {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease;
+}
+
+.dashboard-card:hover .icono-img {
+    transform: scale(1.1);
+}
 </style>
 
 <div class="container py-5">
@@ -71,7 +83,7 @@
             <!-- Empleados -->
             <div class="col-md-4">
                 <div class="card dashboard-card text-center p-4">
-                    <div class="dashboard-icon">👥</div>
+                    <div class="dashboard-icon"><img src="{{ asset('icons/empleado.png') }}" class="icono-img"></div>
                     <h5>Empleados</h5>
                     <p class="text-muted small">
                         Administrar la información del personal.

@@ -193,3 +193,12 @@ Route::delete('/calendario/{id}', [CalendarioController::class,'destroy'])->name
 //importar feriados nacional del sig año
 Route::get('/calendario/importar-feriados/{year}', [CalendarioController::class,'importarFeriados'])
     ->name('calendario.importar');
+
+
+
+
+
+    //LOGIN
+    Route::get('/login', function () {
+    return view('auth.login');
+});
