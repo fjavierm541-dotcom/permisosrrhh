@@ -18,12 +18,13 @@
 
         /* FONDO */
         .login-bg {
-            position: relative;
-            width: 100%;
-            height: 100vh;
-            background: url('/images/login-rrhh.png') no-repeat center;
-            background-size: cover;
-        }
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    transition: background-image 0.2s ease-in-out;
+}
 
         .login-bg::before {
             content: "";
@@ -224,3 +225,25 @@ document.addEventListener("DOMContentLoaded", function(){
 
 </body>
 </html>
+
+
+<script>
+
+const imagenes = [
+    "/images/login-1.png",
+    "/images/login-2.png"
+];
+
+let index = localStorage.getItem("bgIndex");
+
+if(index === null){
+    index = 0;
+} else {
+    index = parseInt(index) === 0 ? 1 : 0; // 🔥 alterna entre 0 y 1
+}
+
+localStorage.setItem("bgIndex", index);
+
+document.querySelector('.login-bg').style.backgroundImage = `url(${imagenes[index]})`;
+
+</script>
