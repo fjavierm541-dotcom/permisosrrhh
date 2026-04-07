@@ -10,10 +10,7 @@ use App\Http\Controllers\DepartamentoMuniController;
 use App\Http\Controllers\DocumentoEmpleado;
 use App\Http\Controllers\CalendarioController;
 use Illuminate\Support\Facades\DB;
-
-
-
-
+use App\Http\Controllers\SolicitudCompensatorioController;
     
 
 /*
@@ -202,3 +199,40 @@ Route::get('/calendario/importar-feriados/{year}', [CalendarioController::class,
     Route::get('/login', function () {
     return view('auth.login');
 });
+
+
+
+// COMPENSATORIOS 
+
+
+Route::post('/compensatorios/solicitudes', [SolicitudCompensatorioController::class, 'store'])
+    ->name('compensatorios.solicitudes.store');
+
+Route::get('/compensatorios/solicitudes/create', [SolicitudCompensatorioController::class, 'create'])
+    ->name('compensatorios.solicitudes.create');
+
+
+//agregar solicitud por depto específico 
+Route::get('/empleados/por-departamento/{id}', function ($id) {
+    return DB::table('empleados')
+        ->where('departamento_funcional_id', $id)
+        ->select(
+            'DNI',
+            DB::raw("CONCAT(primer_nombre, ' ', primer_apellido) as nombre")
+        )
+        ->get();
+});
+
+//rechazar o aprobar solicitudes 
+Route::get('/compensatorios/solicitudes', [SolicitudCompensatorioController::class, 'index'])
+    ->name('compensatorios.solicitudes.index');
+//vista detalle
+    Route::get('/compensatorios/solicitudes/{id}', [SolicitudCompensatorioController::class, 'show'])
+    ->name('compensatorios.solicitudes.show');
+
+
+    Route::post('/compensatorios/{id}/aprobar', [SolicitudCompensatorioController::class, 'aprobar'])
+    ->name('compensatorios.solicitudes.aprobar');
+
+Route::post('/compensatorios/{id}/rechazar', [SolicitudCompensatorioController::class, 'rechazar'])
+    ->name('compensatorios.solicitudes.rechazar');
