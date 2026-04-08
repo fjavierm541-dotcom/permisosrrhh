@@ -3,7 +3,6 @@
 namespace App\Models;
 use App\Models\DepartamentoMuni;
 use App\Models\SolicitudCompensatorioEmpleado;
-
 use Illuminate\Database\Eloquent\Model;
 
 class SolicitudCompensatorio extends Model

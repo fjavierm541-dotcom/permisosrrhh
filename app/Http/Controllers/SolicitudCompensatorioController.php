@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 use App\Models\SolicitudCompensatorio; 
+use App\Models\Compensatorio; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+
+
+
 class SolicitudCompensatorioController extends Controller
 {
     /**
@@ -108,21 +112,38 @@ class SolicitudCompensatorioController extends Controller
 
 
 
+
 public function aprobar(Request $request, $id)
 {
-    $solicitud = SolicitudCompensatorio::findOrFail($id);
+    $solicitud = SolicitudCompensatorio::with('empleados')->findOrFail($id);
 
     $request->validate([
         'dias_aprobados' => 'required|integer|min:1'
     ]);
 
+    // ✅ actualizar solicitud
     $solicitud->update([
         'estado' => 'aprobado',
         'dias_aprobados' => $request->dias_aprobados,
         'aprobado_por' => auth()->id() ?? 1
     ]);
 
-    return redirect()->back()->with('success', 'Solicitud aprobada');
+    // 🔥 GENERAR COMPENSATORIOS
+    foreach ($solicitud->empleados as $emp) {
+
+        Compensatorio::create([
+            'dni_empleado' => $emp->dni_empleado,
+            'dias_otorgados' => $request->dias_aprobados,
+            'dias_disponibles' => $request->dias_aprobados,
+            'fecha_origen' => $solicitud->fecha_trabajada,
+            'fecha_vencimiento' => Carbon::parse($solicitud->fecha_trabajada)->addYears(3),
+            'estado' => 'activo',
+            'origen' => 'compensatorio',
+            'referencia_id' => $solicitud->id
+        ]);
+    }
+
+    return redirect()->back()->with('success', 'Solicitud aprobada y compensatorios generados');
 }
 
 
