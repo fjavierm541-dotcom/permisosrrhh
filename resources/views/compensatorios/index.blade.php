@@ -23,10 +23,10 @@
         <table class="table align-middle">
             <thead style="background:#2d4f73; color:white;">
                 <tr>
-                    <th>#</th>
-                    <th>Solicitud del Depto.</th>
-                    <th>Fecha</th>
-                    <th>Empleados</th>
+                    <th># solicitud</th>
+                    <th>Departamento</th>
+                    <th>Fecha de solicitud</th>
+                    <th>Empleados incluidos</th>
                     <th>Estado</th>
                     <th></th>
                 </tr>

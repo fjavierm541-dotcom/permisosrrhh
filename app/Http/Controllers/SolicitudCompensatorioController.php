@@ -128,20 +128,35 @@ public function aprobar(Request $request, $id)
         'aprobado_por' => auth()->id() ?? 1
     ]);
 
-    // 🔥 GENERAR COMPENSATORIOS
     foreach ($solicitud->empleados as $emp) {
 
-        Compensatorio::create([
-            'dni_empleado' => $emp->dni_empleado,
-            'dias_otorgados' => $request->dias_aprobados,
-            'dias_disponibles' => $request->dias_aprobados,
-            'fecha_origen' => $solicitud->fecha_trabajada,
-            'fecha_vencimiento' => Carbon::parse($solicitud->fecha_trabajada)->addYears(3),
-            'estado' => 'activo',
-            'origen' => 'compensatorio',
-            'referencia_id' => $solicitud->id
-        ]);
-    }
+    // 🟢 1. CREAR COMPENSATORIO
+    Compensatorio::create([
+        'dni_empleado' => $emp->dni_empleado,
+        'dias_otorgados' => $request->dias_aprobados,
+        'dias_disponibles' => $request->dias_aprobados,
+        'fecha_origen' => $solicitud->fecha_trabajada,
+        'fecha_vencimiento' => \Carbon\Carbon::parse($solicitud->fecha_trabajada)->addYears(3),
+        'estado' => 'activo',
+        'origen' => 'solicitud',
+        'referencia_id' => $solicitud->id
+    ]);
+
+    // 🔥 2. REGISTRAR MOVIMIENTO
+    \DB::table('movimientos_permisos_sistema')->insert([
+        'dni_empleado' => $emp->dni_empleado,
+        'permiso_id' => null,
+        'periodo_id' => null,
+        'categoria' => 'compensatorio',
+        'tipo_movimiento' => 'asignacion',
+        'dias_afectados' => $request->dias_aprobados,
+        'horas_afectadas' => 0,
+        'descripcion' => 'Asignación de ' . $request->dias_aprobados . ' día(s) compensatorio(s) por solicitud #' . $solicitud->id,
+        'created_at' => now(),
+        'updated_at' => now()
+    ]);
+
+}
 
     return redirect()->back()->with('success', 'Solicitud aprobada y compensatorios generados');
 }

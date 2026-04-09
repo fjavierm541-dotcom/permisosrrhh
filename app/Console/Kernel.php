@@ -32,8 +32,8 @@ class Kernel extends ConsoleKernel
 
     try {
 //prueba rapida de descuentos en el calendario 
-$hoy = '2026-04-08';
-        //$hoy = date('Y-m-d');
+//$hoy = '2026-04-10';
+        $hoy = date('Y-m-d');
 
         $dias = \App\Models\CalendarioDia::where(function ($q) use ($hoy) {
             $q->where('fecha_inicio', '<=', $hoy)

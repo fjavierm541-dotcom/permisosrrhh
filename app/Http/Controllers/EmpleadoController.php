@@ -476,16 +476,16 @@ $request->validate([
 
 
 
-
-public function show($dni)
+//shoe para ver movimientos y dias disponibles
+public function show($dni) 
 {
     $empleado = Empleado::where('DNI', $dni)->firstOrFail();
 
     // 🔥 Activos + Extendidos
     $periodosActivos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
-    ->whereIn('estado', ['activo', 'extendido'])
-    ->orderByDesc(DB::raw('COALESCE(extension_hasta, fecha_vencimiento)'))
-    ->get();
+        ->whereIn('estado', ['activo', 'extendido'])
+        ->orderByDesc(DB::raw('COALESCE(extension_hasta, fecha_vencimiento)'))
+        ->get();
     
     // 🔹 Vencidos
     $periodosVencidos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
@@ -498,20 +498,30 @@ public function show($dni)
         ->orderByDesc('created_at')
         ->get();
 
-    // 🔥 Total (ya incluye extendidos)
+    // 🔥 Vacaciones disponibles
     $totalDiasDisponibles = $periodosActivos->sum(function ($periodo) {
         return max(0, $periodo->dias_otorgados - $periodo->dias_usados);
     });
+
+    // 🔥 COMPENSATORIOS (AQUÍ ESTABA EL PROBLEMA)
+    $diasCompensatorios = DB::table('compensatorios_sistema')
+        ->where('dni_empleado', $dni)
+        ->where('estado', 'activo')
+        ->sum('dias_disponibles');
+
+    // 🔥 TOTAL GENERAL
+    $totalGeneral = $totalDiasDisponibles + $diasCompensatorios;
 
     return view('empleados.show', compact(
         'empleado',
         'periodosActivos',
         'periodosVencidos',
         'movimientos',
-        'totalDiasDisponibles'
+        'totalDiasDisponibles',
+        'diasCompensatorios',
+        'totalGeneral'
     ));
 }
-
 
 
 

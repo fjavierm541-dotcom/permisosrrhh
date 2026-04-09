@@ -67,11 +67,23 @@
 </div>
 
 
-    <!-- RESUMEN DISPONIBLE -->
-    <div class="alert alert-info">
-        <strong>Días disponibles actuales:</strong>
-        {{ $totalDiasDisponibles }} días
+<!-- RESUMEN DISPONIBLE -->
+<div class="alert alert-info">
+
+    <div class="mt-2">
+        <strong>Total de días disponibles: {{ $totalGeneral }} </strong>
     </div>
+
+    <div class="mt-2">
+        Compensatorios: <strong>{{ $diasCompensatorios }}</strong> días<br>
+        Vacaciones: <strong>{{ $totalDiasDisponibles }}</strong> días
+    </div>
+
+    
+
+    <small class="text-muted d-block mt-2">
+        * Los días compensatorios se utilizan primero automáticamente al solicitar permisos.
+    </small>
 
 </div>
 
