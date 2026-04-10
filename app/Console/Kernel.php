@@ -6,6 +6,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Support\Facades\DB;
 use App\Models\CalendarioDia;
+use Carbon\Carbon;
 
 class Kernel extends ConsoleKernel
 {
@@ -14,8 +15,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-
-    
 
         /**
          * 🔹 1. ACTUALIZAR ESTADOS DE VACACIONES
@@ -26,83 +25,132 @@ class Kernel extends ConsoleKernel
 
 
         /**
-         * 🔥 2. CALENDARIO AUTOMÁTICO (FIFO REAL)
+         * 🔥 2. CALENDARIO AUTOMÁTICO
          */
         $schedule->call(function () {
 
-    try {
-//prueba rapida de descuentos en el calendario 
-//$hoy = '2026-04-10';
-        $hoy = date('Y-m-d');
+            try {
 
-        $dias = \App\Models\CalendarioDia::where(function ($q) use ($hoy) {
-            $q->where('fecha_inicio', '<=', $hoy)
-              ->whereRaw('IFNULL(fecha_fin, fecha_inicio) >= ?', [$hoy]);
-        })
-        ->where('tipo_afectacion', 'descuento')
-        ->get();
+                // 🧪 PRUEBA (luego cambias a date('Y-m-d'))
+                $hoy = '2026-04-14';
+                // $hoy = date('Y-m-d');
 
-        foreach ($dias as $dia) {
+                $dias = CalendarioDia::where(function ($q) use ($hoy) {
+                        $q->where('fecha_inicio', '<=', $hoy)
+                          ->whereRaw('IFNULL(fecha_fin, fecha_inicio) >= ?', [$hoy]);
+                    })
+                    ->where('tipo_afectacion', 'descuento')
+                    ->get();
 
-            $excepciones = DB::table('calendario_excepciones')
-                ->where('calendario_dia_id', $dia->id)
-                ->pluck('departamento_id')
-                ->toArray(); // 🔥 IMPORTANTE
+                foreach ($dias as $dia) {
 
-            $empleados = DB::table('empleados')
-                ->whereNotIn('departamento_funcional_id', $excepciones ?: [0]) // 🔥 FIX vacío
-                ->get();
+                    // 🔥 Departamentos que SÍ trabajan
+                    $excepciones = DB::table('calendario_excepciones')
+                        ->where('calendario_dia_id', $dia->id)
+                        ->pluck('departamento_id')
+                        ->toArray();
 
-            foreach ($empleados as $emp) {
+                    /**
+                     * 🔴 1. EMPLEADOS QUE NO TRABAJAN → DESCUENTO
+                     */
+                    $empleadosNoTrabajan = DB::table('empleados')
+                        ->whereNotIn('departamento_funcional_id', $excepciones ?: [0])
+                        ->get();
 
-                $yaDescontado = DB::table('movimientos_permisos_sistema')
-                    ->where('dni_empleado', $emp->DNI)
-                    ->where('tipo_movimiento', 'descuento_calendario')
-                    ->whereDate('created_at', $hoy)
-                    ->where('descripcion', 'like', '%feriado ID: ' . $dia->id . '%')
-                    ->exists();
+                    foreach ($empleadosNoTrabajan as $emp) {
 
-                if ($yaDescontado) continue;
+                        $yaDescontado = DB::table('movimientos_permisos_sistema')
+                            ->where('dni_empleado', $emp->DNI)
+                            ->where('tipo_movimiento', 'descuento_calendario')
+                            ->whereDate('created_at', $hoy)
+                            ->where('descripcion', 'like', '%ID: ' . $dia->id . '%')
+                            ->exists();
 
-                $periodo = DB::table('periodos_vacaciones_sistema')
-                    ->where('dni_empleado', $emp->DNI)
-                    ->whereIn('estado', ['activo', 'extendido'])
-                    ->whereRaw('(dias_otorgados - dias_usados) > 0') // 🔥 FIX CLAVE
-                    ->orderBy('fecha_inicio_periodo', 'asc')
-                    ->first();
+                        if ($yaDescontado) continue;
 
-                if ($periodo) {
+                        $periodo = DB::table('periodos_vacaciones_sistema')
+                            ->where('dni_empleado', $emp->DNI)
+                            ->whereIn('estado', ['activo', 'extendido'])
+                            ->whereRaw('(dias_otorgados - dias_usados) > 0')
+                            ->orderBy('fecha_inicio_periodo', 'asc')
+                            ->first();
 
-                    DB::table('periodos_vacaciones_sistema')
-                        ->where('id', $periodo->id)
-                        ->increment('dias_usados', 1);
+                        if ($periodo) {
 
-                    DB::table('movimientos_permisos_sistema')->insert([
-                        'dni_empleado' => $emp->DNI,
-                        'periodo_id' => $periodo->id,
-                        'permiso_id' => null,
-                        'categoria' => 'vacaciones',
-                        'tipo_movimiento' => 'descuento_calendario',
-                        'dias_afectados' => 1,
-                        'horas_afectadas' => 0,
-                        'descripcion' => 'Descuento por feriado: ' . $dia->titulo,
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ]);
+                            DB::table('periodos_vacaciones_sistema')
+                                ->where('id', $periodo->id)
+                                ->increment('dias_usados', 1);
+
+                            DB::table('movimientos_permisos_sistema')->insert([
+                                'dni_empleado' => $emp->DNI,
+                                'periodo_id' => $periodo->id,
+                                'permiso_id' => null,
+                                'categoria' => 'vacaciones',
+                                'tipo_movimiento' => 'descuento_calendario',
+                                'dias_afectados' => 1,
+                                'horas_afectadas' => 0,
+                                'descripcion' => 'Descuento por feriado: ' . $dia->titulo . ' (ID: ' . $dia->id . ')',
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ]);
+                        }
+                    }
+
+
+                    /**
+                     * 🟢 2. EMPLEADOS QUE SÍ TRABAJAN → COMPENSATORIO
+                     */
+                    $empleadosTrabajan = DB::table('empleados')
+                        ->whereIn('departamento_funcional_id', $excepciones ?: [0])
+                        ->get();
+
+                    foreach ($empleadosTrabajan as $emp) {
+
+                        $yaAsignado = DB::table('movimientos_permisos_sistema')
+                            ->where('dni_empleado', $emp->DNI)
+                            ->where('tipo_movimiento', 'asignacion_calendario')
+                            ->whereDate('created_at', $hoy)
+                            ->where('descripcion', 'like', '%ID: ' . $dia->id . '%')
+                            ->exists();
+
+                        if ($yaAsignado) continue;
+
+                        // 🔥 Crear compensatorio
+                        DB::table('compensatorios_sistema')->insert([
+                            'dni_empleado' => $emp->DNI,
+                            'dias_otorgados' => 1,
+                            'dias_disponibles' => 1,
+                            'fecha_origen' => $hoy,
+                            'fecha_vencimiento' => Carbon::parse($hoy)->addYears(3),
+                            'estado' => 'activo',
+                            'origen' => 'calendario',
+                            'referencia_id' => $dia->id,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
+
+                        // 🔥 Movimiento
+                        DB::table('movimientos_permisos_sistema')->insert([
+                            'dni_empleado' => $emp->DNI,
+                            'periodo_id' => null,
+                            'permiso_id' => null,
+                            'categoria' => 'compensatorio',
+                            'tipo_movimiento' => 'asignacion_calendario',
+                            'dias_afectados' => 1,
+                            'horas_afectadas' => 0,
+                            'descripcion' => 'Asignación por feriado trabajado: ' . $dia->titulo . ' (ID: ' . $dia->id . ')',
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
+                    }
                 }
+
+            } catch (\Throwable $e) {
+                dd($e->getMessage(), $e->getFile(), $e->getLine());
             }
-        }
 
-    } catch (\Throwable $e) {
-        dd($e->getMessage(), $e->getFile(), $e->getLine());
+        })->everyMinute();
     }
-
-})
-->everyMinute();
-    }
-
-
-    
 
     /**
      * Register the commands for the application.
