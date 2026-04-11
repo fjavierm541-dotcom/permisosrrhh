@@ -11,24 +11,24 @@ use App\Models\DiasAcumuladosSistema;
 use App\Models\PeriodoVacacionesSistema;
 use App\Models\MovimientoPermisoSistema;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PermisoController extends Controller
 {
     /* ==========================
        LISTAR PERMISOS
     ========================== */
-   public function index()
-{
-    $permisos = PermisoSistema::with(['empleado','tipo','estado'])
-        ->latest()
-        ->get();
+    public function index()
+    {
+        $permisos = PermisoSistema::with(['empleado','tipo','estado'])
+            ->latest()
+            ->get();
 
-    $acumulados = DiasAcumuladosSistema::all()
-        ->keyBy('dni_empleado');
+        $acumulados = DiasAcumuladosSistema::all()
+            ->keyBy('dni_empleado');
 
-    return view('permisos.index', compact('permisos', 'acumulados'));
-}
-
+        return view('permisos.index', compact('permisos', 'acumulados'));
+    }
 
     /* ==========================
        FORMULARIO CREAR
@@ -41,45 +41,147 @@ class PermisoController extends Controller
         return view('permisos.create', compact('empleados', 'tipos'));
     }
 
-
-
-
-
-
-
-
     /* ==========================
        GUARDAR PERMISO
     ========================== */
-   public function store(Request $request)
+    public function store(Request $request)
+    {
+        $request->validate([
+            'dni_empleado' => 'required',
+            'tipo_permiso_id' => 'required',
+            'fecha_inicio' => 'required|date',
+        ]);
+
+        $permiso = PermisoSistema::create([
+            'dni_empleado' => $request->dni_empleado,
+            'modalidad' => $request->modalidad,
+            'tipo_permiso_id' => $request->tipo_permiso_id,
+            'estado_permiso_id' => 1,
+            'fecha_inicio' => $request->fecha_inicio,
+            'fecha_fin' => $request->fecha_fin,
+            'horas' => $request->horas ?? 0,
+            'motivo' => $request->motivo,
+        ]);
+
+        return redirect()
+            ->route('permisos.index')
+            ->with('permiso_imprimir', $permiso->id);
+    }
+
+    /* ==========================
+       APROBAR PERMISOS (FIFO REAL)
+    ========================== */
+public function aprobar($id)
 {
-    $request->validate([
-        'dni_empleado' => 'required',
-        'tipo_permiso_id' => 'required',
-        'fecha_inicio' => 'required|date',
-    ]);
+    $permiso = PermisoSistema::with(['tipo','estado'])->findOrFail($id);
 
-    $permiso = PermisoSistema::create([
-        'dni_empleado' => $request->dni_empleado,
-        'modalidad' => $request->modalidad,
-        'tipo_permiso_id' => $request->tipo_permiso_id,
-        'estado_permiso_id' => 1,
-        'fecha_inicio' => $request->fecha_inicio,
-        'fecha_fin' => $request->fecha_fin,
-        'horas' => $request->horas ?? 0,
-        'motivo' => $request->motivo,
-    ]);
+    if (strtolower($permiso->estado->nombre) !== 'pendiente') {
+        return back()->with('error', 'Este permiso ya fue procesado.');
+    }
 
-    return redirect()
-        ->route('permisos.index')
-        ->with('permiso_imprimir', $permiso->id);
+    $estadoAprobado = EstadoPermisoSistema::whereRaw('LOWER(nombre) = ?', ['aprobado'])->firstOrFail();
+
+    $tipoNombre = strtolower($permiso->tipo->nombre);
+
+    // 🔥 CALCULAR HORAS → DÍAS
+    $horasARestar = 0;
+
+    switch ($permiso->modalidad) {
+        case 'horas':
+            $horasARestar = $permiso->horas ?? 0;
+            break;
+
+        case 'medio_dia':
+            $horasARestar = 4;
+            break;
+
+        case 'un_dia':
+            $horasARestar = 8;
+            break;
+
+        case 'varios_dias':
+            $dias = Carbon::parse($permiso->fecha_inicio)
+                ->diffInDays(Carbon::parse($permiso->fecha_fin)) + 1;
+            $horasARestar = $dias * 8;
+            break;
+    }
+
+    $diasARestar = max(1, floor($horasARestar / 8));
+
+    /**
+     * 🔵 TIPOS QUE NO RESTAN
+     */
+    if (!$this->tipoRestaDias($tipoNombre)) {
+
+        $permiso->estado_permiso_id = $estadoAprobado->id;
+        $permiso->save();
+
+        return redirect()->route('permisos.index')
+            ->with('success', 'Permiso aprobado sin afectar saldo.');
+    }
+
+    /**
+     * 🔴 VALIDAR SALDO TOTAL
+     */
+    $totalCompensatorios = DB::table('compensatorios_sistema')
+        ->where('dni_empleado', $permiso->dni_empleado)
+        ->where('estado', 'activo')
+        ->sum('dias_disponibles');
+
+    $totalVacaciones = DB::table('periodos_vacaciones_sistema')
+        ->where('dni_empleado', $permiso->dni_empleado)
+        ->whereIn('estado', ['activo','extendido'])
+        ->selectRaw('SUM(dias_otorgados - dias_usados) as total')
+        ->value('total') ?? 0;
+
+    $totalDisponible = $totalCompensatorios + $totalVacaciones;
+
+    if ($diasARestar > $totalDisponible) {
+        return back()->with('error', 'No hay días disponibles suficientes.');
+    }
+
+    /**
+     * 🔥 FIFO REAL
+     */
+    $this->consumirDiasFIFO(
+        $permiso->dni_empleado,
+        $diasARestar,
+        $permiso->id,
+        $tipoNombre
+    );
+
+    /**
+     * ✅ APROBAR
+     */
+    $permiso->estado_permiso_id = $estadoAprobado->id;
+    $permiso->save();
+
+    return redirect()->route('permisos.index')
+        ->with('success', 'Permiso aprobado correctamente.');
 }
 
 
 
 
 
+    /* ==========================
+       RECHAZAR
+    ========================== */
+    public function rechazar(Request $request, $id)
+    {
+        $permiso = PermisoSistema::with('estado')->findOrFail($id);
 
+        if (strtolower($permiso->estado->nombre) !== 'pendiente') {
+            return back()->with('error', 'Este permiso ya fue procesado.');
+        }
+
+        $estadoRechazado = EstadoPermisoSistema::whereRaw('LOWER(nombre) = ?', ['rechazado'])->firstOrFail();
+
+        $permiso->estado_permiso_id = $estadoRechazado->id;
+        $permiso->save();
+
+        return back()->with('success', 'Permiso rechazado correctamente.');
+    }
 
 
 
@@ -87,209 +189,100 @@ class PermisoController extends Controller
 
 
     
-/* ==========================
-   APROBAR PERMISOS
-========================== */
-public function aprobar($id)
+    /* ==========================
+       FIFO REAL
+    ========================== */
+   private function consumirDiasFIFO($dni, $diasSolicitados, $permisoId, $tipoNombre)
 {
-    $permiso = PermisoSistema::with(['tipo','estado'])->findOrFail($id);
+    $diasRestantes = $diasSolicitados;
 
-    // 🔒 BLOQUEO SI YA FUE PROCESADO
-    if (strtolower($permiso->estado->nombre) !== 'pendiente') {
-        return back()->with('error', 'Este permiso ya fue procesado.');
+    /**
+     * 🔥 1. COMPENSATORIOS
+     */
+    $compensatorios = DB::table('compensatorios_sistema')
+        ->where('dni_empleado', $dni)
+        ->where('estado', 'activo')
+        ->where('dias_disponibles', '>', 0)
+        ->orderBy('fecha_origen', 'asc')
+        ->get();
+
+    foreach ($compensatorios as $comp) {
+
+        if ($diasRestantes <= 0) break;
+
+        $usar = min($comp->dias_disponibles, $diasRestantes);
+
+        DB::table('compensatorios_sistema')
+            ->where('id', $comp->id)
+            ->update([
+                'dias_disponibles' => $comp->dias_disponibles - $usar,
+                'estado' => ($comp->dias_disponibles - $usar) <= 0 ? 'agotado' : 'activo'
+            ]);
+
+        DB::table('movimientos_permisos_sistema')->insert([
+            'dni_empleado' => $dni,
+            'permiso_id' => $permisoId,
+            'categoria' => $tipoNombre,
+            'tipo_movimiento' => 'consumo',
+            'dias_afectados' => $usar,
+            'horas_afectadas' => 0,
+            'descripcion' => 'Descuento de ' . $usar . ' día(s) por permiso (' . ucfirst($tipoNombre) . ')',
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        $diasRestantes -= $usar;
     }
 
-    $estadoAprobado = EstadoPermisoSistema::whereRaw('LOWER(nombre) = ?', ['aprobado'])->firstOrFail();
+    /**
+     * 🔥 2. VACACIONES
+     */
+    if ($diasRestantes > 0) {
 
-    // ===== SOLO SI RESTA DÍAS =====
-    if ($permiso->tipo->resta_dias) {
-
-        $horasARestar = 0;
-
-        switch ($permiso->modalidad) {
-            case 'horas':
-                $horasARestar = $permiso->horas ?? 0;
-                break;
-
-            case 'medio_dia':
-                $horasARestar = 4;
-                break;
-
-            case 'un_dia':
-                $horasARestar = 8;
-                break;
-
-            case 'varios_dias':
-                $dias = Carbon::parse($permiso->fecha_inicio)
-                    ->diffInDays(Carbon::parse($permiso->fecha_fin)) + 1;
-                $horasARestar = $dias * 8;
-                break;
-        }
-
-        $diasARestar = floor($horasARestar / 8);
-        $horasExtras = $horasARestar % 8;
-
-        // 🔎 TRAER PERÍODOS FIFO
-        $periodos = PeriodoVacacionesSistema::where('dni_empleado', $permiso->dni_empleado)
-            ->where('estado', 'activo')
+        $periodos = DB::table('periodos_vacaciones_sistema')
+            ->where('dni_empleado', $dni)
+            ->whereIn('estado', ['activo','extendido'])
             ->whereRaw('(dias_otorgados - dias_usados) > 0')
-            ->orderByRaw('COALESCE(extension_hasta, fecha_vencimiento) asc')
+            ->orderBy('fecha_inicio_periodo', 'asc')
             ->get();
 
-        $diasPendientes = $diasARestar;
+        foreach ($periodos as $p) {
 
-        foreach ($periodos as $periodo) {
+            if ($diasRestantes <= 0) break;
 
-            if ($diasPendientes <= 0) break;
+            $disponible = $p->dias_otorgados - $p->dias_usados;
+            $usar = min($disponible, $diasRestantes);
 
-            $diasDisponibles = $periodo->dias_otorgados - $periodo->dias_usados;
+            DB::table('periodos_vacaciones_sistema')
+                ->where('id', $p->id)
+                ->increment('dias_usados', $usar);
 
-            if ($diasDisponibles >= $diasPendientes) {
+            DB::table('movimientos_permisos_sistema')->insert([
+                'dni_empleado' => $dni,
+                'permiso_id' => $permisoId,
+                'periodo_id' => $p->id,
+                'categoria' => $tipoNombre,
+                'tipo_movimiento' => 'consumo',
+                'dias_afectados' => $usar,
+                'horas_afectadas' => 0,
+                'descripcion' => 'Descuento de ' . $usar . ' día(s) por permiso (' . ucfirst($tipoNombre) . ')',
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
 
-                $periodo->dias_usados += $diasPendientes;
-                $diasPendientes = 0;
-
-            } else {
-
-                $periodo->dias_usados += $diasDisponibles;
-                $diasPendientes -= $diasDisponibles;
-            }
-
-            $periodo->save();
+            $diasRestantes -= $usar;
         }
-
-        // ❌ Si no alcanzó saldo
-        if ($diasPendientes > 0) {
-            return back()->with('error', 'Saldo insuficiente de vacaciones.');
-        }
-
-        // ===== HORAS ACUMULADAS =====
-        $acumulado = DiasAcumuladosSistema::firstOrCreate(
-            ['dni_empleado' => $permiso->dni_empleado],
-            [
-                'dias_vacacionales' => 0,
-                'dias_compensatorios' => 0,
-                'horas_acumuladas' => 0
-            ]
-        );
-
-        if ($horasExtras > 0) {
-
-            if ($acumulado->horas_acumuladas < $horasExtras) {
-                return back()->with('error', 'Horas acumuladas insuficientes.');
-            }
-
-            $acumulado->horas_acumuladas -= $horasExtras;
-            $acumulado->save();
-        }
-
-       // 📌 REGISTRAR MOVIMIENTO
-MovimientoPermisoSistema::create([
-    'dni_empleado' => $permiso->dni_empleado,
-    'permiso_id' => $permiso->id,
-    'tipo_movimiento' => 'aprobacion_permiso',
-    'categoria' => strtolower($permiso->tipo->nombre),
-    'descripcion' => 'Se aprobaron ' . $diasARestar . ' días y ' . $horasExtras . ' horas.',
-    'dias_afectados' => $diasARestar,
-    'horas_afectadas' => $horasExtras,
-    'usuario_responsable' => auth()->user()->name ?? 'Sistema',
-    'fecha' => now() // si tienes campo fecha en la tabla
-]);
-
-        
     }
 
-    // ===== COMPENSATORIOS =====
-    if (strtolower($permiso->tipo->nombre) == 'compensatorio') {
-
-        $acumulado = DiasAcumuladosSistema::firstOrCreate(
-            ['dni_empleado' => $permiso->dni_empleado],
-            [
-                'dias_vacacionales' => 0,
-                'dias_compensatorios' => 0,
-                'horas_acumuladas' => 0
-            ]
-        );
-
-        if ($acumulado->dias_compensatorios <= 0) {
-            return back()->with('error', 'Saldo compensatorio insuficiente.');
-        }
-
-        $acumulado->dias_compensatorios -= 1;
-        $acumulado->save();
-
-        // 📌 REGISTRAR MOVIMIENTO
-        MovimientoPermisoSistema::create([
-            'dni_empleado' => $permiso->dni_empleado,
-            'permiso_id' => $permiso->id,
-            'tipo_movimiento' => 'permiso_compensatorio',
-            'descripcion' => 'Se descontó 1 día compensatorio.',
-            'dias_afectados' => 1,
-            'horas_afectadas' => 0,
-            'usuario_responsable' => auth()->user()->name ?? 'Sistema'
-        ]);
-    }
-
-    // ✅ ACTUALIZAR ESTADO
-    $permiso->estado_permiso_id = $estadoAprobado->id;
-    $permiso->save();
-
-    return redirect()->route('permisos.index')
-        ->with('success', 'Permiso aprobado correctamente y saldo actualizado.');
+    return $diasRestantes;
 }
 
-
-
-
-
-
-
-
-public function rechazar($id)
+private function tipoRestaDias($tipoNombre)
 {
-    $permiso = PermisoSistema::with('estado')->findOrFail($id);
+    $tipo = strtolower($tipoNombre);
 
-    // 🚨 BLOQUEO SI YA NO ESTÁ PENDIENTE
-    if (strtolower($permiso->estado->nombre) !== 'pendiente') {
-        return back()->with('error', 'Este permiso ya fue procesado.');
-    }
-
-    $estadoRechazado = EstadoPermisoSistema::whereRaw('LOWER(nombre) = ?', ['rechazado'])->firstOrFail();
-
-    $permiso->estado_permiso_id = $estadoRechazado->id;
-    $permiso->save();
-
-    return redirect()->route('empleados.verRegistro.imprimir', $request->dni_empleado)
-        ->with('success', 'Permiso rechazado correctamente.');
-}
-
-
-
-
-
-//imprimir permisos
-public function imprimir($id)
-{
-    $permiso = PermisoSistema::with(
-        'empleado.departamentoFuncional'
-    )->findOrFail($id);
-
-    $empleado = $permiso->empleado;
-
-    $jefeDepto = $empleado->departamentoFuncional->jefe ?? null;
-
-    $rrhh = DepartamentoMuni::where('nombre','Recursos Humanos')->first();
-
-    $jefeRRHH = $rrhh->jefe ?? null;
-
-    return view(
-        'permisos.imprimir',
-        compact(
-            'permiso',
-            'empleado',
-            'jefeDepto',
-            'jefeRRHH'
-        )
-    );
+    return str_contains($tipo, 'vacacion') ||
+           str_contains($tipo, 'compensatorio') ||
+           str_contains($tipo, 'personal');
 }
 }

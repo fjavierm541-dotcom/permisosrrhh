@@ -32,8 +32,8 @@ class Kernel extends ConsoleKernel
             try {
 
                 // 🧪 PRUEBA (luego cambias a date('Y-m-d'))
-                $hoy = '2026-04-14';
-                // $hoy = date('Y-m-d');
+                $hoy = '2026-04-13';
+                //$hoy = date('Y-m-d');
 
                 $dias = CalendarioDia::where(function ($q) use ($hoy) {
                         $q->where('fecha_inicio', '<=', $hoy)

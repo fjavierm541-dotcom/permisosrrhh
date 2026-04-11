@@ -21,7 +21,7 @@ class TipoPermisoSistemaSeeder extends Seeder
 
             [
                 'nombre' => 'Compensatorio',
-                'resta_dias' => 0,
+                'resta_dias' => 1, 
                 'resta_horas' => 0,
                 'requiere_documento' => 0,
                 'activo' => 1,
@@ -29,46 +29,14 @@ class TipoPermisoSistemaSeeder extends Seeder
 
             [
                 'nombre' => 'Permiso Personal',
-                'resta_dias' => 0,
-                'resta_horas' => 1,
+                'resta_dias' => 1, 
+                'resta_horas' => 0,
                 'requiere_documento' => 0,
                 'activo' => 1,
             ],
 
             [
                 'nombre' => 'Cita Médica',
-                'resta_dias' => 0,
-                'resta_horas' => 1,
-                'requiere_documento' => 0,
-                'activo' => 1,
-            ],
-
-            [
-                'nombre' => 'Permiso por Duelo',
-                'resta_dias' => 0,
-                'resta_horas' => 0,
-                'requiere_documento' => 1,
-                'activo' => 1,
-            ],
-
-            [
-                'nombre' => 'Permiso Institucional',
-                'resta_dias' => 0,
-                'resta_horas' => 0,
-                'requiere_documento' => 0,
-                'activo' => 1,
-            ],
-
-            [
-                'nombre' => 'Trabajo en Día Inhábil',
-                'resta_dias' => 0,
-                'resta_horas' => 0,
-                'requiere_documento' => 0,
-                'activo' => 1,
-            ],
-
-            [
-                'nombre' => 'Otros',
                 'resta_dias' => 0,
                 'resta_horas' => 0,
                 'requiere_documento' => 0,
