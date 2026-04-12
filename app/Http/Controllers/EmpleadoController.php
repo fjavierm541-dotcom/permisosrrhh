@@ -512,6 +512,13 @@ public function show($dni)
     // 🔥 TOTAL GENERAL
     $totalGeneral = $totalDiasDisponibles + $diasCompensatorios;
 
+    // 🔥 COMPENSATORIOS POR AÑO
+    $diasCompensatoriosPorAnio = DB::table('compensatorios_sistema')
+        ->selectRaw('YEAR(fecha_origen) as anio, SUM(dias_otorgados) as total')
+        ->where('dni_empleado', $dni)
+        ->groupBy('anio')
+        ->pluck('total', 'anio');
+
     return view('empleados.show', compact(
         'empleado',
         'periodosActivos',
@@ -519,7 +526,8 @@ public function show($dni)
         'movimientos',
         'totalDiasDisponibles',
         'diasCompensatorios',
-        'totalGeneral'
+        'totalGeneral',
+        'diasCompensatoriosPorAnio',
     ));
 }
 
@@ -528,50 +536,74 @@ public function show($dni)
 
 public function reporte($dni)
 {
-    $empleado = Empleado::where('DNI', $dni)->firstOrFail();
+	$empleado = Empleado::where('DNI', $dni)
+		->with('departamentoFuncional')
+		->firstOrFail();
 
-    $periodosActivos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
-        ->where('estado', 'activo')
-        ->orderByDesc('anio_laboral')
-        ->get();
+	// 🔥 ACTIVOS
+	$periodosActivos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
+		->whereIn('estado', ['activo','extendido'])
+		->orderByDesc(DB::raw('COALESCE(extension_hasta, fecha_vencimiento)'))
+		->get();
 
-    $periodosVencidos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
-        ->where('estado', 'vencido')
-        ->orderByDesc('anio_laboral')
-        ->get();
+	// 🔴 VENCIDOS
+	$periodosVencidos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
+		->where('estado', 'vencido')
+		->orderByDesc('anio_laboral')
+		->get();
 
-    $movimientos = MovimientoPermisoSistema::where('dni_empleado', $dni)
-        ->orderByDesc('created_at')
-        ->get();
+	// 📊 MOVIMIENTOS
+	$movimientos = MovimientoPermisoSistema::where('dni_empleado', $dni)
+		->orderByDesc('created_at')
+		->get();
 
-    $totalDiasDisponibles = 0;
+	// 🔥 VACACIONES
+	$totalDiasDisponibles = $periodosActivos->sum(function ($periodo) {
+		return max(0, $periodo->dias_otorgados - $periodo->dias_usados);
+	});
 
-    foreach ($periodosActivos as $periodo) {
-        $totalDiasDisponibles += max(0, $periodo->dias_otorgados - $periodo->dias_usados);
-    }
+	// 🔥 COMPENSATORIOS
+	$diasCompensatorios = DB::table('compensatorios_sistema')
+		->where('dni_empleado', $dni)
+		->where('estado', 'activo')
+		->sum('dias_disponibles');
 
-    // 🔥 IMPORTANTE: usar timezone correcto
-    $fechaGeneracion = Carbon::now('America/Tegucigalpa')
-        ->locale('es')
-        ->translatedFormat('d \d\e F \d\e\l Y H:i');
+	// 🔥 TOTAL REAL
+	$totalGeneral = $totalDiasDisponibles + $diasCompensatorios;
 
-    $pdf = Pdf::loadView('empleados.reporte', compact(
-        'empleado',
-        'periodosActivos',
-        'periodosVencidos',
-        'movimientos',
-        'totalDiasDisponibles',
-        'fechaGeneracion'
-    ));
+	// 🔥 COMPENSATORIOS POR AÑO
+	$diasCompensatoriosPorAnio = DB::table('compensatorios_sistema')
+		->selectRaw('YEAR(fecha_origen) as anio, SUM(dias_otorgados) as total')
+		->where('dni_empleado', $dni)
+		->groupBy('anio')
+		->pluck('total', 'anio');
 
-    $pdf->setPaper('a4', 'portrait');
+	// 📅 FECHA
+	$fechaGeneracion = Carbon::now('America/Tegucigalpa')
+		->locale('es')
+		->translatedFormat('d \d\e F \d\e\l Y H:i');
 
-    // 🔥 Renderizar primero para que calcule páginas
-    $pdf->render();
+        
 
-    return $pdf->stream('reporte_empleado_'.$empleado->DNI.'.pdf', [
-        'Attachment' => false // 👈 abre en nueva pestaña
-    ]);
+	$pdf = Pdf::loadView('empleados.reporte', [
+    'empleado' => $empleado,
+    'periodosActivos' => $periodosActivos,
+    'periodosVencidos' => $periodosVencidos,
+    'movimientos' => $movimientos,
+    'totalDiasDisponibles' => $totalDiasDisponibles,
+    'diasCompensatorios' => $diasCompensatorios,
+    'totalGeneral' => $totalGeneral,
+    'diasCompensatoriosPorAnio' => $diasCompensatoriosPorAnio,
+    'fechaGeneracion' => $fechaGeneracion,
+]);
+
+    
+	$pdf->setPaper('a4', 'portrait');
+	$pdf->render();
+
+	return $pdf->stream('reporte_empleado_'.$empleado->DNI.'.pdf', [
+		'Attachment' => false
+	]);
 }
 
 

@@ -88,62 +88,79 @@
 </div>
 
 
-
 <!-- PERÍODOS ACTIVOS -->
 <div class="glass-card p-4 mb-4">
 
     <h5 class="mb-1">Períodos Activos</h5>
-<small class="text-muted">Año(s) que todavía tienen día(s) libre.</small>
-
-    
+    <small class="text-muted">Histórico de días asignados por año.</small>
 
     <div class="table-responsive">
         <table class="table table-bordered table-hover text-center">
+
             <thead>
                 <tr>
                     <th>Año</th>
-                    <th>Días otorgados</th>
-                    <th>Días usados</th>
-                    <th>Días restantes</th>
+                    <th>Vacaciones</th>
+                    <th>Compensatorios</th>
+                    <th>Total acumulados</th>
                     <th>Vencimiento</th>
                     <th>Detalle</th>
                 </tr>
             </thead>
+
             <tbody>
                 @forelse($periodosActivos as $periodo)
-                    <tr>
-                        <td>{{ $periodo->anio_laboral }}</td>
-                        <td>{{ $periodo->dias_otorgados }}</td>
-                        <td>{{ $periodo->dias_usados }}</td>
-                        <td>{{ $periodo->dias_otorgados - $periodo->dias_usados }}</td>
-                        <td>{{ \Carbon\Carbon::parse($periodo->extension_hasta ?? $periodo->fecha_vencimiento)->format('d-m-y') }}</td>
-                        <th>
 
+                    @php
+                        $anio = $periodo->anio_laboral;
+
+                        // 🟡 Vacaciones (dato fijo)
+                        $vacaciones = $periodo->dias_otorgados;
+
+                        // 🟢 Compensatorios acumulados del año
+                        $compensatorios = $diasCompensatoriosPorAnio[$anio] ?? 0;
+
+                        // 🔵 Total histórico
+                        $total = $vacaciones + $compensatorios;
+                    @endphp
+
+                    <tr>
+                        <td>{{ $anio }}</td>
+
+                        <td>{{ $vacaciones }}</td>
+
+                        <td>{{ $compensatorios }}</td>
+
+                        <td class="fw-bold">{{ $total }}</td>
+
+                        <td>
+                            {{ \Carbon\Carbon::parse($periodo->extension_hasta ?? $periodo->fecha_vencimiento)->format('d-m-y') }}
+                        </td>
+
+                        <td>
                             @if($periodo->estado == 'extendido')
                                 <span class="badge bg-info">Extendido</span>
-                            @endif
-                            
-                            
-    @if($periodo->estado == 'extendido')
-        <button 
-            class="btn btn-sm btn-outline-primary"
-            data-bs-toggle="modal"
-            data-bs-target="#modalDetalleExtension"
-            data-motivo="{{ $periodo->motivo_extension }}"
-            data-documento="{{ $periodo->documento_extension }}"
-        >
-            Ver detalle
-        </button>
-    @endif
 
-                        </th>
+                                <button 
+                                    class="btn btn-sm btn-outline-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalDetalleExtension"
+                                    data-motivo="{{ $periodo->motivo_extension }}"
+                                    data-documento="{{ $periodo->documento_extension }}"
+                                >
+                                    Ver detalle
+                                </button>
+                            @endif
+                        </td>
                     </tr>
+
                 @empty
                     <tr>
                         <td colspan="6">No hay períodos activos.</td>
                     </tr>
                 @endforelse
             </tbody>
+
         </table>
     </div>
 
@@ -162,7 +179,9 @@
             <thead>
                 <tr>
                     <th>Año</th>
-                    <th>Días otorgados</th>
+                    <th>Vacaciones</th>
+                    <th>Compensatorios</th>
+                    <th>Total</th>
                     <th>Días usados</th>
                     <th>Vencimiento</th>
                     <th>Acción</th>
@@ -170,11 +189,39 @@
             </thead>
             <tbody>
                 @forelse($periodosVencidos as $periodo)
+
+                    @php
+                        $anio = $periodo->anio_laboral;
+
+                        // 🟡 Vacaciones
+                        $vacaciones = $periodo->dias_otorgados;
+
+                        // 🟢 Compensatorios del año
+                        $compensatorios = $diasCompensatoriosPorAnio[$anio] ?? 0;
+
+                        // 🔵 Total histórico
+                        $total = $vacaciones + $compensatorios;
+
+                        // 🔴 Usados (tal cual tu sistema)
+                        $usados = $periodo->dias_usados;
+                    @endphp
+
                     <tr class="table-danger">
-                        <td>{{ $periodo->anio_laboral }}</td>
-                        <td>{{ $periodo->dias_otorgados }}</td>
-                        <td>{{ $periodo->dias_usados }}</td>
-                        <td>{{ \Carbon\Carbon::parse($periodo->extension_hasta ?? $periodo->fecha_vencimiento)->format('d-m-Y') }}</td>
+
+                        <td>{{ $anio }}</td>
+
+                        <td>{{ $vacaciones }}</td>
+
+                        <td>{{ $compensatorios }}</td>
+
+                        <td class="fw-bold">{{ $total }}</td>
+
+                        <td>{{ $usados }}</td>
+
+                        <td>
+                            {{ \Carbon\Carbon::parse($periodo->extension_hasta ?? $periodo->fecha_vencimiento)->format('d-m-Y') }}
+                        </td>
+
                         <td>
                             @if($periodo->estado == 'vencido')
                                 <button class="btn btn-sm btn-warning" 
@@ -185,13 +232,15 @@
                                 </button>
                             @endif
                         </td>
+
                     </tr>
+
                 @empty
                     <tr>
-                        <td colspan="5">No hay períodos vencidos.</td>
+                        <td colspan="7">No hay períodos vencidos.</td>
                     </tr>
                 @endforelse
-            </tbody>
+                </tbody>
         </table>
     </div>
 

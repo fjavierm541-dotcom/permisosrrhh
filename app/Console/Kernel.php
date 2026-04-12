@@ -32,8 +32,8 @@ class Kernel extends ConsoleKernel
             try {
 
                 // 🧪 PRUEBA (luego cambias a date('Y-m-d'))
-                $hoy = '2026-04-13';
-                //$hoy = date('Y-m-d');
+                //$hoy = '2026-04-13';
+                $hoy = date('Y-m-d');
 
                 $dias = CalendarioDia::where(function ($q) use ($hoy) {
                         $q->where('fecha_inicio', '<=', $hoy)
@@ -150,8 +150,40 @@ class Kernel extends ConsoleKernel
             }
 
         })->everyMinute();
+
+
+        /**
+     * 🔥 3. VENCIMIENTO AUTOMÁTICO DE PERÍODOS
+     */
+    $schedule->call(function () {
+
+        try {
+
+            $hoy = now()->toDateString();
+
+            $periodos = \App\Models\PeriodoVacacionesSistema::whereIn('estado', ['activo','extendido'])
+                ->get();
+
+            foreach ($periodos as $periodo) {
+
+                $fechaVencimiento = $periodo->extension_hasta ?? $periodo->fecha_vencimiento;
+
+                if ($fechaVencimiento && $fechaVencimiento < $hoy) {
+
+                    $periodo->estado = 'vencido';
+                    $periodo->save();
+                }
+            }
+
+        } catch (\Throwable $e) {
+            dd($e->getMessage(), $e->getFile(), $e->getLine());
+        }
+
+    })->everyMinute(); // 🔥 luego lo cambias a daily()
     }
 
+
+    
     /**
      * Register the commands for the application.
      */
