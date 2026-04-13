@@ -12,7 +12,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\DepartamentoMuni;
 use App\Models\DocumentoEmpleado;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\PermisoSistema;
 
 class EmpleadoController extends Controller
 {
@@ -477,58 +477,68 @@ $request->validate([
 
 
 //shoe para ver movimientos y dias disponibles
-public function show($dni) 
+public function show($dni)
 {
-    $empleado = Empleado::where('DNI', $dni)->firstOrFail();
+	$empleado = Empleado::where('DNI', $dni)
+		->with('departamentoFuncional')
+		->firstOrFail();
 
-    // 🔥 Activos + Extendidos
-    $periodosActivos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
-        ->whereIn('estado', ['activo', 'extendido'])
-        ->orderByDesc(DB::raw('COALESCE(extension_hasta, fecha_vencimiento)'))
-        ->get();
-    
-    // 🔹 Vencidos
+	$periodosActivos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
+	->whereIn('estado', ['activo', 'extendido'])
+	->orderByDesc('anio_laboral')
+	->get();
+
     $periodosVencidos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
-        ->where('estado', 'vencido')
-        ->orderByDesc('anio_laboral')
-        ->get();
+	->where('estado', 'vencido')
+	->orderByDesc('anio_laboral')
+	->get();
 
-    // 🔹 Movimientos
-    $movimientos = MovimientoPermisoSistema::where('dni_empleado', $dni)
-        ->orderByDesc('created_at')
-        ->get();
+	// 🔹 Movimientos
+	$movimientos = MovimientoPermisoSistema::where('dni_empleado', $dni)
+		->orderByDesc('created_at')
+		->get();
 
-    // 🔥 Vacaciones disponibles
-    $totalDiasDisponibles = $periodosActivos->sum(function ($periodo) {
-        return max(0, $periodo->dias_otorgados - $periodo->dias_usados);
-    });
+	// 🔥 Vacaciones disponibles
+	$totalDiasDisponibles = $periodosActivos->sum(function ($periodo) {
+		return max(0, $periodo->dias_otorgados - $periodo->dias_usados);
+	});
 
-    // 🔥 COMPENSATORIOS (AQUÍ ESTABA EL PROBLEMA)
-    $diasCompensatorios = DB::table('compensatorios_sistema')
-        ->where('dni_empleado', $dni)
-        ->where('estado', 'activo')
-        ->sum('dias_disponibles');
+	// 🔥 Compensatorios disponibles
+	$diasCompensatorios = DB::table('compensatorios_sistema')
+		->where('dni_empleado', $dni)
+		->where('estado', 'activo')
+		->sum('dias_disponibles');
 
-    // 🔥 TOTAL GENERAL
-    $totalGeneral = $totalDiasDisponibles + $diasCompensatorios;
+	// 🔥 Total general
+	$totalGeneral = $totalDiasDisponibles + $diasCompensatorios;
 
-    // 🔥 COMPENSATORIOS POR AÑO
-    $diasCompensatoriosPorAnio = DB::table('compensatorios_sistema')
-        ->selectRaw('YEAR(fecha_origen) as anio, SUM(dias_otorgados) as total')
-        ->where('dni_empleado', $dni)
-        ->groupBy('anio')
-        ->pluck('total', 'anio');
+	// 🔥 Compensatorios por año
+	$diasCompensatoriosPorAnio = DB::table('compensatorios_sistema')
+		->selectRaw('YEAR(fecha_origen) as anio, SUM(dias_otorgados) as total')
+		->where('dni_empleado', $dni)
+		->groupBy('anio')
+		->pluck('total', 'anio');
 
-    return view('empleados.show', compact(
-        'empleado',
-        'periodosActivos',
-        'periodosVencidos',
-        'movimientos',
-        'totalDiasDisponibles',
-        'diasCompensatorios',
-        'totalGeneral',
-        'diasCompensatoriosPorAnio',
-    ));
+	// 🔥 Permisos relacionados con los movimientos
+	$permisos = PermisoSistema::whereIn(
+			'id',
+			$movimientos->pluck('permiso_id')->filter()->unique()
+		)
+		->with(['tipo', 'estado'])
+		->get()
+		->keyBy('id');
+
+	return view('empleados.show', compact(
+		'empleado',
+		'periodosActivos',
+		'periodosVencidos',
+		'movimientos',
+		'totalDiasDisponibles',
+		'diasCompensatorios',
+		'totalGeneral',
+		'diasCompensatoriosPorAnio',
+		'permisos'
+	));
 }
 
 
@@ -543,7 +553,7 @@ public function reporte($dni)
 	// 🔥 ACTIVOS
 	$periodosActivos = PeriodoVacacionesSistema::where('dni_empleado', $dni)
 		->whereIn('estado', ['activo','extendido'])
-		->orderByDesc(DB::raw('COALESCE(extension_hasta, fecha_vencimiento)'))
+		->orderByDesc('anio_laboral')
 		->get();
 
 	// 🔴 VENCIDOS
@@ -568,7 +578,7 @@ public function reporte($dni)
 		->where('estado', 'activo')
 		->sum('dias_disponibles');
 
-	// 🔥 TOTAL REAL
+	// 🔥 TOTAL
 	$totalGeneral = $totalDiasDisponibles + $diasCompensatorios;
 
 	// 🔥 COMPENSATORIOS POR AÑO
@@ -578,26 +588,33 @@ public function reporte($dni)
 		->groupBy('anio')
 		->pluck('total', 'anio');
 
+	// 🔥 PERMISOS RELACIONADOS
+	$permisos = PermisoSistema::whereIn(
+			'id',
+			$movimientos->pluck('permiso_id')->filter()->unique()
+		)
+		->with(['tipo','estado'])
+		->get()
+		->keyBy('id');
+
 	// 📅 FECHA
 	$fechaGeneracion = Carbon::now('America/Tegucigalpa')
 		->locale('es')
 		->translatedFormat('d \d\e F \d\e\l Y H:i');
 
-        
-
 	$pdf = Pdf::loadView('empleados.reporte', [
-    'empleado' => $empleado,
-    'periodosActivos' => $periodosActivos,
-    'periodosVencidos' => $periodosVencidos,
-    'movimientos' => $movimientos,
-    'totalDiasDisponibles' => $totalDiasDisponibles,
-    'diasCompensatorios' => $diasCompensatorios,
-    'totalGeneral' => $totalGeneral,
-    'diasCompensatoriosPorAnio' => $diasCompensatoriosPorAnio,
-    'fechaGeneracion' => $fechaGeneracion,
-]);
+		'empleado' => $empleado,
+		'periodosActivos' => $periodosActivos,
+		'periodosVencidos' => $periodosVencidos,
+		'movimientos' => $movimientos,
+		'totalDiasDisponibles' => $totalDiasDisponibles,
+		'diasCompensatorios' => $diasCompensatorios,
+		'totalGeneral' => $totalGeneral,
+		'diasCompensatoriosPorAnio' => $diasCompensatoriosPorAnio,
+		'permisos' => $permisos,
+		'fechaGeneracion' => $fechaGeneracion
+	]);
 
-    
 	$pdf->setPaper('a4', 'portrait');
 	$pdf->render();
 

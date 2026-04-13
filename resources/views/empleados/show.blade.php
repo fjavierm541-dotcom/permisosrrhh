@@ -251,45 +251,107 @@
 <!-- HISTORIAL DE MOVIMIENTOS -->
 <div class="glass-card p-4">
 
-    <h5 class="mb-3">Historial de Movimientos</h5>
+	<h5 class="mb-3">Historial de Movimientos</h5>
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover text-center">
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Tipo</th>
-                    <th>Descripción</th>
-                    <th>Días</th>
-                    <th>Horas</th>
-                </tr>
-            </thead>
-            <tbody>
-    @forelse($movimientos as $movimiento)
-        <tr>
-            <!-- 📅 Fecha formateada -->
-            <td>{{ \Carbon\Carbon::parse($movimiento->created_at)->format('d-m-Y') }}</td>
+	<div class="table-responsive">
+		<table class="table table-bordered table-hover text-center">
+			<thead>
+				<tr>
+					<th>Fecha de gestión</th>
+					<th>Tipo</th>
+					<th>Estado</th>
+					<th>Rango</th>
+					<th>Días</th>
+					<th>Descripción</th>
+					<th>Aprobado por</th>
+				</tr>
+			</thead>
 
-            <!-- 🔤 Tipo sin guiones -->
-            <td>{{ str_replace('_', ' ', ucfirst($movimiento->tipo_movimiento)) }}</td>
+			<tbody>
+				@forelse($movimientos as $movimiento)
 
-            <!-- 📝 Descripción -->
-            <td>{{ $movimiento->descripcion }}</td>
+					@php
+						$permiso = $permisos[$movimiento->permiso_id] ?? null;
 
-            <!-- 📊 Días -->
-            <td>{{ $movimiento->dias_afectados ?? '-' }}</td>
+						$tipoMovimiento = strtolower($movimiento->tipo_movimiento ?? '');
+						$categoria = strtolower($movimiento->categoria ?? '');
 
-            <!-- ⏱️ Horas -->
-            <td>{{ $movimiento->horas_afectadas ?? '-' }}</td>
-        </tr>
-    @empty
-        <tr>
-            <td colspan="5">No hay movimientos registrados.</td>
-        </tr>
-    @endforelse
-</tbody>
-        </table>
-    </div>
+						// 🔹 Tipo visible
+						if ($tipoMovimiento === 'descuento_calendario') {
+							$tipoVisible = 'Descuento calendario';
+						} elseif ($tipoMovimiento === 'asignacion_calendario') {
+							$tipoVisible = 'Asignación calendario';
+						} elseif ($tipoMovimiento === 'asignacion') {
+							$tipoVisible = 'Asignación';
+						} elseif (!empty($categoria)) {
+							$tipoVisible = ucfirst($categoria);
+						} elseif ($permiso && $permiso->tipo) {
+							$tipoVisible = $permiso->tipo->nombre;
+						} else {
+							$tipoVisible = 'Movimiento';
+						}
+
+						// 🔹 Estado
+						if ($permiso && $permiso->estado) {
+							$estadoVisible = $permiso->estado->nombre;
+						} elseif ($tipoMovimiento === 'descuento_calendario' || $tipoMovimiento === 'asignacion_calendario') {
+							$estadoVisible = 'Automático';
+						} elseif ($tipoMovimiento === 'asignacion') {
+							$estadoVisible = 'Asignado';
+						} else {
+							$estadoVisible = '—';
+						}
+
+						// 🔹 Rango
+						$fechaInicio = null;
+						$fechaFin = null;
+
+						if ($permiso && !empty($permiso->fecha_inicio)) {
+							$fechaInicio = \Carbon\Carbon::parse($permiso->fecha_inicio)->format('d-m-Y');
+						}
+
+						if ($permiso && !empty($permiso->fecha_fin)) {
+							$fechaFin = \Carbon\Carbon::parse($permiso->fecha_fin)->format('d-m-Y');
+						}
+
+						// 🔹 Aprobado por (preparado para usuarios)
+						$aprobadoPor = '—';
+					@endphp
+
+					<tr>
+						<td>{{ \Carbon\Carbon::parse($movimiento->created_at)->format('d-m-Y H:i') }}</td>
+
+						<td>{{ $tipoVisible }}</td>
+
+						<td>{{ $estadoVisible }}</td>
+
+						<td>
+							@if($fechaInicio)
+								{{ $fechaInicio }}
+								@if($fechaFin && $fechaFin !== $fechaInicio)
+									<br>
+									{{ $fechaFin }}
+								@endif
+							@else
+								—
+							@endif
+						</td>
+
+						<td>{{ $movimiento->dias_afectados ?? 0 }}</td>
+
+						<td>{{ $movimiento->descripcion ?? '—' }}</td>
+
+						<td>{{ $aprobadoPor }}</td>
+					</tr>
+
+				@empty
+					<tr>
+						<td colspan="7">No hay movimientos registrados.</td>
+					</tr>
+				@endforelse
+			</tbody>
+		</table>
+	</div>
 
 </div>
 
