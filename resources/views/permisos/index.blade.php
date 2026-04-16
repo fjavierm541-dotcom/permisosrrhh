@@ -53,8 +53,12 @@
             <h4 class="mb-0">Gestión de Permisos</h4>
 
             <a href="{{ route('permisos.create') }}" class="btn btn-gold">
+                + Permiso día no laboral
+            </a>
+            <a href="{{ route('permisos.create') }}" class="btn btn-gold">
                 + Nuevo Permiso
             </a>
+            
         </div>
 
         <div class="p-4">

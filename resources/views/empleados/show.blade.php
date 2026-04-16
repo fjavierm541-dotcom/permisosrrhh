@@ -21,7 +21,7 @@
     <a href="{{ route('empleados.reporte', $empleado->DNI) }}" 
    target="_blank"
    class="btn btn-outline-dark btn-sm">
-   Imprimir PDF
+   Imprimir
 </a>
 
 </div>

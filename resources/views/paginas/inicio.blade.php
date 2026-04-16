@@ -145,7 +145,7 @@
             </p>
         </div>
 
-        <div class="row g-4">
+         <div class="row g-4">
 
             <!-- Empleados -->
             <div class="col-md-4">
@@ -177,21 +177,24 @@
     </a>
 </div>
 
-            <!-- Carga Histórica -->
-            <div class="col-md-4">
-    <a href="{{ route('periodos.create') }}" class="dashboard-link">
-        <div class="card dashboard-card text-center p-4">
-            <div class="dashboard-icon">
-                <img src="{{ asset('icons/registro.png') }}" class="icono-img">
+                <!-- Carga Histórica -->
+                <div class="col-md-4">
+        <a href="{{ route('periodos.create') }}" class="dashboard-link">
+            <div class="card dashboard-card text-center p-4">
+                <div class="dashboard-icon">
+                    <img src="{{ asset('icons/registro.png') }}" class="icono-img">
+                </div>
+                <h5>Registro histórico de vacaciones</h5>
+                <p class="text-muted small">
+                    Carga de historial de vacaciones de empleados.
+                </p>
             </div>
-            <h5>Registro histórico de vacaciones</h5>
-            <p class="text-muted small">
-                Carga de historial de vacaciones de empleados.
-            </p>
-        </div>
-    </a>
+        </a>
+    </div>
 </div>
 
+
+<br>
 
             <div class="row g-4">
 
@@ -225,22 +228,22 @@
     </a>
 </div>
 
-            <!-- AJUSTES -->
-            <div class="col-md-4">
-    <a href="{{ route('periodos.create') }}" class="dashboard-link">
-        <div class="card dashboard-card text-center p-4">
-            <div class="dashboard-icon">
-                <img src="{{ asset('icons/ajustes.png') }}" class="icono-img">
-            </div>
-            <h5>Ajustes</h5>
-            <p class="text-muted small">
-                Configuración general del sistema.
-            </p>
-        </div>
-    </a>
-</div>
+                            <!-- AJUSTES -->
+                            <div class="col-md-4">
+                    <a href="{{ route('periodos.create') }}" class="dashboard-link">
+                        <div class="card dashboard-card text-center p-4">
+                            <div class="dashboard-icon">
+                                <img src="{{ asset('icons/ajustes.png') }}" class="icono-img">
+                            </div>
+                            <h5>Ajustes</h5>
+                            <p class="text-muted small">
+                                Configuración general del sistema.
+                            </p>
+                        </div>
+                    </a>
+                </div>
 
-            
+            </div>
 
         </div>
 
