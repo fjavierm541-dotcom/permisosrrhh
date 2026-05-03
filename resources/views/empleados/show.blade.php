@@ -303,7 +303,25 @@
 <!-- HISTORIAL DE MOVIMIENTOS -->
 <div class="glass-card p-4">
 
-	<h5 class="mb-3">Historial de Movimientos</h5>
+	<div class="d-flex justify-content-between align-items-center mb-3">
+	<h5 class="mb-0">Historial de Movimientos</h5>
+
+	<form method="GET" action="{{ route('empleados.show', $empleado->DNI) }}" class="d-flex align-items-center gap-2">
+		<label class="mb-0 fw-bold">Año:</label>
+
+		<select name="anio" class="form-select form-select-sm" onchange="this.form.submit()">
+			<option value="todos" {{ $anioSeleccionado == 'todos' ? 'selected' : '' }}>
+				Todos
+			</option>
+
+			@foreach($aniosMovimientos as $anio)
+				<option value="{{ $anio }}" {{ $anioSeleccionado == $anio ? 'selected' : '' }}>
+					{{ $anio }}
+				</option>
+			@endforeach
+		</select>
+	</form>
+</div>
 
 	<div class="table-responsive table-bordered table-hover text-center table-sm tabla-movimientos">
 		<table class="table table-bordered table-hover text-center">

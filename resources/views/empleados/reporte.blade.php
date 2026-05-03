@@ -89,8 +89,10 @@
 
 	/* Historial un poco más compacto, pero con aire */
 	.tabla-movimientos {
-		font-size: 9px;
-	}
+	table-layout: fixed;
+	width: 100%;
+	font-size: 8.5px;
+}
 
 	.text-left {
 		text-align: left;
@@ -207,95 +209,94 @@
 
 <div class="section-title">Historial de Movimientos</div>
 
-<table class="tabla-movimientos">
-	<thead>
-		<tr>
-			<th style="width: 13%;">Fecha</th>
-			<th style="width: 12%;">Tipo</th>
-			<th style="width: 11%;">Estado</th>
-			<th style="width: 14%;">Rango</th>
-			<th style="width: 6%;">Días</th>
-			<th style="width: 34%;">Descripción</th>
-			<th style="width: 10%;">Aprobado por</th>
-		</tr>
-	</thead>
+@forelse($movimientosPorAnio as $anio => $movimientosDelAnio)
 
-	<tbody>
-		@forelse($movimientos as $movimiento)
-			@php
-				$permiso = $permisos[$movimiento->permiso_id] ?? null;
+	<div class="section-title">Historial de Movimientos {{ $anio }}</div>
 
-				$tipoMovimiento = strtolower($movimiento->tipo_movimiento ?? '');
-
-if ($permiso) {
-	switch ($permiso->modalidad) {
-		case 'horas':
-			$tipo = 'Horas';
-			break;
-
-		case 'medio_dia':
-			$tipo = 'Medio día';
-			break;
-
-		case 'un_dia':
-			$tipo = 'Un día';
-			break;
-
-		case 'varios_dias':
-			$tipo = 'Varios días';
-			break;
-
-		default:
-			$tipo = 'Permiso';
-			break;
-	}
-} elseif ($tipoMovimiento === 'descuento_calendario') {
-	$tipo = 'Descuento calendario';
-
-} elseif ($tipoMovimiento === 'asignacion_calendario') {
-	$tipo = 'Asignación calendario';
-
-} elseif ($tipoMovimiento === 'asignacion') {
-	$tipo = 'Asignación';
-
-} else {
-	$tipo = 'Movimiento';
-}
-
-				$estado = $permiso->estado->nombre ?? '—';
-
-				$inicio = $permiso->fecha_inicio ?? null;
-				$fin = $permiso->fecha_fin ?? null;
-			@endphp
-
+	<table class="tabla-movimientos">
+		<thead>
 			<tr>
-				<td class="nowrap">{{ $movimiento->created_at->format('d-m-Y H:i') }}</td>
-				<td>{{ $tipo }}</td>
-				<td>{{ $estado }}</td>
-
-				<td>
-					@if($inicio)
-						{{ \Carbon\Carbon::parse($inicio)->format('d-m-Y') }}
-						@if($fin && $fin != $inicio)
-							<br>
-							{{ \Carbon\Carbon::parse($fin)->format('d-m-Y') }}
-						@endif
-					@else
-						—
-					@endif
-				</td>
-
-				<td>{{ $movimiento->dias_afectados ?? 0 }}</td>
-				<td class="text-left">{{ $movimiento->descripcion }}</td>
-				<td>—</td>
+				<th style="width: 15%;">Fecha</th>
+				<th style="width: 13%;">Tipo</th>
+				<th style="width: 11%;">Estado</th>
+				<th style="width: 13%;">Rango</th>
+				<th style="width: 6%;">Días</th>
+				<th style="width: 32%;">Descripción</th>
+				<th style="width: 10%;">Aprobado por</th>
 			</tr>
-		@empty
+		</thead>
+
+		<tbody>
+			@foreach($movimientosDelAnio as $movimiento)
+
+				@php
+					$permiso = $permisos[$movimiento->permiso_id] ?? null;
+					$tipoMovimiento = strtolower($movimiento->tipo_movimiento ?? '');
+
+					if ($permiso) {
+						switch ($permiso->modalidad) {
+							case 'horas': $tipo = 'Horas'; break;
+							case 'medio_dia': $tipo = 'Medio día'; break;
+							case 'un_dia': $tipo = 'Un día'; break;
+							case 'varios_dias': $tipo = 'Varios días'; break;
+							default: $tipo = 'Permiso'; break;
+						}
+					} elseif ($tipoMovimiento === 'descuento_calendario') {
+						$tipo = 'Descuento calendario';
+					} elseif ($tipoMovimiento === 'asignacion_calendario') {
+						$tipo = 'Asignación calendario';
+					} elseif ($tipoMovimiento === 'asignacion') {
+						$tipo = 'Asignación';
+					} else {
+						$tipo = 'Movimiento';
+					}
+
+					$estado = $permiso->estado->nombre ?? '—';
+					$inicio = $permiso->fecha_inicio ?? null;
+					$fin = $permiso->fecha_fin ?? null;
+				@endphp
+
+				<tr>
+					<td class="nowrap">{{ $movimiento->created_at->format('d-m-Y H:i') }}</td>
+					<td>{{ $tipo }}</td>
+					<td>{{ $estado }}</td>
+
+					<td>
+						@if($inicio)
+							{{ \Carbon\Carbon::parse($inicio)->format('d-m-Y') }}
+							@if($fin && $fin != $inicio)
+								<br>
+								{{ \Carbon\Carbon::parse($fin)->format('d-m-Y') }}
+							@endif
+						@else
+							—
+						@endif
+					</td>
+
+					<td>{{ $movimiento->dias_afectados ?? 0 }}</td>
+
+					<td class="text-left">
+						{{ $movimiento->descripcion ?? '—' }}
+					</td>
+
+					<td>—</td>
+				</tr>
+
+			@endforeach
+		</tbody>
+	</table>
+
+@empty
+
+	<table class="tabla-movimientos">
+		<tbody>
 			<tr>
 				<td colspan="7">No hay movimientos.</td>
 			</tr>
-		@endforelse
-	</tbody>
-</table>
+		</tbody>
+	</table>
+
+@endforelse
 
 <script type="text/php">
 if (isset($pdf)) {

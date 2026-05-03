@@ -494,9 +494,26 @@ public function show($dni)
 	->get();
 
 	// 🔹 Movimientos
-	$movimientos = MovimientoPermisoSistema::where('dni_empleado', $dni)
-		->orderByDesc('created_at')
-		->get();
+	// 🔹 Año seleccionado para historial
+$anioSeleccionado = request('anio', now()->year);
+
+// 🔹 Años disponibles en movimientos
+$aniosMovimientos = MovimientoPermisoSistema::where('dni_empleado', $dni)
+	->selectRaw('YEAR(created_at) as anio')
+	->distinct()
+	->orderByDesc('anio')
+	->pluck('anio');
+
+// 🔹 Movimientos filtrados
+$movimientosQuery = MovimientoPermisoSistema::where('dni_empleado', $dni);
+
+if ($anioSeleccionado !== 'todos') {
+	$movimientosQuery->whereYear('created_at', $anioSeleccionado);
+}
+
+$movimientos = $movimientosQuery
+	->orderByDesc('created_at')
+	->get();
 
 	// 🔥 Vacaciones disponibles
 	$totalDiasDisponibles = $periodosActivos->sum(function ($periodo) {
@@ -545,6 +562,8 @@ $horasDisponibles = DB::table('horas_acumuladas_sistema')
 		'totalGeneral',
         'horasDisponibles',
 		'diasCompensatoriosPorAnio',
+        'anioSeleccionado',
+'aniosMovimientos',
 		'permisos'
     
 	));
@@ -575,6 +594,11 @@ public function reporte($dni)
 	$movimientos = MovimientoPermisoSistema::where('dni_empleado', $dni)
 		->orderByDesc('created_at')
 		->get();
+
+        // 📊 Movimientos agrupados por año para el PDF
+$movimientosPorAnio = $movimientos->groupBy(function ($movimiento) {
+	return \Carbon\Carbon::parse($movimiento->created_at)->format('Y');
+});
 
 	// 🔥 VACACIONES
 	$totalDiasDisponibles = $periodosActivos->sum(function ($periodo) {
@@ -623,6 +647,7 @@ $horasDisponibles = DB::table('horas_acumuladas_sistema')
 		'periodosActivos' => $periodosActivos,
 		'periodosVencidos' => $periodosVencidos,
 		'movimientos' => $movimientos,
+        'movimientosPorAnio' => $movimientosPorAnio,
 		'totalDiasDisponibles' => $totalDiasDisponibles,
 		'diasCompensatorios' => $diasCompensatorios,
 		'totalGeneral' => $totalGeneral,
