@@ -476,7 +476,7 @@ $request->validate([
 
 
 
-//shoe para ver movimientos y dias disponibles
+//show para ver movimientos y dias disponibles
 public function show($dni)
 {
 	$empleado = Empleado::where('DNI', $dni)
@@ -528,6 +528,13 @@ public function show($dni)
 		->get()
 		->keyBy('id');
 
+        // 🔥 Horas disponibles
+$horasDisponibles = DB::table('horas_acumuladas_sistema')
+	->where('dni_empleado', $dni)
+	->where('estado', 'activo')
+	->selectRaw('SUM(horas_otorgadas - horas_usadas) as total')
+	->value('total') ?? 0;
+
 	return view('empleados.show', compact(
 		'empleado',
 		'periodosActivos',
@@ -536,8 +543,10 @@ public function show($dni)
 		'totalDiasDisponibles',
 		'diasCompensatorios',
 		'totalGeneral',
+        'horasDisponibles',
 		'diasCompensatoriosPorAnio',
 		'permisos'
+    
 	));
 }
 
@@ -578,6 +587,13 @@ public function reporte($dni)
 		->where('estado', 'activo')
 		->sum('dias_disponibles');
 
+        // 🔥 HORAS DISPONIBLES
+$horasDisponibles = DB::table('horas_acumuladas_sistema')
+	->where('dni_empleado', $dni)
+	->where('estado', 'activo')
+	->selectRaw('SUM(horas_otorgadas - horas_usadas) as total')
+	->value('total') ?? 0;
+
 	// 🔥 TOTAL
 	$totalGeneral = $totalDiasDisponibles + $diasCompensatorios;
 
@@ -612,6 +628,7 @@ public function reporte($dni)
 		'totalGeneral' => $totalGeneral,
 		'diasCompensatoriosPorAnio' => $diasCompensatoriosPorAnio,
 		'permisos' => $permisos,
+        'horasDisponibles' => $horasDisponibles,
 		'fechaGeneracion' => $fechaGeneracion
 	]);
 

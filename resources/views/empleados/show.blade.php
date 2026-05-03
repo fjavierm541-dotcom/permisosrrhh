@@ -4,6 +4,58 @@
 
 @section('content')
 
+<style>
+
+.tabla-movimientos {
+	border-collapse: collapse;
+	table-layout: fixed;
+	width: 100%;
+	font-size: 13px; /* 🔥 tamaño pequeño */
+}
+
+/* 🔹 Encabezado */
+.tabla-movimientos th {
+	background-color: #e9ecef;
+	color: #333;
+	font-weight: 600;
+	padding: 4px 6px;
+	border: 1px solid #dee2e6;
+}
+
+/* 🔹 Celdas */
+.tabla-movimientos td {
+	background-color: #f8f9fa;
+	padding: 4px 6px;
+	border: 1px solid #dee2e6;
+	line-height: 1.2;
+}
+
+/* 🔹 Filas alternas */
+.tabla-movimientos tr:nth-child(even) td {
+	background-color: #f1f3f5;
+}
+
+/* 🔹 Hover */
+.tabla-movimientos tbody tr:hover td {
+	background-color: #e2e6ea;
+}
+
+/* 🔹 Columna descripción (más controlada) */
+.tabla-movimientos td:nth-child(6) {
+	max-width: 220px;
+	word-wrap: break-word;
+}
+
+/* 🔹 Opcional: evitar que columnas se hagan gigantes */
+.tabla-movimientos td,
+.tabla-movimientos th {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+</style>
+
+
 <div class="glass-card p-4 mb-4">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -68,22 +120,22 @@
 
 
 <!-- RESUMEN DISPONIBLE -->
+<!-- RESUMEN DISPONIBLE -->
 <div class="alert alert-info">
 
-    <div class="mt-2">
-        <strong>Total de días disponibles: {{ $totalGeneral }} </strong>
-    </div>
+	<div class="mt-2">
+		<strong>Total de días disponibles: {{ $totalGeneral }}</strong>
+	</div>
 
-    <div class="mt-2">
-        Compensatorios: <strong>{{ $diasCompensatorios }}</strong> días<br>
-        Vacaciones: <strong>{{ $totalDiasDisponibles }}</strong> días
-    </div>
+	<div class="mt-2">
+		Compensatorios: <strong>{{ $diasCompensatorios }}</strong> días<br>
+		Vacaciones: <strong>{{ $totalDiasDisponibles }}</strong> días<br>
+		Horas acumuladas: <strong>{{ $horasDisponibles }}</strong> horas
+	</div>
 
-    
-
-    <small class="text-muted d-block mt-2">
-        * Los días compensatorios se utilizan primero automáticamente al solicitar permisos.
-    </small>
+	<small class="text-muted d-block mt-2">
+		* Los días compensatorios se utilizan primero automáticamente al solicitar permisos.
+	</small>
 
 </div>
 
@@ -253,7 +305,7 @@
 
 	<h5 class="mb-3">Historial de Movimientos</h5>
 
-	<div class="table-responsive">
+	<div class="table-responsive table-bordered table-hover text-center table-sm tabla-movimientos">
 		<table class="table table-bordered table-hover text-center">
 			<thead>
 				<tr>
@@ -267,89 +319,88 @@
 				</tr>
 			</thead>
 
-			<tbody>
-				@forelse($movimientos as $movimiento)
+<tbody>
+	@forelse($movimientos as $movimiento)
 
-					@php
-						$permiso = $permisos[$movimiento->permiso_id] ?? null;
+		@php
+			$permiso = $permisos[$movimiento->permiso_id] ?? null;
 
-						$tipoMovimiento = strtolower($movimiento->tipo_movimiento ?? '');
-						$categoria = strtolower($movimiento->categoria ?? '');
+			$tipoMovimiento = strtolower($movimiento->tipo_movimiento ?? '');
 
-						// 🔹 Tipo visible
-						if ($tipoMovimiento === 'descuento_calendario') {
-							$tipoVisible = 'Descuento calendario';
-						} elseif ($tipoMovimiento === 'asignacion_calendario') {
-							$tipoVisible = 'Asignación calendario';
-						} elseif ($tipoMovimiento === 'asignacion') {
-							$tipoVisible = 'Asignación';
-						} elseif (!empty($categoria)) {
-							$tipoVisible = ucfirst($categoria);
-						} elseif ($permiso && $permiso->tipo) {
-							$tipoVisible = $permiso->tipo->nombre;
-						} else {
-							$tipoVisible = 'Movimiento';
-						}
+			if ($permiso) {
+				switch ($permiso->modalidad) {
+					case 'horas':
+						$tipo = 'Horas';
+						break;
 
-						// 🔹 Estado
-						if ($permiso && $permiso->estado) {
-							$estadoVisible = $permiso->estado->nombre;
-						} elseif ($tipoMovimiento === 'descuento_calendario' || $tipoMovimiento === 'asignacion_calendario') {
-							$estadoVisible = 'Automático';
-						} elseif ($tipoMovimiento === 'asignacion') {
-							$estadoVisible = 'Asignado';
-						} else {
-							$estadoVisible = '—';
-						}
+					case 'medio_dia':
+						$tipo = 'Medio día';
+						break;
 
-						// 🔹 Rango
-						$fechaInicio = null;
-						$fechaFin = null;
+					case 'un_dia':
+						$tipo = 'Un día';
+						break;
 
-						if ($permiso && !empty($permiso->fecha_inicio)) {
-							$fechaInicio = \Carbon\Carbon::parse($permiso->fecha_inicio)->format('d-m-Y');
-						}
+					case 'varios_dias':
+						$tipo = 'Varios días';
+						break;
 
-						if ($permiso && !empty($permiso->fecha_fin)) {
-							$fechaFin = \Carbon\Carbon::parse($permiso->fecha_fin)->format('d-m-Y');
-						}
+					default:
+						$tipo = 'Permiso';
+						break;
+				}
+			} elseif ($tipoMovimiento === 'descuento_calendario') {
+				$tipo = 'Descuento calendario';
 
-						// 🔹 Aprobado por (preparado para usuarios)
-						$aprobadoPor = '—';
-					@endphp
+			} elseif ($tipoMovimiento === 'asignacion_calendario') {
+				$tipo = 'Asignación calendario';
 
-					<tr>
-						<td>{{ \Carbon\Carbon::parse($movimiento->created_at)->format('d-m-Y H:i') }}</td>
+			} elseif ($tipoMovimiento === 'asignacion') {
+				$tipo = 'Asignación';
 
-						<td>{{ $tipoVisible }}</td>
+			} else {
+				$tipo = 'Movimiento';
+			}
 
-						<td>{{ $estadoVisible }}</td>
+			$estado = $permiso->estado->nombre ?? '—';
 
-						<td>
-							@if($fechaInicio)
-								{{ $fechaInicio }}
-								@if($fechaFin && $fechaFin !== $fechaInicio)
-									<br>
-									{{ $fechaFin }}
-								@endif
-							@else
-								—
-							@endif
-						</td>
+			$inicio = $permiso->fecha_inicio ?? null;
+			$fin = $permiso->fecha_fin ?? null;
+		@endphp
 
-						<td>{{ $movimiento->dias_afectados ?? 0 }}</td>
+		<tr>
+			<td>{{ $movimiento->created_at->format('d-m-Y H:i') }}</td>
 
-						<td>{{ $movimiento->descripcion ?? '—' }}</td>
+			<td>{{ $tipo }}</td>
 
-						<td>{{ $aprobadoPor }}</td>
-					</tr>
+			<td>{{ $estado }}</td>
 
-				@empty
-					<tr>
-						<td colspan="7">No hay movimientos registrados.</td>
-					</tr>
-				@endforelse
-			</tbody>
+			<td>
+				@if($inicio)
+					{{ \Carbon\Carbon::parse($inicio)->format('d-m-Y') }}
+
+					@if($fin && $fin != $inicio)
+						<br>
+						{{ \Carbon\Carbon::parse($fin)->format('d-m-Y') }}
+					@endif
+				@else
+					—
+				@endif
+			</td>
+
+			<td>{{ $movimiento->dias_afectados ?? 0 }}</td>
+
+			<td>{{ $movimiento->descripcion ?? '—' }}</td>
+
+			<td>—</td>
+		</tr>
+
+	@empty
+		<tr>
+			<td colspan="7">No hay movimientos.</td>
+		</tr>
+	@endforelse
+</tbody>
 		</table>
 	</div>
 

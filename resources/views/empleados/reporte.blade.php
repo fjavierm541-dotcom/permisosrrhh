@@ -123,9 +123,12 @@
 	<strong>Departamento:</strong> {{ $empleado->departamentoFuncional->nombre ?? 'Sin asignar' }}
 </p>
 
+
 <div class="resumen">
 	<strong>Total disponible: {{ $totalGeneral }} días</strong><br>
-	Compensatorios: {{ $diasCompensatorios }} | Vacaciones: {{ $totalDiasDisponibles }}
+	Compensatorios: {{ $diasCompensatorios }} | 
+	Vacaciones: {{ $totalDiasDisponibles }} | 
+	Horas: {{ $horasDisponibles }}
 </div>
 
 <div class="section-title">Períodos Activos</div>
@@ -222,7 +225,43 @@
 			@php
 				$permiso = $permisos[$movimiento->permiso_id] ?? null;
 
-				$tipo = ucfirst($movimiento->categoria ?? 'Movimiento');
+				$tipoMovimiento = strtolower($movimiento->tipo_movimiento ?? '');
+
+if ($permiso) {
+	switch ($permiso->modalidad) {
+		case 'horas':
+			$tipo = 'Horas';
+			break;
+
+		case 'medio_dia':
+			$tipo = 'Medio día';
+			break;
+
+		case 'un_dia':
+			$tipo = 'Un día';
+			break;
+
+		case 'varios_dias':
+			$tipo = 'Varios días';
+			break;
+
+		default:
+			$tipo = 'Permiso';
+			break;
+	}
+} elseif ($tipoMovimiento === 'descuento_calendario') {
+	$tipo = 'Descuento calendario';
+
+} elseif ($tipoMovimiento === 'asignacion_calendario') {
+	$tipo = 'Asignación calendario';
+
+} elseif ($tipoMovimiento === 'asignacion') {
+	$tipo = 'Asignación';
+
+} else {
+	$tipo = 'Movimiento';
+}
+
 				$estado = $permiso->estado->nombre ?? '—';
 
 				$inicio = $permiso->fecha_inicio ?? null;
