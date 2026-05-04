@@ -40,15 +40,16 @@
     <div class="d-flex justify-content-between align-items-center px-4 py-3"
          style="background:#2d4f73; color:white;">
 
-        <h5 class="mb-0">Gestión de Compensatorios</h5>
+        <h5 class="mb-0">Listado de solicitudes para trabajo en día no laboral</h5>
 
         <div class="d-flex gap-2">
-            <a href="{{ route('permisos.menu') }}" class="btn btn-outline-light btn-sm">
-                Volver
-            </a>
-
+            
             <a href="{{ route('compensatorios.solicitudes.create') }}" class="btn btn-gold btn-sm">
                 + Nueva Solicitud
+            </a>
+
+            <a href="{{ route('permisos.menu') }}" class="btn btn-outline-light btn-sm">
+                Volver
             </a>
         </div>
     </div>
@@ -67,7 +68,7 @@
                     <tr>
                         <th># Solicitud</th>
                         <th>Departamento</th>
-                        <th>Fecha trabajada</th>
+                        <th>Fecha solicitada para laborar</th>
                         <th>Empleados incluidos</th>
                         <th>Estado</th>
                         <th class="text-end">Acciones</th>

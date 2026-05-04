@@ -65,6 +65,10 @@ $yearActual = date('Y');
                         + Agregar feriado
                     </a>
 
+                    <a href="{{ url()->previous() }}" class="btn btn-outline-secondar">
+                        Volver
+                    </a>
+
                 </div>
 
                 </div>

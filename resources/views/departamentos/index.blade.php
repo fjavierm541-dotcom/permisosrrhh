@@ -24,6 +24,19 @@
 
 @endif
 
+<style>
+
+    .btn-group .btn {
+    border-color: #2d4f73;
+    color: #2d4f73;
+}
+.btn-group .btn:hover {
+    background: #2d4f73;
+    color: white;
+}
+
+    </Style>
+
     <!-- HEADER -->
     <div class="p-3 text-white"
     style="background:#2f4f6f;border-top-left-radius:18px;border-top-right-radius:18px;">
@@ -31,7 +44,7 @@
         <div class="d-flex justify-content-between align-items-center">
 
             <h5 class="mb-0">
-                Listado de Departamentos
+                Listado de Departamentos Activos
             </h5>
 
             <div>
@@ -42,7 +55,7 @@
                 </a>
                 <a href="{{ route('paginas.inicio') }}"
                 class="btn btn-secondary btn-sm">
-                    Atrás
+                    Volver
                 </a>
 
             </div>
@@ -51,8 +64,6 @@
 
     </div>
 
-
-    <!-- BUSCADOR -->
 
    <!-- BUSCADOR -->
 <div class="p-3">
@@ -152,14 +163,15 @@
                     </td>
 
                     <td>
+                    <div class="btn-group" role="group">
 
                         <a href="{{ route('departamentos.show',$dep->id) }}"
-                        class="btn btn-dark btn-sm">
+                        class="btn btn-outline-dark btn-sm">
                             Ver
                         </a>
 
                         <a href="{{ route('departamentos.edit',$dep->id) }}"
-                        class="btn btn-warning btn-sm">
+                        class="btn btn-outline-warning btn-sm">
                             Editar
                         </a>
 
@@ -170,15 +182,15 @@
                             @csrf
                             @method('PATCH')
 
-                            <button class="btn btn-outline-secondary btn-sm">
-
+                            <button type="submit"
+                            class="btn btn-outline-secondary btn-sm">
                                 {{ $dep->activo ? 'Desactivar' : 'Activar' }}
-
                             </button>
 
                         </form>
 
-                    </td>
+                    </div>
+                </td>
 
                 </tr>
 

@@ -50,19 +50,16 @@
     <div class="glass-card"> 
 
         <div class="card-header-custom p-4 d-flex justify-content-between align-items-center">
-    <h4 class="mb-0">Gestión de Permisos</h4>
+    <h4 class="mb-0">Listado de Permisos</h4>
 
     <div class="d-flex gap-2">
 
-        <a href="{{ route('compensatorios.solicitudes.create') }}" class="btn btn-gold">
-            + Permiso día no laboral
-        </a>
 
         <a href="{{ route('permisos.create') }}" class="btn btn-gold">
             + Nuevo Permiso
         </a>
 
-         <a href="{{ route('paginas.inicio') }}" class="btn btn-outline-light">
+         <a href="{{ route('permisos.menu') }}" class="btn btn-outline-light">
             Volver
         </a>
 
@@ -84,8 +81,8 @@
                             <th>Empleado</th>
                             <th>Modalidad</th>
                             <th>Tipo</th>
-                            <th>Inicio</th>
-                            <th>Fin</th>
+                            <th>Fecha inicial</th>
+                            <th>Fecha final</th>
                             <th>Horas</th>
                             <th>Estado</th>
                             <th>Acciones</th>

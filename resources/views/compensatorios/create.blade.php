@@ -9,7 +9,7 @@
     <!-- HEADER -->
     <div class="mb-4">
         <h4 class="fw-bold text-dark">
-            Solicitud de Día No Laboral
+            Solicitar laborar día inhábil
         </h4>
     </div>
 
@@ -87,6 +87,10 @@
 
         <!-- BOTÓN -->
         <div class="text-end">
+        <a href="{{ route('compensatorios.solicitudes.index') }}"
+        class="btn btn-outline-secondary me-2">
+        Cancelar</a>
+
             <button type="submit" class="btn btn-primary-custom">
                 Guardar solicitud
             </button>

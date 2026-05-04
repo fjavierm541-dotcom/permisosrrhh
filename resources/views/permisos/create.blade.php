@@ -64,7 +64,7 @@
     <div class="glass-card">
 
         <div class="card-header-custom p-4">
-            <h4 class="mb-0">Registrar Nuevo Permiso</h4>
+            <h4 class="mb-0">Solicitar Nuevo permiso</h4>
         </div>
 
         <div class="p-4">

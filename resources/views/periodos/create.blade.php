@@ -105,10 +105,11 @@
                     + Agregar otro año
                 </button>
 
+
                 <div class="text-end">
                     <button type="submit" class="btn btn-gold">
-    Guardar historial
-</button>
+                        Guardar historial
+                    </button>
                 </div>
 
             </form>
