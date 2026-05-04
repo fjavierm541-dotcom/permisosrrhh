@@ -18,17 +18,24 @@ class PermisoController extends Controller
     /* ==========================
        LISTAR PERMISOS
     ========================== */
-    public function index()
-    {
-        $permisos = PermisoSistema::with(['empleado','tipo','estado'])
-            ->latest()
-            ->get();
+   public function index()
+{
+    $permisos = PermisoSistema::with(['empleado','tipo','estado'])
+        ->orderByRaw("
+            CASE 
+                WHEN estado_permiso_id = (
+                    SELECT id FROM estados_permiso_sistema 
+                    WHERE LOWER(nombre) = 'pendiente' 
+                    LIMIT 1
+                ) THEN 0
+                ELSE 1
+            END
+        ")
+        ->latest()
+        ->paginate(15);
 
-        $acumulados = DiasAcumuladosSistema::all()
-            ->keyBy('dni_empleado');
-
-        return view('permisos.index', compact('permisos', 'acumulados'));
-    }
+    return view('permisos.index', compact('permisos'));
+}
 
     /* ==========================
        FORMULARIO CREAR
@@ -120,12 +127,25 @@ public function aprobar($id)
      */
     if (!$this->tipoRestaDias($tipoNombre)) {
 
-        $permiso->estado_permiso_id = $estadoAprobado->id;
-        $permiso->save();
+    $permiso->estado_permiso_id = $estadoAprobado->id;
+    $permiso->save();
 
-        return redirect()->route('permisos.index')
-            ->with('success', 'Permiso aprobado sin afectar saldo.');
-    }
+    MovimientoPermisoSistema::create([
+        'dni_empleado' => $permiso->dni_empleado,
+        'periodo_id' => null,
+        'permiso_id' => $permiso->id,
+        'categoria' => $tipoNombre,
+        'tipo_movimiento' => 'aprobacion_permiso',
+        'dias_afectados' => 0,
+        'horas_afectadas' => 0,
+        'descripcion' => 'Permiso aprobado sin afectar saldo (' . $permiso->tipo->nombre . ').',
+        'created_at' => now(),
+        'updated_at' => now()
+    ]);
+
+    return redirect()->route('permisos.index')
+        ->with('success', 'Permiso aprobado sin afectar saldo.');
+}
 
     /**
      * 🔴 VALIDAR SALDO TOTAL
@@ -405,21 +425,41 @@ private function consumirHorasFIFO($dniEmpleado, $horasSolicitadas, $permisoId, 
     /* ==========================
        RECHAZAR
     ========================== */
-    public function rechazar(Request $request, $id)
-    {
-        $permiso = PermisoSistema::with('estado')->findOrFail($id);
+   public function rechazar(Request $request, $id)
+{
+    $request->validate([
+        'motivo_rechazo' => 'required|string|max:500'
+    ], [
+        'motivo_rechazo.required' => 'Debe ingresar el motivo del rechazo.',
+        'motivo_rechazo.max' => 'El motivo no puede exceder 500 caracteres.'
+    ]);
 
-        if (strtolower($permiso->estado->nombre) !== 'pendiente') {
-            return back()->with('error', 'Este permiso ya fue procesado.');
-        }
+    $permiso = PermisoSistema::with(['estado', 'tipo'])->findOrFail($id);
 
-        $estadoRechazado = EstadoPermisoSistema::whereRaw('LOWER(nombre) = ?', ['rechazado'])->firstOrFail();
-
-        $permiso->estado_permiso_id = $estadoRechazado->id;
-        $permiso->save();
-
-        return back()->with('success', 'Permiso rechazado correctamente.');
+    if (strtolower($permiso->estado->nombre) !== 'pendiente') {
+        return back()->with('error', 'Este permiso ya fue procesado.');
     }
+
+    $estadoRechazado = EstadoPermisoSistema::whereRaw('LOWER(nombre) = ?', ['rechazado'])->firstOrFail();
+
+    $permiso->estado_permiso_id = $estadoRechazado->id;
+    $permiso->save();
+
+    MovimientoPermisoSistema::create([
+        'dni_empleado' => $permiso->dni_empleado,
+        'periodo_id' => null,
+        'permiso_id' => $permiso->id,
+        'categoria' => strtolower($permiso->tipo->nombre ?? 'permiso'),
+        'tipo_movimiento' => 'rechazo_permiso',
+        'dias_afectados' => 0,
+        'horas_afectadas' => 0,
+        'descripcion' => 'Permiso rechazado: ' . $request->motivo_rechazo,
+        'created_at' => now(),
+        'updated_at' => now()
+    ]);
+
+    return back()->with('success', 'Permiso rechazado correctamente.');
+}
 
 
 

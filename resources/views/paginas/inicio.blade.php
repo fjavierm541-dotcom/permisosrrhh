@@ -164,7 +164,7 @@
 
             <!-- Permisos -->
             <div class="col-md-4">
-    <a href="{{ route('permisos.index') }}" class="dashboard-link">
+    <a href="{{ route('permisos.menu') }}" class="dashboard-link">
         <div class="card dashboard-card text-center p-4">
             <div class="dashboard-icon">
                 <img src="{{ asset('icons/permisos.png') }}" class="icono-img">

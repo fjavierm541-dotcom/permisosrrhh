@@ -47,6 +47,11 @@ Route::get('/inicio', function () {
 })->name('paginas.inicio');
 
 
+//Ruta para menu de permisos 
+Route::get('/permisos/menu', function () {
+    return view('permisos.menu');
+})->name('permisos.menu');
+
 
 
 Route::get('/permisos', [PermisoController::class, 'index'])
@@ -57,8 +62,9 @@ Route::post('/permisos', [PermisoController::class, 'store'])
     ->name('permisos.store');
     Route::get('permisos/{id}/aprobar', [PermisoController::class, 'aprobar'])
     ->name('permisos.aprobar');
-    Route::get('permisos/{id}/rechazar', [PermisoController::class, 'rechazar'])
-    ->name('permisos.rechazar');
+
+Route::post('/permisos/{id}/aprobar', [PermisoController::class, 'aprobar'])->name('permisos.aprobar');
+Route::post('/permisos/{id}/rechazar', [PermisoController::class, 'rechazar'])->name('permisos.rechazar');
 
     //imprimir permisos 
     Route::get('/permisos/{id}/imprimir',
@@ -203,8 +209,6 @@ Route::get('/calendario/importar-feriados/{year}', [CalendarioController::class,
 
 
 // COMPENSATORIOS 
-
-
 Route::post('/compensatorios/solicitudes', [SolicitudCompensatorioController::class, 'store'])
     ->name('compensatorios.solicitudes.store');
 

@@ -47,19 +47,27 @@
 
 <div class="container py-5">
 
-    <div class="glass-card">
+    <div class="glass-card"> 
 
         <div class="card-header-custom p-4 d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">Gestión de Permisos</h4>
+    <h4 class="mb-0">Gestión de Permisos</h4>
 
-            <a href="{{ route('permisos.create') }}" class="btn btn-gold">
-                + Permiso día no laboral
-            </a>
-            <a href="{{ route('permisos.create') }}" class="btn btn-gold">
-                + Nuevo Permiso
-            </a>
-            
-        </div>
+    <div class="d-flex gap-2">
+
+        <a href="{{ route('compensatorios.solicitudes.create') }}" class="btn btn-gold">
+            + Permiso día no laboral
+        </a>
+
+        <a href="{{ route('permisos.create') }}" class="btn btn-gold">
+            + Nuevo Permiso
+        </a>
+
+         <a href="{{ route('paginas.inicio') }}" class="btn btn-outline-light">
+            Volver
+        </a>
+
+    </div>
+</div>
 
         <div class="p-4">
 
@@ -87,29 +95,11 @@
                     <tbody>
                         @forelse($permisos as $permiso)
                             <tr>
-                                <td>
-    <div>
-        <strong>
-            {{ $permiso->empleado->primer_nombre ?? '' }}
-            {{ $permiso->empleado->primer_apellido ?? '' }}
-        </strong>
-    </div>
+                                <td class="text-start">
+                                        {{ $permiso->empleado->primer_nombre ?? '' }} {{ $permiso->empleado->segundo_nombre ?? '' }}
+                                        {{ $permiso->empleado->primer_apellido ?? '' }}  {{ $permiso->empleado->segundo_apellido ?? '' }}
 
-    @php
-        $saldo = $acumulados[$permiso->dni_empleado] ?? null;
-    @endphp
-
-    @if($saldo)
-        <small class="text-muted">
-            {{ $saldo->dias_vacacionales }} días -
-            {{ $saldo->horas_acumuladas }} horas disponibles
-        </small>
-    @else
-        <small class="text-muted">
-            0 días - 0 horas disponibles
-        </small>
-    @endif
-</td>
+                                </td>
 
 
                                 <td>
@@ -119,8 +109,10 @@
                                 </td>
 
                                 <td>{{ $permiso->tipo->nombre ?? '' }}</td>
-                                <td>{{ $permiso->fecha_inicio }}</td>
-                                <td>{{ $permiso->fecha_fin ?? '-' }}</td>
+                                <td>{{ \Carbon\Carbon::parse($permiso->fecha_inicio)->format('d-m-Y') }}</td>
+                                <td>
+                                    {{ $permiso->fecha_fin ? \Carbon\Carbon::parse($permiso->fecha_fin)->format('d-m-Y') : '-' }}
+                                </td>
                                 <td>{{ $permiso->modalidad == 'horas' ? $permiso->horas : '-' }}</td>
 
                                 <td>
@@ -161,43 +153,66 @@
                     </tbody>
 
                 </table>
-            </div>
 
-        </div>
-    </div>
+                
+            </div>
+<div class="d-flex justify-content-end mt-3">
+    {{ $permisos->links() }}
 </div>
+        </div>
+        
+    </div>
+    
+</div>
+
 
 <!-- MODAL CONFIRMACION -->
 <div class="modal fade" id="confirmacionModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <form method="POST" id="formConfirmacion">
+            @csrf
 
-            <div class="modal-header" style="background-color:#274769; color:white;">
-                <h5 class="modal-title" id="modalTitulo"></h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-content">
+
+                <div class="modal-header" style="background-color:#274769; color:white;">
+                    <h5 class="modal-title" id="modalTitulo"></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p id="modalMensaje"></p>
+
+                    <div class="mb-3 d-none" id="bloqueMotivoRechazo">
+                        <label class="form-label fw-bold">Motivo del rechazo</label>
+                        <textarea 
+                            name="motivo_rechazo" 
+                            id="motivo_rechazo"
+                            class="form-control"
+                            rows="3"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <button type="submit" id="btnConfirmar" class="btn">
+                        Confirmar
+                    </button>
+                </div>
+
             </div>
-
-            <div class="modal-body">
-                <p id="modalMensaje"></p>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                    Cancelar
-                </button>
-                <a href="#" id="btnConfirmar" class="btn">
-                    Confirmar
-                </a>
-            </div>
-
-        </div>
+        </form>
     </div>
 </div>
+
+
 
 <!-- BOOTSTRAP JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- SCRIPT MODAL -->
 <script>
     function abrirModal(accion, id) {
 
@@ -205,19 +220,29 @@
         const titulo = document.getElementById('modalTitulo');
         const mensaje = document.getElementById('modalMensaje');
         const boton = document.getElementById('btnConfirmar');
+        const form = document.getElementById('formConfirmacion');
+        const bloqueMotivo = document.getElementById('bloqueMotivoRechazo');
+        const motivo = document.getElementById('motivo_rechazo');
+
+        motivo.value = '';
+        motivo.required = false;
+        bloqueMotivo.classList.add('d-none');
 
         if (accion === 'aprobar') {
             titulo.textContent = "Confirmar Aprobación";
             mensaje.textContent = "¿Está seguro que desea aprobar este permiso?";
             boton.className = "btn btn-success";
-            boton.href = "/permisos/" + id + "/aprobar";
+            form.action = "/permisos/" + id + "/aprobar";
         }
 
         if (accion === 'rechazar') {
             titulo.textContent = "Confirmar Rechazo";
-            mensaje.textContent = "¿Está seguro que desea rechazar este permiso?";
+            mensaje.textContent = "Ingrese el motivo por el cual se rechazará este permiso.";
             boton.className = "btn btn-danger";
-            boton.href = "/permisos/" + id + "/rechazar";
+            form.action = "/permisos/" + id + "/rechazar";
+
+            bloqueMotivo.classList.remove('d-none');
+            motivo.required = true;
         }
 
         modal.show();
