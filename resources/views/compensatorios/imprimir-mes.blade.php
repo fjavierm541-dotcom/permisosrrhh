@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Permisos por mes</title>
+    <title>Solicitudes por mes</title>
 
     <style>
         body {
@@ -38,7 +38,6 @@
         .header p {
             margin: 6px 0 0;
             font-size: 14px;
-            color: #f1f1f1;
         }
 
         .actions {
@@ -177,7 +176,7 @@
 <div class="container">
 
     <div class="header">
-        <h2>Listado de Permisos</h2>
+        <h2>Solicitudes de Trabajo en Día No Laboral</h2>
         <p>{{ ucfirst($nombreMes) }} de {{ $anio }}</p>
     </div>
 
@@ -211,7 +210,7 @@
                 Imprimir
             </button>
 
-            <a href="{{ route('permisos.index') }}" class="btn btn-primary">
+            <a href="{{ route('compensatorios.solicitudes.index') }}" class="btn btn-primary">
                 Volver
             </a>
         </div>
@@ -220,7 +219,7 @@
 
     <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px;">
     <div>
-        <strong>Total de permisos:</strong> {{ $permisos->count() }}
+        <strong>Total de solicitudes:</strong> {{ $solicitudes->count() }}
     </div>
 
     <div>
@@ -231,55 +230,63 @@
     <table>
         <thead>
             <tr>
-                <th class="text-left">Empleado</th>
-                <th>Tipo</th>
-                <th>Modalidad</th>
-                <th>Inicio</th>
-                <th>Fin</th>
-                <th>Horas</th>
+                <th>#</th>
+                <th>Departamento</th>
+                <th>Fecha solicitud</th>
+                <th>Fecha trabajada</th>
+                <th>Empleados</th>
                 <th>Estado</th>
+                <th class="text-left">Descripción</th>
             </tr>
         </thead>
 
         <tbody>
-        @forelse($permisos as $permiso)
+
+        @forelse($solicitudes as $sol)
             <tr>
+                <td class="text-center">{{ $sol->id }}</td>
+
+                <td class="text-center">
+                    {{ $sol->departamento->nombre ?? '-' }}
+                </td>
+
+                <td class="text-center">
+                    {{ \Carbon\Carbon::parse($sol->created_at)->format('d-m-Y') }}
+                </td>
+
+                <td class="text-center">
+                    {{ \Carbon\Carbon::parse($sol->fecha_trabajada)->format('d-m-Y') }}
+                </td>
+
+                <td class="text-center">
+                    {{ $sol->empleados->count() }}
+                </td>
+
+                <td class="text-center">
+                    {{ ucfirst($sol->estado) }}
+                </td>
+
                 <td class="text-left">
-                    {{ $permiso->empleado->primer_nombre ?? '' }}
-                    {{ $permiso->empleado->segundo_nombre ?? '' }}
-                    {{ $permiso->empleado->primer_apellido ?? '' }}
-                    {{ $permiso->empleado->segundo_apellido ?? '' }}
+                    {{ $sol->descripcion ?? '-' }}
                 </td>
-
-                <td class="text-center">{{ $permiso->tipo->nombre ?? '' }}</td>
-                <td class="text-center">{{ ucfirst(str_replace('_',' ', $permiso->modalidad)) }}</td>
-                <td class="text-center">{{ \Carbon\Carbon::parse($permiso->fecha_inicio)->format('d-m-Y') }}</td>
-
-                <td class="text-center">
-                    {{ $permiso->fecha_fin ? \Carbon\Carbon::parse($permiso->fecha_fin)->format('d-m-Y') : '-' }}
-                </td>
-
-                <td class="text-center">
-                    {{ $permiso->modalidad == 'horas' ? $permiso->horas : '-' }}
-                </td>
-
-                <td class="text-center">{{ $permiso->estado->nombre ?? '' }}</td>
             </tr>
+
         @empty
             <tr>
                 <td colspan="7" class="text-center">
-                    No hay permisos en este mes.
+                    No hay solicitudes en este mes.
                 </td>
             </tr>
         @endforelse
+
         </tbody>
-    </table><br>
-<div class="print-footer">
+    </table>
+    <br>
+    <div class="print-footer">
     Sistema RRHH - Municipalidad de Danlí
 </div>
+
 </div>
-
-
 
 </body>
 </html>

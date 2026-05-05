@@ -83,12 +83,46 @@ public function store(Request $request)
 
 
 
-public function index()
+public function index(Request $request)
 {
     $solicitudes = SolicitudCompensatorio::with([
         'empleados.empleado',
         'departamento'
     ])
+
+    ->when($request->filled('buscar'), function ($query) use ($request) {
+
+        $buscar = $request->buscar;
+
+        $query->where(function ($q) use ($buscar) {
+
+            $q->where('id', 'LIKE', "%{$buscar}%")
+              ->orWhere('estado', 'LIKE', "%{$buscar}%")
+              ->orWhere('descripcion', 'LIKE', "%{$buscar}%")
+              ->orWhere('justificacion', 'LIKE', "%{$buscar}%")
+
+              ->orWhereHas('departamento', function ($dep) use ($buscar) {
+                  $dep->where('nombre', 'LIKE', "%{$buscar}%");
+              })
+
+              ->orWhereHas('empleados.empleado', function ($emp) use ($buscar) {
+                  $emp->where('primer_nombre', 'LIKE', "%{$buscar}%")
+                      ->orWhere('segundo_nombre', 'LIKE', "%{$buscar}%")
+                      ->orWhere('primer_apellido', 'LIKE', "%{$buscar}%")
+                      ->orWhere('segundo_apellido', 'LIKE', "%{$buscar}%")
+                      ->orWhere('DNI', 'LIKE', "%{$buscar}%");
+              });
+        });
+    })
+
+    ->when($request->filled('fecha_desde'), function ($query) use ($request) {
+        $query->whereDate('created_at', '>=', $request->fecha_desde);
+    })
+
+    ->when($request->filled('fecha_hasta'), function ($query) use ($request) {
+        $query->whereDate('created_at', '<=', $request->fecha_hasta);
+    })
+
     ->orderByRaw("
         CASE 
             WHEN estado = 'pendiente' THEN 0
@@ -98,9 +132,33 @@ public function index()
         END
     ")
     ->latest()
-    ->paginate(15);
+    ->paginate(15)
+    ->withQueryString();
 
     return view('compensatorios.index', compact('solicitudes'));
+}
+
+
+
+
+
+
+
+public function imprimirMes(Request $request)
+{
+    $mes = $request->get('mes', now()->format('m'));
+    $anio = $request->get('anio', now()->format('Y'));
+
+    $solicitudes = SolicitudCompensatorio::with([
+        'empleados.empleado',
+        'departamento'
+    ])
+    ->whereMonth('created_at', $mes)
+    ->whereYear('created_at', $anio)
+    ->orderBy('created_at', 'asc')
+    ->get();
+
+    return view('compensatorios.imprimir-mes', compact('solicitudes', 'mes', 'anio'));
 }
 
 

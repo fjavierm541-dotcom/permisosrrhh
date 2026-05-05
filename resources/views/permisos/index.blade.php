@@ -78,6 +78,55 @@
                 </div>
             @endif
 
+
+            <form id="formBusquedaPermisos" method="GET" action="{{ route('permisos.index') }}" class="mb-3">
+
+    <div class="row g-2 align-items-end">
+
+        <div class="col-md-5">
+            <label class="form-label">Buscar</label>
+            <input type="text"
+                   id="buscarPermisoInput"
+                   name="buscar"
+                   class="form-control"
+                   placeholder="Empleado, DNI, modalidad o tipo"
+                   value="{{ request('buscar') }}">
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Desde</label>
+            <input type="date"
+                   id="fechaDesdeInput"
+                   name="fecha_desde"
+                   class="form-control"
+                   value="{{ request('fecha_desde') }}">
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Hasta</label>
+            <input type="date"
+                   id="fechaHastaInput"
+                   name="fecha_hasta"
+                   class="form-control"
+                   value="{{ request('fecha_hasta') }}">
+        </div>
+
+        <div class="col-md-3 d-flex gap-2">
+            <button class="btn btn-primary-custom w-100">
+                Buscar
+            </button>
+
+            <a href="{{ route('permisos.index') }}" class="btn btn-outline-secondary w-100">
+                Limpiar
+            </a>
+        </div>
+
+    </div>
+
+</form>
+
+
+
             <div class="table-responsive">
                 <table class="table table-hover align-middle text-center">
                     <thead>
@@ -248,6 +297,38 @@
 
         modal.show();
     }
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const form = document.getElementById('formBusquedaPermisos');
+    const buscar = document.getElementById('buscarPermisoInput');
+    const desde = document.getElementById('fechaDesdeInput');
+    const hasta = document.getElementById('fechaHastaInput');
+
+    let timer = null;
+
+    function buscarAutomatico() {
+        clearTimeout(timer);
+
+        timer = setTimeout(() => {
+            form.submit();
+        }, 900);
+    }
+
+    buscar.addEventListener('keyup', buscarAutomatico);
+
+    desde.addEventListener('change', function () {
+        form.submit();
+    });
+
+    hasta.addEventListener('change', function () {
+        form.submit();
+    });
+
+});
 </script>
 
 @endsection

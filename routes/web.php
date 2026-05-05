@@ -219,6 +219,10 @@ Route::post('/compensatorios/solicitudes', [SolicitudCompensatorioController::cl
 Route::get('/compensatorios/solicitudes/create', [SolicitudCompensatorioController::class, 'create'])
     ->name('compensatorios.solicitudes.create');
 
+    //imprimir compensatorio por mes 
+    Route::get('/compensatorios/solicitudes/imprimir-mes', [SolicitudCompensatorioController::class, 'imprimirMes'])
+    ->name('compensatorios.solicitudes.imprimir.mes');
+
 
 //agregar solicitud por depto específico 
 Route::get('/empleados/por-departamento/{id}', function ($id) {

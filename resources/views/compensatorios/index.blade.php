@@ -48,6 +48,10 @@
                 + Nueva Solicitud
             </a>
 
+            <a href="{{ route('compensatorios.solicitudes.imprimir.mes') }}" class="btn btn-outline-light btn-sm">
+                Imprimir por mes
+            </a>
+
             <a href="{{ route('permisos.menu') }}" class="btn btn-outline-light btn-sm">
                 Volver
             </a>
@@ -62,13 +66,60 @@
             </div>
         @endif
 
+
+        <form id="formBusquedaSolicitudes" method="GET" action="{{ route('compensatorios.solicitudes.index') }}" class="mb-3">
+
+    <div class="row g-2 align-items-end">
+
+        <div class="col-md-5">
+            <label class="form-label">Buscar</label>
+            <input type="text"
+                   id="buscarSolicitudInput"
+                   name="buscar"
+                   class="form-control"
+                   placeholder="Departamento, empleado, DNI, estado o descripción"
+                   value="{{ request('buscar') }}">
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Desde</label>
+            <input type="date"
+                   id="fechaDesdeInput"
+                   name="fecha_desde"
+                   class="form-control"
+                   value="{{ request('fecha_desde') }}">
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Hasta</label>
+            <input type="date"
+                   id="fechaHastaInput"
+                   name="fecha_hasta"
+                   class="form-control"
+                   value="{{ request('fecha_hasta') }}">
+        </div>
+
+        <div class="col-md-3 d-flex gap-2">
+            <button class="btn btn-blue w-100">
+                Buscar
+            </button>
+
+            <a href="{{ route('compensatorios.solicitudes.index') }}" class="btn btn-outline-secondary w-100">
+                Limpiar
+            </a>
+        </div>
+
+    </div>
+
+</form>
+
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead>
                     <tr>
                         <th># Solicitud</th>
                         <th>Departamento</th>
-                        <th>Fecha solicitada para laborar</th>
+                        <th>Fecha de solicitud</th>
                         <th>Empleados incluidos</th>
                         <th>Estado</th>
                         <th class="text-end">Acciones</th>
@@ -80,7 +131,7 @@
                         <tr>
                             <td>{{ $sol->id }}</td>
                             <td>{{ $sol->departamento->nombre ?? '—' }}</td>
-                            <td>{{ \Carbon\Carbon::parse($sol->fecha_trabajada)->format('d-m-Y') }}</td>
+                            <td>{{ \Carbon\Carbon::parse($sol->created_at)->format('d-m-Y') }}</td>
                             <td>{{ $sol->empleados->count() }}</td>
 
                             <td>
@@ -117,5 +168,38 @@
 
     </div>
 </div>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const form = document.getElementById('formBusquedaSolicitudes');
+    const buscar = document.getElementById('buscarSolicitudInput');
+    const desde = document.getElementById('fechaDesdeInput');
+    const hasta = document.getElementById('fechaHastaInput');
+
+    let timer = null;
+
+    function buscarAutomatico() {
+        clearTimeout(timer);
+
+        timer = setTimeout(() => {
+            form.submit();
+        }, 900);
+    }
+
+    buscar.addEventListener('keyup', buscarAutomatico);
+
+    desde.addEventListener('change', function () {
+        form.submit();
+    });
+
+    hasta.addEventListener('change', function () {
+        form.submit();
+    });
+
+});
+</script>
 
 @endsection

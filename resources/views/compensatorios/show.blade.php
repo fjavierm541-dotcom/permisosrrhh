@@ -15,14 +15,8 @@
 
     <div class="p-4">
 
-        <p>
-            <strong>Fecha solicitada a laborar:</strong><br>
-            {{ \Carbon\Carbon::parse($solicitud->fecha_trabajada)
-                ->locale('es')
-                ->translatedFormat('l j \\d\\e F \\d\\e\\l Y') }}
-        </p>
 
-        <p>
+     <p>
             <strong>Estado:</strong>
             @if($solicitud->estado == 'pendiente')
                 <span class="badge bg-warning text-dark">Pendiente</span>
@@ -33,19 +27,48 @@
             @endif
         </p>
 
+        <p>
+            <strong>Fecha solicitada a laborar:</strong><br>
+            {{ \Carbon\Carbon::parse($solicitud->fecha_trabajada)
+                ->locale('es')
+                ->translatedFormat('l j \\d\\e F \\d\\e\\l Y') }}
+        </p>
+
+       
+
+
+        <p>
+            <strong>Fecha en que se hizo la solicitud:</strong><br>
+            {{ \Carbon\Carbon::parse($solicitud->created_at)
+                ->locale('es')
+                ->translatedFormat('l j \\d\\e F \\d\\e\\l Y') }}
+        </p>
+
+        <p>
+            <strong>Descripción:</strong><br>
+            {{ $solicitud->descripcion ?? 'Sin descripción registrada.' }}
+        </p>
+
+        <p>
+            <strong>Justificación:</strong><br>
+            {{ $solicitud->justificacion ?? 'Sin justificación registrada.' }}
+        </p>
+
         <hr>
 
         <h6>Empleados incluidos</h6>
 
         <ul class="mb-3">
-            @foreach($solicitud->empleados as $emp)
-                <li>
-                    {{ $emp->empleado->primer_nombre ?? '' }}
-                    {{ $emp->empleado->primer_apellido ?? '' }}
-                    ({{ $emp->dni_empleado }})
-                </li>
-            @endforeach
-        </ul>
+    @foreach($solicitud->empleados as $emp)
+        <li>
+            {{ $emp->empleado->primer_nombre ?? '' }}
+            {{ $emp->empleado->segundo_nombre ?? '' }}
+            {{ $emp->empleado->primer_apellido ?? '' }}
+            {{ $emp->empleado->segundo_apellido ?? '' }}
+            ({{ $emp->dni_empleado }})
+        </li>
+    @endforeach
+</ul>
 
         @if($solicitud->estado == 'pendiente')
 

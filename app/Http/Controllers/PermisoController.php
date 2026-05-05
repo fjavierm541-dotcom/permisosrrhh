@@ -18,9 +18,41 @@ class PermisoController extends Controller
     /* ==========================
        LISTAR PERMISOS
     ========================== */
-   public function index()
+  public function index(Request $request)
 {
     $permisos = PermisoSistema::with(['empleado','tipo','estado'])
+        ->when($request->filled('buscar'), function ($query) use ($request) {
+
+            $buscar = $request->buscar;
+
+            $query->where(function ($q) use ($buscar) {
+
+                $q->where('modalidad', 'LIKE', "%{$buscar}%")
+                  ->orWhereDate('fecha_inicio', $buscar)
+                  ->orWhereDate('fecha_fin', $buscar)
+
+                  ->orWhereHas('tipo', function ($tipo) use ($buscar) {
+                      $tipo->where('nombre', 'LIKE', "%{$buscar}%");
+                  })
+
+                  ->orWhereHas('empleado', function ($empleado) use ($buscar) {
+                      $empleado->where('primer_nombre', 'LIKE', "%{$buscar}%")
+                          ->orWhere('segundo_nombre', 'LIKE', "%{$buscar}%")
+                          ->orWhere('primer_apellido', 'LIKE', "%{$buscar}%")
+                          ->orWhere('segundo_apellido', 'LIKE', "%{$buscar}%")
+                          ->orWhere('DNI', 'LIKE', "%{$buscar}%");
+                  });
+            });
+        })
+
+        ->when($request->filled('fecha_desde'), function ($query) use ($request) {
+            $query->whereDate('fecha_inicio', '>=', $request->fecha_desde);
+        })
+
+        ->when($request->filled('fecha_hasta'), function ($query) use ($request) {
+            $query->whereDate('fecha_inicio', '<=', $request->fecha_hasta);
+        })
+
         ->orderByRaw("
             CASE 
                 WHEN estado_permiso_id = (
@@ -32,10 +64,16 @@ class PermisoController extends Controller
             END
         ")
         ->latest()
-        ->paginate(15);
+        ->paginate(15)
+        ->withQueryString();
 
     return view('permisos.index', compact('permisos'));
 }
+
+
+
+
+
 
     /* ==========================
        FORMULARIO CREAR
