@@ -21,7 +21,6 @@ class EmpleadoController extends Controller
      */
 public function index(Request $request)
 {
-
     // 🔄 Marcar vencidos automáticamente
     PeriodoVacacionesSistema::where('estado', 'activo')
         ->where(function ($query) {
@@ -34,48 +33,55 @@ public function index(Request $request)
         })
         ->update(['estado' => 'vencido']);
 
-
-    $empleados = Empleado::all();
-
+    // 👤 Empleados únicos
+    $empleados = Empleado::query()
+        ->orderBy('primer_nombre')
+        ->get()
+        ->unique('DNI')
+        ->values();
 
     foreach ($empleados as $empleado) {
 
-        // ===== DÍAS DISPONIBLES =====
-        $periodos = PeriodoVacacionesSistema::where('dni_empleado', $empleado->DNI)
+        // ===== VACACIONES DISPONIBLES =====
+        $diasVacaciones = PeriodoVacacionesSistema::where('dni_empleado', $empleado->DNI)
+            ->whereIn('estado', ['activo', 'extendido'])
+            ->selectRaw('SUM(dias_otorgados - dias_usados) as total')
+            ->value('total') ?? 0;
+
+        // ===== COMPENSATORIOS DISPONIBLES =====
+        $diasCompensatorios = DB::table('compensatorios_sistema')
+            ->where('dni_empleado', $empleado->DNI)
             ->where('estado', 'activo')
-            ->get();
+            ->sum('dias_disponibles');
 
-        $totalDiasDisponibles = 0;
+        // ===== HORAS DISPONIBLES =====
+        $horasDisponibles = DB::table('horas_acumuladas_sistema')
+            ->where('dni_empleado', $empleado->DNI)
+            ->where('estado', 'activo')
+            ->selectRaw('SUM(horas_otorgadas - horas_usadas) as total')
+            ->value('total') ?? 0;
 
-        foreach ($periodos as $periodo) {
-            $otorgados = (int) $periodo->dias_otorgados;
-            $usados = (int) ($periodo->dias_usados ?? 0);
-            $restantes = max(0, $otorgados - $usados);
-            $totalDiasDisponibles += $restantes;
-        }
-
-        $empleado->dias_disponibles = $totalDiasDisponibles;
-
-        
-
+        // Total para mostrar en la vista
+        $empleado->dias_disponibles = (int) $diasVacaciones + (int) $diasCompensatorios;
+        $empleado->horas_disponibles = (int) $horasDisponibles;
 
         // ===== SEMÁFORO =====
         $periodoProximo = PeriodoVacacionesSistema::where('dni_empleado', $empleado->DNI)
-            ->where('estado', 'activo')
+            ->whereIn('estado', ['activo', 'extendido'])
             ->whereRaw('(dias_otorgados - dias_usados) > 0')
             ->orderByRaw('COALESCE(extension_hasta, fecha_vencimiento) asc')
             ->first();
 
         if ($periodoProximo) {
 
-            $fechaReferencia = $periodoProximo->extension_hasta
-                ?? $periodoProximo->fecha_vencimiento;
+            $inicioPeriodo = Carbon::parse($periodoProximo->fecha_inicio_periodo);
+            $hoy = Carbon::today();
 
-            $diasRestantes = Carbon::today()->diffInDays($fechaReferencia, false);
+            $aniosTranscurridos = $inicioPeriodo->diffInYears($hoy);
 
-            if ($diasRestantes > 180) {
+            if ($aniosTranscurridos < 1) {
                 $empleado->semaforo = 'verde';
-            } elseif ($diasRestantes > 90) {
+            } elseif ($aniosTranscurridos < 2) {
                 $empleado->semaforo = 'amarillo';
             } else {
                 $empleado->semaforo = 'rojo';
@@ -86,45 +92,39 @@ public function index(Request $request)
         }
     }
 
-
     // 🔍 BUSCADOR
     if ($request->filled('buscar')) {
-
         $buscar = strtolower($request->buscar);
 
         $empleados = $empleados->filter(function ($empleado) use ($buscar) {
-
             $nombreCompleto = strtolower(
-                $empleado->primer_nombre . ' ' .
-                $empleado->segundo_nombre . ' ' .
-                $empleado->primer_apellido . ' ' .
-                $empleado->segundo_apellido
+                ($empleado->primer_nombre ?? '') . ' ' .
+                ($empleado->segundo_nombre ?? '') . ' ' .
+                ($empleado->primer_apellido ?? '') . ' ' .
+                ($empleado->segundo_apellido ?? '')
             );
 
             return str_contains($nombreCompleto, $buscar)
                 || str_contains(strtolower($empleado->DNI), $buscar);
-        });
+        })->values();
     }
-
 
     // 🔍 FILTRO POR SEXO
-    if ($request->sexo) {
-        $empleados = $empleados->where('sexo', $request->sexo);
+    if ($request->filled('sexo')) {
+        $empleados = $empleados->where('sexo', $request->sexo)->values();
     }
-
 
     // 🔍 FILTRO POR SEMÁFORO
-    if ($request->estado) {
-        $empleados = $empleados->where('semaforo', $request->estado);
+    if ($request->filled('estado')) {
+        $empleados = $empleados->where('semaforo', $request->estado)->values();
     }
-
 
     // 🔢 PAGINACIÓN MANUAL
     $page = $request->get('page', 1);
     $perPage = 15;
 
     $empleados = new \Illuminate\Pagination\LengthAwarePaginator(
-        $empleados->forPage($page, $perPage),
+        $empleados->forPage($page, $perPage)->values(),
         $empleados->count(),
         $perPage,
         $page,

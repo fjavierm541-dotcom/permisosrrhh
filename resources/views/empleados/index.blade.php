@@ -55,13 +55,7 @@
 
             <div class="d-flex gap-2">
 
-                <!-- BOTÓN GENERAR VACACIONES -->
-                <form method="POST" action="{{ route('vacaciones.generar') }}">
-                    @csrf
-                    <button class="btn btn-warning btn-sm">
-                        Generar Vacaciones Año Actual
-                    </button>
-                </form>
+                
                 <!-- BOTÓN CREAER -->
                 <a href="{{ route('empleados.create') }}"
                 class="btn btn-primary-custom btn-sm">

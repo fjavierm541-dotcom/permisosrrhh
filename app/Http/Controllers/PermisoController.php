@@ -78,7 +78,20 @@ class PermisoController extends Controller
 
 
 
+//imprimir por mes
+public function imprimirMes(Request $request)
+{
+    $mes = $request->get('mes', now()->format('m'));
+    $anio = $request->get('anio', now()->format('Y'));
 
+    $permisos = PermisoSistema::with(['empleado', 'tipo', 'estado'])
+        ->whereMonth('fecha_inicio', $mes)
+        ->whereYear('fecha_inicio', $anio)
+        ->orderBy('fecha_inicio', 'asc')
+        ->get();
+
+    return view('permisos.imprimir-mes', compact('permisos', 'mes', 'anio'));
+}
 
 
     

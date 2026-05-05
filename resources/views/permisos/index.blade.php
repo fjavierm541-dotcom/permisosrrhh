@@ -54,9 +54,13 @@
 
     <div class="d-flex gap-2">
 
-
+            
         <a href="{{ route('permisos.create') }}" class="btn btn-gold">
             + Nuevo Permiso
+        </a>
+
+        <a href="{{ route('permisos.imprimir.mes') }}" class="btn btn-outline-light">
+            Imprimir por mes
         </a>
 
          <a href="{{ route('permisos.menu') }}" class="btn btn-outline-light">

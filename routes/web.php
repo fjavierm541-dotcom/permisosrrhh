@@ -53,7 +53,7 @@ Route::get('/permisos/menu', function () {
 })->name('permisos.menu');
 
 
-
+//Permisos laboral
 Route::get('/permisos', [PermisoController::class, 'index'])
     ->name('permisos.index');
 Route::get('/permisos/crear', [PermisoController::class, 'create'])
@@ -66,17 +66,21 @@ Route::post('/permisos', [PermisoController::class, 'store'])
 Route::post('/permisos/{id}/aprobar', [PermisoController::class, 'aprobar'])->name('permisos.aprobar');
 Route::post('/permisos/{id}/rechazar', [PermisoController::class, 'rechazar'])->name('permisos.rechazar');
 
-    //imprimir permisos 
+    //imprimir permisos individual pendiente
     Route::get('/permisos/{id}/imprimir',
     [PermisoController::class,'imprimir'])
 ->name('permisos.imprimir');
 
+//Imprimir listado de permisos por mes 
+Route::get('/permisos/imprimir-mes', [PermisoController::class, 'imprimirMes'])
+    ->name('permisos.imprimir.mes');
 
 
 
 
 
 
+//periodos 
 Route::get('periodos/create', [PeriodoVacacionesController::class, 'create'])
     ->name('periodos.create');
 
