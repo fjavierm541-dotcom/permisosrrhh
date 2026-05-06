@@ -28,6 +28,7 @@ class SolicitudCompensatorioController extends Controller
 
 
 
+    
 
     /**
      * 🟢 Guardar solicitud
@@ -85,8 +86,11 @@ public function store(Request $request)
     }
 
     return redirect()
-        ->route('compensatorios.solicitudes.index')
-        ->with('success', 'Solicitud creada correctamente.');
+    ->route('compensatorios.solicitudes.index')
+    ->with([
+        'success' => 'Solicitud creada correctamente.',
+        'imprimir_solicitud' => $solicitud->id
+    ]);
 }
 
 
@@ -187,6 +191,16 @@ public function imprimirMes(Request $request)
     ])->findOrFail($id);
 
     return view('compensatorios.show', compact('solicitud'));
+}
+//imprimir al enviar permiso
+public function imprimir($id)
+{
+    $solicitud = SolicitudCompensatorio::with([
+        'empleados.empleado',
+        'departamento'
+    ])->findOrFail($id);
+
+    return view('compensatorios.imprimir', compact('solicitud'));
 }
 
 

@@ -66,6 +66,20 @@
             </div>
         @endif
 
+        @if(session('imprimir_solicitud'))
+        <script>
+            window.addEventListener('load', function () {
+                setTimeout(function () {
+                    window.open(
+                        "{{ route('compensatorios.solicitudes.imprimir', session('imprimir_solicitud')) }}",
+                        "_blank",
+                        "noopener,noreferrer"
+                    );
+                }, 500);
+            });
+        </script>
+        @endif
+
 
         <form id="formBusquedaSolicitudes" method="GET" action="{{ route('compensatorios.solicitudes.index') }}" class="mb-3">
 

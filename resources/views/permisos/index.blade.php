@@ -78,6 +78,20 @@
                 </div>
             @endif
 
+            @if(session('permiso_imprimir'))
+            <script>
+                window.addEventListener('load', function () {
+                    setTimeout(function () {
+                        window.open(
+                            "{{ route('permisos.imprimir', session('permiso_imprimir')) }}",
+                            "_blank",
+                            "noopener,noreferrer"
+                        );
+                    }, 500);
+                });
+            </script>
+            @endif
+
 
             <form id="formBusquedaPermisos" method="GET" action="{{ route('permisos.index') }}" class="mb-3">
 

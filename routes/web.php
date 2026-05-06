@@ -66,16 +66,15 @@ Route::post('/permisos', [PermisoController::class, 'store'])
 Route::post('/permisos/{id}/aprobar', [PermisoController::class, 'aprobar'])->name('permisos.aprobar');
 Route::post('/permisos/{id}/rechazar', [PermisoController::class, 'rechazar'])->name('permisos.rechazar');
 
-    //imprimir permisos individual pendiente
-    Route::get('/permisos/{id}/imprimir',
-    [PermisoController::class,'imprimir'])
-->name('permisos.imprimir');
-
-//permiso individual 
-
 //Imprimir listado de permisos por mes 
 Route::get('/permisos/imprimir-mes', [PermisoController::class, 'imprimirMes'])
     ->name('permisos.imprimir.mes');
+    
+//permiso permiso al enviar la solicitud 
+Route::get('/permisos/{id}/imprimir', [PermisoController::class, 'imprimir'])
+    ->name('permisos.imprimir');
+
+
 
 
 
@@ -225,6 +224,11 @@ Route::get('/compensatorios/solicitudes/create', [SolicitudCompensatorioControll
     Route::get('/compensatorios/solicitudes/imprimir-mes', [SolicitudCompensatorioController::class, 'imprimirMes'])
     ->name('compensatorios.solicitudes.imprimir.mes');
 
+    //imprimir compensatorio individual pendiente
+    Route::get(
+    '/compensatorios/solicitudes/{id}/imprimir',
+    [SolicitudCompensatorioController::class, 'imprimir']
+)->name('compensatorios.solicitudes.imprimir');
 
 //agregar solicitud por depto específico 
 Route::get('/empleados/por-departamento/{id}', function ($id) {

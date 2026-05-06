@@ -106,7 +106,7 @@ class PermisoController extends Controller
             ->store('documentos_permisos', 'public');
     }
 
-    PermisoSistema::create([
+    $permiso = PermisoSistema::create([
         'dni_empleado' => $request->dni_empleado,
         'modalidad' => $request->modalidad,
         'tipo_permiso_id' => $request->tipo_permiso_id,
@@ -118,9 +118,12 @@ class PermisoController extends Controller
         'documento' => $rutaDocumento,
     ]);
 
-    return redirect()
-        ->route('permisos.index')
-        ->with('success', 'Solicitud enviada correctamente.');
+   return redirect()
+    ->route('permisos.index')
+    ->with([
+        'success' => 'Solicitud enviada correctamente.',
+        'permiso_imprimir' => $permiso->id
+    ]);
 }
 
 
@@ -523,8 +526,17 @@ private function consumirHorasFIFO($dniEmpleado, $horasSolicitadas, $permisoId, 
 }
 
 
+//imprimir permiso individual 
+public function imprimir($id)
+{
+    $permiso = PermisoSistema::with([
+        'empleado',
+        'tipo',
+        'estado'
+    ])->findOrFail($id);
 
-
+    return view('permisos.imprimir', compact('permiso'));
+}
 
 
     
