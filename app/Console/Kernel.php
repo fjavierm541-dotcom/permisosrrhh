@@ -24,8 +24,17 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping();
 
 
+            /**
+             * 2. GENERAR VACACIONES AUTOMÁTICAS POR ANIVERSARIO LABORAL
+             */
+            $schedule->command('vacaciones:generar-automaticas')
+                ->dailyAt('01:00')
+                ->name('generar-vacaciones-automaticas')
+                ->withoutOverlapping();
+                
+
         /**
-         * 🔥 2. CALENDARIO AUTOMÁTICO
+         * 🔥 3. CALENDARIO AUTOMÁTICO
          */
         $schedule->call(function () {
 
