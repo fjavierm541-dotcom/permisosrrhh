@@ -44,10 +44,11 @@ class GenerarVacacionesAutomaticas extends Command
 
             // Evitar duplicados por empleado + año laboral
             $yaExiste = PeriodoVacacionesSistema::where('dni_empleado', $empleado->DNI)
-                ->where('anio_laboral', $aniosCumplidos)
+                ->where('anio_laboral', (int) $aniosCumplidos)
                 ->exists();
 
             if ($yaExiste) {
+                $this->warn("Ya existe período para {$empleado->DNI} - Año laboral {$aniosCumplidos}");
                 continue;
             }
 
