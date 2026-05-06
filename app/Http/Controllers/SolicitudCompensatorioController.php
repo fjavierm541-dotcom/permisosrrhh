@@ -41,6 +41,9 @@ public function store(Request $request)
         'empleados.*' => 'required|string',
         'descripcion' => 'nullable|string',
         'justificacion' => 'nullable|string',
+
+        // PDF opcional
+        'documento' => 'nullable|file|mimes:pdf|max:5120',
     ]);
 
     $hoy = Carbon::today();
@@ -55,10 +58,18 @@ public function store(Request $request)
             ->withInput();
     }
 
+    $rutaDocumento = null;
+
+    if ($request->hasFile('documento')) {
+        $rutaDocumento = $request->file('documento')
+            ->store('documentos_compensatorios', 'public');
+    }
+
     $solicitud = SolicitudCompensatorio::create([
         'departamento_id' => $request->departamento_id,
         'fecha_trabajada' => $request->fecha_trabajada,
         'descripcion' => $request->descripcion,
+        'documento_path' => $rutaDocumento,
         'estado' => 'pendiente',
         'es_registro_tardio' => $esTardio,
         'justificacion' => $request->justificacion,
@@ -241,6 +252,7 @@ public function rechazar(Request $request, $id)
 
     $solicitud->update([
         'estado' => 'rechazado',
+        'motivo_rechazo' => $request->motivo_rechazo,
         'aprobado_por' => auth()->id() ?? 1
     ]);
 
@@ -260,9 +272,8 @@ public function rechazar(Request $request, $id)
     }
 
     return redirect()
-        ->route('compensatorios.solicitudes.index')
+        ->route('compensatorios.solicitudes.show', $solicitud->id)
         ->with('success', 'Solicitud rechazada correctamente.');
 }
-
 
 }

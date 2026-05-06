@@ -89,29 +89,39 @@ class PermisoController extends Controller
     /* ==========================
        GUARDAR PERMISO
     ========================== */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'dni_empleado' => 'required',
-            'tipo_permiso_id' => 'required',
-            'fecha_inicio' => 'required|date',
-        ]);
+   public function store(Request $request)
+{
+    $request->validate([
+        'dni_empleado' => 'required',
+        'tipo_permiso_id' => 'required',
+        'modalidad' => 'required',
+        'fecha_inicio' => 'required|date',
+        'documento' => 'nullable|file|mimes:pdf|max:5120',
+    ]);
 
-        $permiso = PermisoSistema::create([
-            'dni_empleado' => $request->dni_empleado,
-            'modalidad' => $request->modalidad,
-            'tipo_permiso_id' => $request->tipo_permiso_id,
-            'estado_permiso_id' => 1,
-            'fecha_inicio' => $request->fecha_inicio,
-            'fecha_fin' => $request->fecha_fin,
-            'horas' => $request->horas ?? 0,
-            'motivo' => $request->motivo,
-        ]);
+    $rutaDocumento = null;
 
-        return redirect()
-            ->route('permisos.index')
-            ->with('permiso_imprimir', $permiso->id);
+    if ($request->hasFile('documento')) {
+        $rutaDocumento = $request->file('documento')
+            ->store('documentos_permisos', 'public');
     }
+
+    PermisoSistema::create([
+        'dni_empleado' => $request->dni_empleado,
+        'modalidad' => $request->modalidad,
+        'tipo_permiso_id' => $request->tipo_permiso_id,
+        'estado_permiso_id' => 1,
+        'fecha_inicio' => $request->fecha_inicio,
+        'fecha_fin' => $request->fecha_fin,
+        'horas' => $request->horas ?? 0,
+        'motivo' => $request->motivo,
+        'documento' => $rutaDocumento,
+    ]);
+
+    return redirect()
+        ->route('permisos.index')
+        ->with('success', 'Solicitud enviada correctamente.');
+}
 
 
 

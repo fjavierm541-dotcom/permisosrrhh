@@ -31,7 +31,7 @@
     @endif
 
     <!-- FORM -->
-    <form method="POST" action="{{ route('compensatorios.solicitudes.store') }}">
+   <form method="POST" action="{{ route('compensatorios.solicitudes.store') }}" enctype="multipart/form-data">
         @csrf
 
         <!-- DEPARTAMENTO -->
@@ -84,6 +84,23 @@
             <label class="form-label">Justificación (si es tardío)</label>
             <textarea name="justificacion" class="form-control"></textarea>
         </div>
+
+        <div class="mb-3">
+    <label class="form-label">Documento de soporte PDF (opcional)</label>
+
+    <input type="file"
+           name="documento"
+           class="form-control"
+           accept="application/pdf">
+
+    <small class="text-muted">
+        Solo se permite archivo PDF.
+    </small>
+
+    @error('documento')
+        <small class="text-danger d-block">{{ $message }}</small>
+    @enderror
+</div>
 
         <!-- BOTÓN -->
         <div class="text-end">

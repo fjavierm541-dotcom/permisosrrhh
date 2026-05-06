@@ -69,7 +69,7 @@
 
         <div class="p-4">
 
-            <form method="POST" action="{{ route('permisos.store') }}">
+            <form method="POST" action="{{ route('permisos.store') }}" enctype="multipart/form-data">
                 @csrf
 
                 <div class="row">
@@ -135,7 +135,22 @@
                         <label class="form-label">Motivo</label>
                         <textarea name="motivo" class="form-control" rows="3"></textarea>
                     </div>
+<div class="col-12 mb-3">
+    <label class="form-label">Documento de soporte PDF (opcional)</label>
 
+    <input type="file"
+           name="documento"
+           class="form-control"
+           accept="application/pdf">
+
+    <small class="text-muted">
+        Solo se permite archivo PDF.
+    </small>
+
+    @error('documento')
+        <small class="text-danger d-block">{{ $message }}</small>
+    @enderror
+</div>
                 </div>
 
                 <div class="d-flex justify-content-end mt-4">

@@ -71,6 +71,8 @@ Route::post('/permisos/{id}/rechazar', [PermisoController::class, 'rechazar'])->
     [PermisoController::class,'imprimir'])
 ->name('permisos.imprimir');
 
+//permiso individual 
+
 //Imprimir listado de permisos por mes 
 Route::get('/permisos/imprimir-mes', [PermisoController::class, 'imprimirMes'])
     ->name('permisos.imprimir.mes');

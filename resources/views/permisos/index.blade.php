@@ -137,6 +137,7 @@
                             <th>Fecha inicial</th>
                             <th>Fecha final</th>
                             <th>Horas</th>
+                            <th>Doc.</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
@@ -164,7 +165,17 @@
                                     {{ $permiso->fecha_fin ? \Carbon\Carbon::parse($permiso->fecha_fin)->format('d-m-Y') : '-' }}
                                 </td>
                                 <td>{{ $permiso->modalidad == 'horas' ? $permiso->horas : '-' }}</td>
-
+                                <td>
+                                    @if($permiso->documento)
+                                        <a href="{{ asset('storage/' . $permiso->documento) }}"
+                                        target="_blank"
+                                        class="btn btn-sm btn-outline-primary">
+                                            👁
+                                        </a>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
                                 <td>
                                     @if($permiso->estado->nombre == 'Pendiente')
                                         <span class="badge bg-warning text-dark">Pendiente</span>
