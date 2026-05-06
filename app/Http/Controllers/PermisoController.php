@@ -526,18 +526,22 @@ private function consumirHorasFIFO($dniEmpleado, $horasSolicitadas, $permisoId, 
 }
 
 
-//imprimir permiso individual 
 public function imprimir($id)
 {
     $permiso = PermisoSistema::with([
-        'empleado',
+        'empleado.departamentoFuncional',
         'tipo',
         'estado'
     ])->findOrFail($id);
 
-    return view('permisos.imprimir', compact('permiso'));
-}
+    $departamentoRRHH = \App\Models\DepartamentoMuni::with('jefe')
+        ->where('nombre', 'LIKE', '%Recursos Humanos%')
+        ->first();
 
+    $jefeRRHH = $departamentoRRHH?->jefe;
+
+    return view('permisos.imprimir', compact('permiso', 'jefeRRHH'));
+}
 
     
     /* ==========================

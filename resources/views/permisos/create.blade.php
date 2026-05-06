@@ -132,9 +132,22 @@
 
                     <!-- MOTIVO -->
                     <div class="col-12 mb-3">
-                        <label class="form-label">Motivo</label>
-                        <textarea name="motivo" class="form-control" rows="3"></textarea>
-                    </div>
+    <label class="form-label">
+        Motivo
+        <small class="text-muted">(Máximo 500 caracteres)</small>
+    </label>
+
+    <textarea
+        name="motivo"
+        class="form-control"
+        rows="4"
+        maxlength="500"
+    >{{ old('motivo') }}</textarea>
+
+    @error('motivo')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div>
 <div class="col-12 mb-3">
     <label class="form-label">Documento de soporte PDF (opcional)</label>
 
