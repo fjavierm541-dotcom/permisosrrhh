@@ -156,7 +156,7 @@
                     <div class="col-12 mb-3">
     <label class="form-label">
         Motivo
-        <small class="text-muted">(Máximo 500 caracteres)</small>
+        <small class="text-muted">(Razón en caso de ser laboral, personal o compensatorio)</small>
     </label>
 
     <textarea

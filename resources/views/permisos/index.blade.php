@@ -154,6 +154,7 @@
                             <th>Doc.</th>
                             <th>Estado</th>
                             <th>Acciones</th>
+                            <th></th>
                         </tr>
                     </thead>
 
@@ -217,6 +218,7 @@
                                     @endif
                                 </td>
                                 <td>
+
                                     @if($permiso->estado->nombre == 'Pendiente')
                                         <span class="badge bg-warning text-dark">Pendiente</span>
                                     @elseif($permiso->estado->nombre == 'Aprobado')
@@ -224,6 +226,7 @@
                                     @else
                                         <span class="badge bg-danger">Rechazado</span>
                                     @endif
+                                    
                                 </td>
 
                                 <td>
@@ -242,6 +245,14 @@
                                     @else
                                         <span class="text-muted">—</span>
                                     @endif
+
+                                    
+                                </td>
+                                <td><a href="{{ route('permisos.imprimir', $permiso->id) }}"
+                                    target="_blank"
+                                    class="btn btn-sm btn-outline-primary">
+                                        🖨️
+                                    </a>
                                 </td>
                             </tr>
                         @empty
