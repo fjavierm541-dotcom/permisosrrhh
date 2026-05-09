@@ -9,8 +9,8 @@ use App\Models\MovimientoPermisoSistema;
 use Carbon\Carbon;
 
 ////Correr este comando para prueba manual de Generación automática de Vacaciones 
-// php artisan vacaciones:generar-automaticas
-
+// php artisan vacaciones:generar-automaticas 
+//NO CORRER COMANDO EL PRODUCCION 
 class GenerarVacacionesAutomaticas extends Command
 {
     protected $signature = 'vacaciones:generar-automaticas';
