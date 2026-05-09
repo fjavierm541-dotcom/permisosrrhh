@@ -123,19 +123,52 @@
 <!-- RESUMEN DISPONIBLE -->
 <div class="alert alert-info">
 
-	<div class="mt-2">
-		<strong>Total de días disponibles: {{ $totalGeneral }}</strong>
-	</div>
+    @php
 
-	<div class="mt-2">
-		Compensatorios: <strong>{{ $diasCompensatorios }}</strong> días<br>
-		Vacaciones: <strong>{{ $totalDiasDisponibles }}</strong> días<br>
-		Horas acumuladas: <strong>{{ $horasDisponibles }}</strong> horas
-	</div>
+        $horasEnteras = floor($horasDisponibles);
 
-	<small class="text-muted d-block mt-2">
-		* Los días compensatorios se utilizan primero automáticamente al solicitar permisos.
-	</small>
+        $minutos = round(($horasDisponibles - $horasEnteras) * 60);
+
+        $textoHoras = '';
+
+        if ($horasEnteras > 0) {
+            $textoHoras .= $horasEnteras . 'h ';
+        }
+
+        if ($minutos > 0) {
+            $textoHoras .= $minutos . 'min';
+        }
+
+        if ($textoHoras == '') {
+            $textoHoras = '0h';
+        }
+
+    @endphp
+
+    <div class="mt-2">
+        <strong>
+            Total de días disponibles: {{ $totalGeneral }}
+        </strong>
+    </div>
+
+    <div class="mt-2">
+
+        Compensatorios:
+        <strong>{{ $diasCompensatorios }}</strong> días
+        <br>
+
+        Vacaciones:
+        <strong>{{ $totalDiasDisponibles }}</strong> días
+        <br>
+
+        Horas acumuladas:
+        <strong>{{ $textoHoras }}</strong>
+
+    </div>
+
+    <small class="text-muted d-block mt-2">
+        * Los días compensatorios se utilizan primero automáticamente al solicitar permisos.
+    </small>
 
 </div>
 

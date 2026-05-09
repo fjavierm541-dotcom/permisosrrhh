@@ -31,7 +31,7 @@ return new class extends Migration
             // generado | descuento | vencido | extension | ajuste_manual
 
             $table->integer('dias_afectados')->default(0);
-            $table->integer('horas_afectadas')->default(0);
+            $table->decimal('horas_afectadas', 8, 2)->default(0);
 
             $table->text('descripcion')->nullable();
 

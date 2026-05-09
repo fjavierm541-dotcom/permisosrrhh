@@ -18,7 +18,7 @@ return new class extends Migration
         $table->foreignId('estado_permiso_id')->constrained('estados_permiso_sistema');
         $table->date('fecha_inicio');
         $table->date('fecha_fin')->nullable();
-        $table->integer('horas')->default(0);
+        $table->decimal('horas', 8, 2)->default(0);
         $table->text('motivo')->nullable();
         $table->string('documento')->nullable();
         $table->timestamps();

@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'Nombre de la Vista')
+@section('title', 'Nuevo Permiso')
 
 @section('content')
 
@@ -125,10 +125,32 @@
                     </div>
 
                     <!-- HORAS -->
-                    <div class="col-md-6 mb-3" id="campo_horas" style="display:none;">
-                        <label class="form-label">Cantidad de horas</label>
-                        <input type="number" name="horas" class="form-control" min="1" max="8">
-                    </div>
+                    <!-- HORAS Y MINUTOS -->
+<div class="col-md-6 mb-3" id="campo_horas" style="display:none;">
+    <label class="form-label">Tiempo solicitado</label>
+
+    <div class="row g-2">
+        <div class="col-md-6">
+            <select name="horas" class="form-select">
+                <option value="0">0 horas</option>
+                @for($h = 1; $h <= 8; $h++)
+                    <option value="{{ $h }}">{{ $h }} hora{{ $h > 1 ? 's' : '' }}</option>
+                @endfor
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <select name="minutos" class="form-select">
+                <option value="0">0 minutos</option>
+                <option value="10">10 minutos</option>
+                <option value="20">20 minutos</option>
+                <option value="30">30 minutos</option>
+                <option value="40">40 minutos</option>
+                <option value="50">50 minutos</option>
+            </select>
+        </div>
+    </div>
+</div>
 
                     <!-- MOTIVO -->
                     <div class="col-12 mb-3">

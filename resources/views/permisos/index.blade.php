@@ -178,7 +178,33 @@
                                 <td>
                                     {{ $permiso->fecha_fin ? \Carbon\Carbon::parse($permiso->fecha_fin)->format('d-m-Y') : '-' }}
                                 </td>
-                                <td>{{ $permiso->modalidad == 'horas' ? $permiso->horas : '-' }}</td>
+                               <td>
+
+                                @if($permiso->modalidad == 'horas')
+
+                                    @php
+                                        $horasEnteras = floor($permiso->horas);
+
+                                        $minutos = round(($permiso->horas - $horasEnteras) * 60);
+
+                                        $texto = '';
+
+                                        if ($horasEnteras > 0) {
+                                            $texto .= $horasEnteras . 'h ';
+                                        }
+
+                                        if ($minutos > 0) {
+                                            $texto .= $minutos . 'min';
+                                        }
+
+                                        echo trim($texto);
+                                    @endphp
+
+                                @else
+                                    —
+                                @endif
+
+                                </td>
                                 <td>
                                     @if($permiso->documento)
                                         <a href="{{ asset('storage/' . $permiso->documento) }}"

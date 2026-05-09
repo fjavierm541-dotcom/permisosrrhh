@@ -89,14 +89,19 @@ class PermisoController extends Controller
     /* ==========================
        GUARDAR PERMISO
     ========================== */
-   public function store(Request $request)
+  public function store(Request $request)
 {
     $request->validate([
         'dni_empleado' => 'required',
         'tipo_permiso_id' => 'required',
         'modalidad' => 'required',
         'fecha_inicio' => 'required|date',
+        'motivo' => 'nullable|string|max:500',
         'documento' => 'nullable|file|mimes:pdf|max:5120',
+
+        // Solo aplica cuando modalidad = horas
+        'horas' => 'nullable|integer|min:0|max:8',
+        'minutos' => 'nullable|integer|in:0,10,20,30,40,50',
     ]);
 
     $rutaDocumento = null;
@@ -106,6 +111,37 @@ class PermisoController extends Controller
             ->store('documentos_permisos', 'public');
     }
 
+    /*
+     * Convertir horas + minutos a horas decimales.
+     * Ejemplos:
+     * 1h 30min = 1.50
+     * 0h 40min = 0.67
+     */
+    $horasDecimal = 0;
+
+    if ($request->modalidad === 'horas') {
+        $horas = (int) ($request->horas ?? 0);
+        $minutos = (int) ($request->minutos ?? 0);
+
+        $horasDecimal = round($horas + ($minutos / 60), 2);
+
+        if ($horasDecimal <= 0) {
+            return back()
+                ->withErrors([
+                    'horas' => 'Debe seleccionar al menos horas o minutos para permisos por horas.'
+                ])
+                ->withInput();
+        }
+
+        if ($horasDecimal > 8) {
+            return back()
+                ->withErrors([
+                    'horas' => 'El permiso por horas no puede superar 8 horas.'
+                ])
+                ->withInput();
+        }
+    }
+
     $permiso = PermisoSistema::create([
         'dni_empleado' => $request->dni_empleado,
         'modalidad' => $request->modalidad,
@@ -113,17 +149,17 @@ class PermisoController extends Controller
         'estado_permiso_id' => 1,
         'fecha_inicio' => $request->fecha_inicio,
         'fecha_fin' => $request->fecha_fin,
-        'horas' => $request->horas ?? 0,
+        'horas' => $horasDecimal,
         'motivo' => $request->motivo,
         'documento' => $rutaDocumento,
     ]);
 
-   return redirect()
-    ->route('permisos.index')
-    ->with([
-        'success' => 'Solicitud enviada correctamente.',
-        'permiso_imprimir' => $permiso->id
-    ]);
+    return redirect()
+        ->route('permisos.index')
+        ->with([
+            'success' => 'Solicitud enviada correctamente.',
+            'permiso_imprimir' => $permiso->id
+        ]);
 }
 
 
@@ -324,7 +360,9 @@ private function consumirHorasFIFO($dniEmpleado, $horasSolicitadas, $permisoId, 
             'tipo_movimiento' => 'consumo',
             'dias_afectados' => 0,
             'horas_afectadas' => $horasAConsumir,
-            'descripcion' => 'Consumo de ' . $horasAConsumir . ' horas acumuladas por permiso de ' . $tipoNombre . '.',
+            'descripcion' => 'Consumo por horas. Se consumieron '
+                . $this->formatearHoras($horasAConsumir)
+                . ' acumuladas por permiso de ' . $tipoNombre . '.',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -397,7 +435,9 @@ private function consumirHorasFIFO($dniEmpleado, $horasSolicitadas, $permisoId, 
             'dias_afectados' => 1,
             'horas_afectadas' => $horasAConsumir,
             'descripcion' => 'Consumo por horas. Se convirtió 1 día compensatorio en 8 horas. Se consumieron '
-                . $horasAConsumir . ' horas y sobraron ' . $sobrante . ' horas.',
+                    . $this->formatearHoras($horasAConsumir)
+                    . ' y sobraron '
+                    . $this->formatearHoras($sobrante) . '.',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -468,18 +508,49 @@ private function consumirHorasFIFO($dniEmpleado, $horasSolicitadas, $permisoId, 
             'dias_afectados' => 1,
             'horas_afectadas' => $horasAConsumir,
             'descripcion' => 'Consumo por horas. Se convirtió 1 día de vacaciones en 8 horas. Se consumieron '
-                . $horasAConsumir . ' horas y sobraron ' . $sobrante . ' horas.',
+                    . $this->formatearHoras($horasAConsumir)
+                    . ' y sobraron '
+                    . $this->formatearHoras($sobrante) . '.',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         $horasPendientes -= $horasAConsumir;
     }
+    
 }
 
 
 
+private function formatearHoras($horas)
+{
+    $horas = (float) $horas;
 
+    $horasEnteras = floor($horas);
+
+    $minutos = round(($horas - $horasEnteras) * 60);
+
+    if ($minutos == 60) {
+        $horasEnteras++;
+        $minutos = 0;
+    }
+
+    $texto = '';
+
+    if ($horasEnteras > 0) {
+        $texto .= $horasEnteras . 'h ';
+    }
+
+    if ($minutos > 0) {
+        $texto .= $minutos . 'min';
+    }
+
+    if (trim($texto) == '') {
+        $texto = '0min';
+    }
+
+    return trim($texto);
+}
 
 
 
