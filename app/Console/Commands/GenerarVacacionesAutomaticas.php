@@ -77,7 +77,7 @@ class GenerarVacacionesAutomaticas extends Command
 
         $periodo = PeriodoVacacionesSistema::create([
             'dni_empleado' => $empleado->DNI,
-            'anio_laboral' => $aniosCumplidos,
+            'anio_laboral' => $fechaInicioPeriodo->year,
             'tipo_periodo' => 'anual',
             'numero_periodo' => $aniosCumplidos,
             'dias_otorgados' => $diasOtorgados,
@@ -156,10 +156,7 @@ class GenerarVacacionesAutomaticas extends Command
 
         $periodo = PeriodoVacacionesSistema::create([
             'dni_empleado' => $empleado->DNI,
-
-            // Para contratos no representa años reales.
-            // Lo dejamos en 0 para no mezclar con permanentes.
-            'anio_laboral' => 0,
+            'anio_laboral' => $fechaInicioPeriodo->year,
 
             'tipo_periodo' => 'mensual',
             'numero_periodo' => $numeroPeriodo,
