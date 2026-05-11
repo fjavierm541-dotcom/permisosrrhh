@@ -77,6 +77,8 @@ class Empleado extends Model
         "tipo",
         "salario_inicial",
         "usuario_crea",
+        'fecha_fin_contrato',
+        'estado_empleado',
         "usuario_modifica",
     ];
 

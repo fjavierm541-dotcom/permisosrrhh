@@ -22,7 +22,9 @@ class PeriodoVacacionesSistema extends Model
         'fecha_vencimiento',
         'extension_hasta',
         'estado',
-        'motivo_extension',     
+        'motivo_extension',  
+        'tipo_periodo',
+        'numero_periodo',      
         'documento_extension'   
     ];
 
