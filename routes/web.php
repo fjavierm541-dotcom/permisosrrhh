@@ -95,6 +95,13 @@ Route::post('/periodos/reactivar', [PeriodoVacacionesController::class, 'reactiv
 
 
 // crear/registrar nuevos empleados en el sistema
+
+//estado de empleado activo o inactivo
+Route::post('/empleados/{dni}/cambiar-estado', [EmpleadoController::class, 'cambiarEstado'])
+    ->where('dni', '.*')
+    ->name('empleados.cambiarEstado');
+    
+
 Route::get('empleados/create', [EmpleadoController::class, 'create'])
     ->name('empleados.create');
 //GUARDAR EMPLEADOS

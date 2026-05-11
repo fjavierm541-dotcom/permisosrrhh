@@ -73,10 +73,21 @@
         
         <div class="p-4">
 
+        @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Cerrar"></button>
+    </div>
+@endif
+
         <form id="formBusqueda" method="GET" action="{{ route('empleados.index') }}" class="mb-3">
   <div class="row g-2">
 
-    <div class="col-md-8">
+    <div class="col-md-6">
       <input type="text"
              id="buscarInput"
              name="buscar"
@@ -92,6 +103,14 @@
         <option value="Femenino" {{ request('sexo') == 'Femenino' ? 'selected' : '' }}>Femenino</option>
       </select>
     </div>
+
+    <div class="col-md-2">
+  <select id="estadoEmpleadoSelect" name="estado_empleado" class="form-control">
+    <option value="activo" {{ request('estado_empleado', 'activo') == 'activo' ? 'selected' : '' }}>Activos</option>
+    <option value="inactivo" {{ request('estado_empleado') == 'inactivo' ? 'selected' : '' }}>Inactivos</option>
+    <option value="todos" {{ request('estado_empleado') == 'todos' ? 'selected' : '' }}>Todos</option>
+  </select>
+</div>
 
     <div class="col-md-2">
       <a href="{{ route('empleados.index') }}" class="btn btn-secondary w-100"> 
@@ -170,20 +189,85 @@
 
                             <td>
     
-    <div class="btn-group btn-group-sm" role="group">
-        
-        <a href="{{ route('empleados.show', $empleado->DNI) }}"
-           class="btn btn-outline-dark">
-            Historial Hrs
-        </a>
+            @php
+    $estadoEmpleado = strtolower(trim($empleado->estado_empleado ?? 'activo'));
+    $accionEstado = $estadoEmpleado === 'inactivo' ? 'Activar' : 'Inactivar';
+    $btnEstado = $estadoEmpleado === 'inactivo' ? 'btn-outline-success' : 'btn-outline-danger';
+    $modalId = 'modalEstadoEmpleado'.$index;
+@endphp
 
-        <a href="{{ route('empleados.verRegistro', $empleado->DNI) }}"
-           class="btn btn-outline-secondary">
-            Registro
-        </a>
+<div class="btn-group btn-group-sm" role="group">
 
+    <a href="{{ route('empleados.show', $empleado->DNI) }}"
+       class="btn btn-outline-dark">
+        Historial Hrs
+    </a>
 
+    <a href="{{ route('empleados.verRegistro', $empleado->DNI) }}"
+       class="btn btn-outline-secondary">
+        Registro
+    </a>
+
+    <button type="button"
+            class="btn {{ $btnEstado }}"
+            data-bs-toggle="modal"
+            data-bs-target="#{{ $modalId }}">
+        {{ $accionEstado }}
+    </button>
+
+</div>
+
+<div class="modal fade"
+     id="{{ $modalId }}"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; overflow: hidden;">
+
+            <div class="modal-header"
+                 style="background: linear-gradient(135deg, #1f3a56, #2d4f73); color: white;">
+                <h5 class="modal-title fw-bold">
+                    ¿Está seguro de cambiar el estado de este empleado?
+                </h5>
+
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body text-center p-4">
+                <p class="mb-2 fw-bold">
+                    {{ $empleado->primer_nombre }}  {{ $empleado->segundo_nombre }} {{ $empleado->primer_apellido }} {{ $empleado->segundo_apellido }}
+                </p>
+
+                <p class="text-muted mb-0">
+                    Verifique cuidadosamente esta acción antes de continuar.
+                </p>
+            </div>
+
+            <div class="modal-footer justify-content-center">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <form action="{{ route('empleados.cambiarEstado', $empleado->DNI) }}"
+                      method="POST">
+                    @csrf
+
+                    <button type="submit"
+                            class="btn {{ $estadoEmpleado === 'inactivo' ? 'btn-success' : 'btn-danger' }}">
+                        Confirmar
+                    </button>
+                </form>
+            </div>
+
+        </div>
     </div>
+</div>
 
 </td>
 
@@ -210,6 +294,7 @@ document.addEventListener('DOMContentLoaded', function () {
 const form = document.getElementById('formBusqueda');
 const input = document.getElementById('buscarInput');
 const sexo = document.getElementById('sexoSelect');
+const estadoEmpleado = document.getElementById('estadoEmpleadoSelect');
 
 let timer = null;
 
@@ -225,10 +310,9 @@ form.submit();
 
 input.addEventListener('keyup', buscarAutomatico);
 
-sexo.addEventListener('change', function(){
-form.submit();
+estadoEmpleado.addEventListener('change', function(){
+    form.submit();
 });
-
 });
 
 </script>

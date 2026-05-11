@@ -26,14 +26,21 @@ class GenerarVacacionesAutomaticas extends Command
 
         foreach ($empleados as $empleado) {
 
-            $tipoEmpleado = strtolower(trim($empleado->tipo ?? ''));
+    $estadoEmpleado = strtolower(trim($empleado->estado_empleado ?? 'activo'));
 
-            if (str_contains($tipoEmpleado, 'contrato')) {
-                $this->generarVacacionesContrato($empleado, $hoy);
-            } else {
-                $this->generarVacacionesPermanente($empleado, $hoy);
-            }
-        }
+    if ($estadoEmpleado === 'inactivo') {
+        $this->warn("Empleado inactivo omitido: {$empleado->DNI}");
+        continue;
+    }
+
+    $tipoEmpleado = strtolower(trim($empleado->tipo ?? ''));
+
+    if (str_contains($tipoEmpleado, 'contrato')) {
+        $this->generarVacacionesContrato($empleado, $hoy);
+    } else {
+        $this->generarVacacionesPermanente($empleado, $hoy);
+    }
+}
 
         $this->info('Proceso de generación automática de vacaciones finalizado.');
 

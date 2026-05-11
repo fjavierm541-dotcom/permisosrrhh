@@ -33,8 +33,28 @@ public function index(Request $request)
         })
         ->update(['estado' => 'vencido']);
 
-    // 👤 Empleados únicos
-    $empleados = Empleado::query()
+        // 👤 Empleados únicos
+    $filtroEstadoEmpleado = $request->get('estado_empleado', 'activo');
+
+    $empleadosQuery = Empleado::query();
+
+    if ($filtroEstadoEmpleado === 'activo') {
+
+        $empleadosQuery->where(function ($query) {
+            $query->where('estado_empleado', 'activo')
+                ->orWhereNull('estado_empleado');
+        });
+
+    } elseif ($filtroEstadoEmpleado === 'inactivo') {
+
+        $empleadosQuery->where('estado_empleado', 'inactivo');
+
+    } elseif ($filtroEstadoEmpleado === 'todos') {
+
+        // No aplica filtro. Muestra activos e inactivos.
+    }
+
+    $empleados = $empleadosQuery
         ->orderBy('primer_nombre')
         ->get()
         ->unique('DNI')
@@ -821,5 +841,30 @@ public function guardarFuncion(Request $request, $dni)
     return redirect()
         ->route('empleados.verRegistro',$dni)
         ->with('success','Asignación funcional actualizada');
+}
+
+
+
+//estado de empleado para inactivar o activar
+public function cambiarEstado($dni)
+{
+    $empleado = Empleado::where('DNI', $dni)->firstOrFail();
+
+    $estadoActual = strtolower(trim($empleado->estado_empleado ?? 'activo'));
+
+    $empleado->estado_empleado = $estadoActual === 'inactivo'
+        ? 'activo'
+        : 'inactivo';
+
+    $empleado->usuario_modifica = auth()->user()->name ?? 'Sistema';
+    $empleado->save();
+
+    $mensaje = $empleado->estado_empleado === 'activo'
+        ? 'Empleado activado correctamente.'
+        : 'Empleado inactivado correctamente.';
+
+    return redirect()
+        ->route('empleados.index')
+        ->with('success', $mensaje);
 }
 }
