@@ -361,15 +361,23 @@
             <div class="info-value">L. {{ number_format($empleado->salario_inicial ?? 0, 2) }}</div>
         </div>
 
-        <div class="info-item">
-            <div class="info-label">Fecha Nombramiento</div>
-            <div class="info-value">{{ $empleado->fecha_nombramiento ?? '-' }}</div>
-        </div>
+       <div class="info-item">
+    <div class="info-label">Fecha Nombramiento</div>
+    <div class="info-value">
+        {{ $empleado->fecha_nombramiento 
+            ? \Carbon\Carbon::parse($empleado->fecha_nombramiento)->format('d/m/Y') 
+            : '-' }}
+    </div>
+</div>
 
-        <div class="info-item">
-            <div class="info-label">Fecha Fin Contrato</div>
-            <div class="info-value">{{ $empleado->fecha_fin_contrato ?: 'No aplica' }}</div>
-        </div>
+<div class="info-item">
+    <div class="info-label">Fecha Fin Contrato</div>
+    <div class="info-value">
+        {{ $empleado->fecha_fin_contrato
+            ? \Carbon\Carbon::parse($empleado->fecha_fin_contrato)->format('d/m/Y')
+            : 'No aplica' }}
+    </div>
+</div>
 
         <div class="info-item">
             <div class="info-label">Depto. Administrativo</div>
@@ -492,6 +500,11 @@
         <a href="{{ route('empleados.index') }}"
            class="btn btn-secondary">
             Volver
+        </a>
+
+        <a href="{{ route('empleados.edit', $empleado->DNI) }}"
+        class="btn btn-warning">
+            Editar
         </a>
 
         <a href="{{ route('empleados.verRegistro.imprimir', $empleado->DNI) }}"

@@ -125,31 +125,128 @@
                     </div>
 
                     <!-- HORAS -->
-                    <!-- HORAS Y MINUTOS -->
-<div class="col-md-6 mb-3" id="campo_horas" style="display:none;">
-    <label class="form-label">Tiempo solicitado</label>
+<!-- PERMISO POR HORAS -->
+<div class="col-md-12 mb-3" id="campo_horas" style="display:none;">
 
-    <div class="row g-2">
-        <div class="col-md-6">
-            <select name="horas" class="form-select">
-                <option value="0">0 horas</option>
-                @for($h = 1; $h <= 8; $h++)
-                    <option value="{{ $h }}">{{ $h }} hora{{ $h > 1 ? 's' : '' }}</option>
-                @endfor
-            </select>
+    <label class="form-label fw-bold">
+        Permiso por horas
+    </label>
+
+    <div class="row g-3 mt-1">
+
+        {{-- HORA DE SALIDA --}}
+        <div class="col-md-4">
+
+            <label class="form-label small fw-semibold">
+                Hora de salida
+            </label>
+
+            <div class="d-flex align-items-center gap-2">
+
+                {{-- HORA --}}
+                <select id="hora_salida_hora"
+                        class="form-select">
+
+                    @for($h = 6; $h <= 18; $h++)
+
+                       <option value="{{ str_pad($h, 2, '0', STR_PAD_LEFT) }}">
+                            {{ str_pad($h, 2, '0', STR_PAD_LEFT) }}
+                        </option>
+
+                    @endfor
+
+                </select>
+
+                <span class="fw-bold">:</span>
+
+                {{-- MINUTOS --}}
+                <select id="hora_salida_minuto"
+                        class="form-select">
+
+                    <option value="00">00</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+
+                </select>
+
+            </div>
+
         </div>
 
-        <div class="col-md-6">
-            <select name="minutos" class="form-select">
-                <option value="0">0 minutos</option>
-                <option value="10">10 minutos</option>
-                <option value="20">20 minutos</option>
-                <option value="30">30 minutos</option>
-                <option value="40">40 minutos</option>
-                <option value="50">50 minutos</option>
-            </select>
+        {{-- HORA DE ENTRADA --}}
+        <div class="col-md-4">
+
+            <label class="form-label small fw-semibold">
+                Hora de entrada
+            </label>
+
+            <div class="d-flex align-items-center gap-2">
+
+                {{-- HORA --}}
+                <select id="hora_entrada_hora"
+                        class="form-select">
+
+                    @for($h = 6; $h <= 18; $h++)
+
+                        <option value="{{ str_pad($h, 2, '0', STR_PAD_LEFT) }}">
+                            {{ str_pad($h, 2, '0', STR_PAD_LEFT) }}
+                        </option>
+
+                    @endfor
+
+                </select>
+
+                <span class="fw-bold">:</span>
+
+                {{-- MINUTOS --}}
+                <select id="hora_entrada_minuto"
+                        class="form-select">
+
+                    <option value="00">00</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+
+                </select>
+
+            </div>
+
         </div>
+
+        {{-- TIEMPO CALCULADO --}}
+        <div class="col-md-4">
+
+            <label class="form-label small fw-semibold">
+                Tiempo solicitado
+            </label>
+
+            <input type="text"
+                   id="tiempo_calculado"
+                   class="form-control"
+                   placeholder="0h 0min"
+                   readonly>
+
+            <small id="error_horario"
+                   class="text-danger d-none">
+                La hora de entrada debe ser mayor que la salida.
+            </small>
+
+        </div>
+
     </div>
+
+    {{-- CAMPOS OCULTOS --}}
+    <input type="hidden" name="horas" id="horas_decimal">
+
+    <input type="hidden" name="hora_salida" id="hora_salida_hidden">
+
+    <input type="hidden" name="hora_entrada" id="hora_entrada_hidden">
+
 </div>
 
                     <!-- MOTIVO -->
@@ -212,11 +309,22 @@
 </div>
 
 <script>
+
     const modalidad = document.getElementById('modalidad');
+
     const campoHoras = document.getElementById('campo_horas');
     const campoFechaFin = document.getElementById('campo_fecha_fin');
 
-    modalidad.addEventListener('change', function() {
+    const tiempoCalculado = document.getElementById('tiempo_calculado');
+
+    const horasDecimal = document.getElementById('horas_decimal');
+
+    const horaSalidaHidden = document.getElementById('hora_salida_hidden');
+    const horaEntradaHidden = document.getElementById('hora_entrada_hidden');
+
+    const errorHorario = document.getElementById('error_horario');
+
+    modalidad.addEventListener('change', function () {
 
         campoHoras.style.display = 'none';
         campoFechaFin.style.display = 'none';
@@ -228,8 +336,78 @@
         if (this.value === 'varios_dias') {
             campoFechaFin.style.display = 'block';
         }
-    });
-</script>
 
+    });
+
+    function calcularTiempo() {
+
+        const salidaHora =
+            document.getElementById('hora_salida_hora').value;
+
+        const salidaMinuto =
+            document.getElementById('hora_salida_minuto').value;
+
+        const entradaHora =
+            document.getElementById('hora_entrada_hora').value;
+
+        const entradaMinuto =
+            document.getElementById('hora_entrada_minuto').value;
+
+        const horaSalida =
+            `${salidaHora}:${salidaMinuto}`;
+
+        const horaEntrada =
+            `${entradaHora}:${entradaMinuto}`;
+
+        horaSalidaHidden.value = horaSalida;
+        horaEntradaHidden.value = horaEntrada;
+
+        const salida =
+            new Date(`1970-01-01T${horaSalida}:00`);
+
+        const entrada =
+            new Date(`1970-01-01T${horaEntrada}:00`);
+
+        let diferencia =
+            (entrada - salida) / 1000 / 60;
+
+        // VALIDAR HORARIO
+        if (diferencia <= 0) {
+
+            tiempoCalculado.value = '';
+
+            horasDecimal.value = '';
+
+            errorHorario.classList.remove('d-none');
+
+            return;
+        }
+
+        errorHorario.classList.add('d-none');
+
+        const horas =
+            Math.floor(diferencia / 60);
+
+        const minutos =
+            diferencia % 60;
+
+        tiempoCalculado.value =
+            `${horas}h ${minutos}min`;
+
+        horasDecimal.value =
+            (diferencia / 60).toFixed(2);
+    }
+
+    document
+        .querySelectorAll(
+            '#hora_salida_hora, #hora_salida_minuto, #hora_entrada_hora, #hora_entrada_minuto'
+        )
+        .forEach(el => {
+
+            el.addEventListener('change', calcularTiempo);
+
+        });
+
+</script>
  
 @endsection

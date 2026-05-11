@@ -21,6 +21,8 @@ return new class extends Migration
         $table->decimal('horas', 8, 2)->default(0);
         $table->text('motivo')->nullable();
         $table->string('documento')->nullable();
+        $table->time('hora_salida')->nullable();
+        $table->time('hora_entrada')->nullable();
         $table->timestamps();
     });
 }

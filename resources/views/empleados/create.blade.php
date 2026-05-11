@@ -972,6 +972,10 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
 
         <div class="mt-4 text-end">
+
+        <a href="{{ route('empleados.index') }}" class="btn btn-secondary">
+                Cancelar
+            </a>
             <button type="submit" class="btn btn-primary-custom">
                 Guardar Empleado
             </button>

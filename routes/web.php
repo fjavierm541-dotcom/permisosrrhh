@@ -107,6 +107,13 @@ Route::get('empleados/create', [EmpleadoController::class, 'create'])
 //GUARDAR EMPLEADOS
 Route::post('empleados', [EmpleadoController::class, 'store'])
     ->name('empleados.store');
+    
+    // editar empleado 
+    Route::get('/empleados/{dni}/editar', [EmpleadoController::class, 'edit'])
+    ->name('empleados.edit');
+
+Route::put('/empleados/{dni}', [EmpleadoController::class, 'update'])
+    ->name('empleados.update');
 
     // ver expediente
 Route::get('empleados/{dni}/expediente', [EmpleadoController::class, 'expediente'])

@@ -13,6 +13,7 @@ use App\Models\DepartamentoMuni;
 use App\Models\DocumentoEmpleado;
 use Illuminate\Support\Facades\DB;
 use App\Models\PermisoSistema;
+use Illuminate\Validation\Rule;
 
 class EmpleadoController extends Controller
 {
@@ -374,6 +375,14 @@ $request->validate([
     'departamento_id' => 'required|exists:departamentos_muni,id',
     'fecha_fin_contrato' => ['nullable', 'date', 'after_or_equal:fecha_nombramiento', 'required_if:tipo,Contrato'],
 
+    'fecha_nombramiento.required' => 'Debe ingresar la fecha de nombramiento.',
+    'fecha_nombramiento.date' => 'Debe ingresar una fecha válida.',
+    'fecha_nombramiento.before_or_equal' => 'La fecha de nombramiento no puede ser futura.',
+
+    'fecha_fin_contrato.required_if' => 'Debe ingresar la fecha de finalización del contrato.',
+    'fecha_fin_contrato.date' => 'La fecha fin de contrato no es válida.',
+    'fecha_fin_contrato.after_or_equal' => 'La fecha fin de contrato no puede ser anterior a la fecha de nombramiento.',
+
     // DOCUMENTOS
     'copia_dni' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
     'acuerdo' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
@@ -552,6 +561,167 @@ $request->validate([
 
 
 
+public function edit($dni)
+{
+    $empleado = Empleado::where('DNI', $dni)->firstOrFail();
+
+    $departamentos = DepartamentoMuni::orderBy('codigo')->get();
+
+    return view('empleados.edit', compact('empleado', 'departamentos'));
+}
+
+
+public function update(Request $request, $dni)
+{
+    $empleado = Empleado::where('DNI', $dni)->firstOrFail();
+
+    for ($i = 1; $i <= 7; $i++) {
+        $request->merge([
+            "nombre_beneficiario$i" => $request->input("nombre_beneficiario$i") ?: 'Vacío',
+            "porcentaje_beneficiario$i" => $request->input("porcentaje_beneficiario$i") ?: 0,
+            "parentezco_beneficiario$i" => $request->input("parentezco_beneficiario$i") ?: 'Vacío',
+            "DNI_beneficiario$i" => $request->input("DNI_beneficiario$i") ?: '0000-0000-00000'
+        ]);
+    }
+
+    $totalPorcentaje = 0;
+    $hayBeneficiarios = false;
+
+    for ($i = 1; $i <= 7; $i++) {
+        $nombre = trim($request->input("nombre_beneficiario$i"));
+        $porcentaje = (int) $request->input("porcentaje_beneficiario$i", 0);
+
+        if (!empty($nombre) && $nombre !== 'Vacío') {
+            $hayBeneficiarios = true;
+            $totalPorcentaje += $porcentaje;
+        }
+    }
+
+    if ($hayBeneficiarios) {
+        if ($totalPorcentaje < 100) {
+            return back()
+                ->withErrors([
+                    'beneficiarios' => "Los porcentajes de beneficiarios suman {$totalPorcentaje}%. Falta asignar " . (100 - $totalPorcentaje) . "% para completar el 100%."
+                ])
+                ->withInput();
+        }
+
+        if ($totalPorcentaje > 100) {
+            return back()
+                ->withErrors([
+                    'beneficiarios' => "Los porcentajes de beneficiarios suman {$totalPorcentaje}%. Excede el límite por " . ($totalPorcentaje - 100) . "%."
+                ])
+                ->withInput();
+        }
+    }
+
+    $request->validate([
+        'codigo' => ['required','regex:/^[0-9]{1,4}$/'],
+
+        'DNI' => [
+            'required',
+            'regex:/^[0-9]{4}-[0-9]{4}-[0-9]{5}$/',
+            Rule::unique('empleados', 'DNI')->ignore($empleado->DNI, 'DNI'),
+        ],
+
+        'RTN' => ['required','regex:/^[0-9]{4}-[0-9]{4}-[0-9]{6}$/'],
+
+        'primer_nombre' => ['required','regex:/^[\pL\s]+$/u','max:50'],
+        'segundo_nombre' => ['nullable','regex:/^[\pL\s]+$/u','max:50'],
+        'primer_apellido' => ['required','regex:/^[\pL\s]+$/u','max:50'],
+        'segundo_apellido' => ['nullable','regex:/^[\pL\s]+$/u','max:50'],
+
+        'sexo' => 'required|in:Masculino,Femenino',
+        'estado_civil' => 'required|in:Soltero(a),Casado(a),Unión Libre,Divorciado(a),Viudo(a)',
+        'nacionalidad' => ['required','regex:/^[\pL\s]+$/u','max:50'],
+        'tipo_sangre' => 'required|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
+
+        'dia_nacimiento' => 'required|integer|min:1|max:31',
+        'mes_nacimiento' => 'required|integer|min:1|max:12',
+        'anio_nacimiento' => 'required|integer|min:1940|max:' . (date('Y') - 18),
+
+        'telefono_celular' => ['required','regex:/^(3|8|9)[0-9]{7}$/'],
+        'telefono_fijo' => ['nullable','regex:/^2[0-9]{7}$/'],
+        'direccion_domicilio' => 'required|string|max:255',
+        'referencia_domicilio' => 'required|string|max:255',
+
+        'nivel_educativo' => 'required|in:Nivel Primario,Nivel Secundario,Nivel Superior,Postgrado',
+
+        'nombre_contacto1' => ['required','regex:/^[\pL\s]+$/u','max:50'],
+        'telefono_contacto1' => ['required','regex:/^[0-9]{8}$/'],
+        'parentezco_contacto1' => 'required|in:Padre,Madre,Hermano(a),Abuelo(a),Tío(a),Primo(a),Esposo(a),Pareja,Hijo(a),Amigo(a),Vecino(a),Otro',
+
+        'nombre_contacto2' => ['nullable','regex:/^[\pL\s]+$/u','max:50'],
+        'telefono_contacto2' => ['nullable','regex:/^[0-9]{8}$/'],
+        'parentezco_contacto2' => 'nullable|in:Padre,Madre,Hermano(a),Abuelo(a),Tío(a),Primo(a),Esposo(a),Pareja,Hijo(a),Amigo(a),Vecino(a),Otro',
+
+        'puesto' => ['required','regex:/^[\pL\s]+$/u','min:3','max:100'],
+        'fecha_nombramiento' => ['required','date','before_or_equal:today'],
+        'tipo' => ['required','in:Acuerdo,Contrato'],
+        'salario_inicial' => ['required','regex:/^L\.?\s?[0-9]{1,3}(,[0-9]{3})*(\.[0-9]{2})?$/'],
+        'departamento_id' => 'required|exists:departamentos_muni,id',
+        'fecha_fin_contrato' => ['nullable', 'date', 'after_or_equal:fecha_nombramiento', 'required_if:tipo,Contrato'],
+
+        'copia_dni' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
+        'acuerdo' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
+        'nota_traslado' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
+        'copia_rtn' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
+    ]);
+
+    if ($request->filled('salario_inicial')) {
+        $salario = $request->salario_inicial;
+        $salario = str_replace('L.', '', $salario);
+        $salario = str_replace(' ', '', $salario);
+        $salario = str_replace(',', '', $salario);
+
+        $request->merge([
+            'salario_inicial' => $salario
+        ]);
+    }
+
+    if ($request->tipo === 'Acuerdo') {
+        $request->merge([
+            'fecha_fin_contrato' => null,
+        ]);
+    }
+
+    $data = $request->except([
+        '_token',
+        '_method',
+        'copia_dni',
+        'acuerdo',
+        'nota_traslado',
+        'copia_rtn',
+    ]);
+
+    $data['usuario_modifica'] = auth()->user()->name ?? 'Sistema';
+
+    $empleado->update($data);
+
+    $documentos = [
+        'copia_dni' => 'Copia DNI',
+        'acuerdo' => 'Acuerdo',
+        'nota_traslado' => 'Nota Traslado',
+        'copia_rtn' => 'Copia RTN',
+    ];
+
+    foreach ($documentos as $campo => $tipo) {
+        if ($request->hasFile($campo)) {
+            $ruta = $request->file($campo)
+                ->store("empleados/{$empleado->DNI}/documentos", 'public');
+
+            DocumentoEmpleado::create([
+                'dni_empleado' => $empleado->DNI,
+                'tipo_documento' => $tipo,
+                'ruta_archivo' => $ruta
+            ]);
+        }
+    }
+
+    return redirect()
+    ->route('empleados.verRegistro', $empleado->DNI)
+    ->with('success', 'Empleado actualizado correctamente.');
+}
 
 
 
@@ -790,21 +960,8 @@ public function verRegistroImprimir($dni)
 }
 
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+
 
     /**
      * Remove the specified resource from storage.

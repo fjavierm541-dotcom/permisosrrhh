@@ -86,6 +86,11 @@ class PermisoController extends Controller
         return view('permisos.create', compact('empleados', 'tipos'));
     }
 
+
+
+
+
+
     /* ==========================
        GUARDAR PERMISO
     ========================== */
@@ -100,8 +105,9 @@ class PermisoController extends Controller
         'documento' => 'nullable|file|mimes:pdf|max:5120',
 
         // Solo aplica cuando modalidad = horas
-        'horas' => 'nullable|integer|min:0|max:8',
-        'minutos' => 'nullable|integer|in:0,10,20,30,40,50',
+        'horas' => 'nullable|numeric|min:0|max:8',
+        'hora_salida' => 'nullable|date_format:H:i',
+        'hora_entrada' => 'nullable|date_format:H:i',
     ]);
 
     $rutaDocumento = null;
@@ -111,35 +117,48 @@ class PermisoController extends Controller
             ->store('documentos_permisos', 'public');
     }
 
-    /*
-     * Convertir horas + minutos a horas decimales.
-     * Ejemplos:
-     * 1h 30min = 1.50
-     * 0h 40min = 0.67
-     */
     $horasDecimal = 0;
 
     if ($request->modalidad === 'horas') {
-        $horas = (int) ($request->horas ?? 0);
-        $minutos = (int) ($request->minutos ?? 0);
 
-        $horasDecimal = round($horas + ($minutos / 60), 2);
-
-        if ($horasDecimal <= 0) {
+        if (!$request->hora_salida || !$request->hora_entrada) {
             return back()
                 ->withErrors([
-                    'horas' => 'Debe seleccionar al menos horas o minutos para permisos por horas.'
+                    'hora_salida' => 'Debe ingresar hora de salida y hora de entrada.'
                 ])
                 ->withInput();
         }
 
-        if ($horasDecimal > 8) {
+        $salida = Carbon::createFromFormat('H:i', $request->hora_salida);
+        $entrada = Carbon::createFromFormat('H:i', $request->hora_entrada);
+
+        if ($entrada->lessThanOrEqualTo($salida)) {
             return back()
                 ->withErrors([
-                    'horas' => 'El permiso por horas no puede superar 8 horas.'
+                    'hora_entrada' => 'La hora de entrada debe ser mayor que la hora de salida.'
                 ])
                 ->withInput();
         }
+
+        $minutosTotales = $salida->diffInMinutes($entrada);
+
+        if ($minutosTotales <= 0) {
+            return back()
+                ->withErrors([
+                    'hora_entrada' => 'El tiempo solicitado no es válido.'
+                ])
+                ->withInput();
+        }
+
+        if ($minutosTotales > 480) {
+            return back()
+                ->withErrors([
+                    'hora_entrada' => 'El permiso por horas no puede superar 8 horas.'
+                ])
+                ->withInput();
+        }
+
+        $horasDecimal = round($minutosTotales / 60, 2);
     }
 
     $permiso = PermisoSistema::create([
@@ -150,6 +169,8 @@ class PermisoController extends Controller
         'fecha_inicio' => $request->fecha_inicio,
         'fecha_fin' => $request->fecha_fin,
         'horas' => $horasDecimal,
+        'hora_salida' => $request->modalidad === 'horas' ? $request->hora_salida : null,
+        'hora_entrada' => $request->modalidad === 'horas' ? $request->hora_entrada : null,
         'motivo' => $request->motivo,
         'documento' => $rutaDocumento,
     ]);
