@@ -107,9 +107,11 @@ Route::get('empleados/{dni}/expediente', [EmpleadoController::class, 'expediente
 
     // ver registro de empleado individual 
 Route::get('empleados/{dni}/ver-registro', [EmpleadoController::class, 'verRegistro'])
+    ->where('dni', '.*')
     ->name('empleados.verRegistro');
 
-Route::get('empleados/{dni}/ver-registro/imprimir', [EmpleadoController::class, 'imprimirRegistro'])
+    Route::get('/empleados/{dni}/imprimir', [EmpleadoController::class, 'verRegistroImprimir'])
+    ->where('dni', '.*')
     ->name('empleados.verRegistro.imprimir');
 
     Route::get('/empleados', [EmpleadoController::class, 'index'])

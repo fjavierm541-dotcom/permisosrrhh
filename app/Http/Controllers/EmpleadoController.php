@@ -218,12 +218,6 @@ return view('empleados.create', compact('departamentos'));
 public function store(Request $request)
 {
 
-$request->merge([
-    'DNI' => preg_replace('/\D+/', '', (string) $request->input('DNI', '')),
-    'RTN' => preg_replace('/\D+/', '', (string) $request->input('RTN', '')),
-
-]);
-
 for ($i = 1; $i <= 7; $i++) {
 
     $request->merge([
@@ -235,6 +229,53 @@ for ($i = 1; $i <= 7; $i++) {
 
 }
 
+// ========================================
+// VALIDAR TOTAL DE PORCENTAJES BENEFICIARIOS
+// ========================================
+
+$totalPorcentaje = 0;
+$hayBeneficiarios = false;
+
+for ($i = 1; $i <= 7; $i++) {
+
+    $nombre = trim($request->input("nombre_beneficiario$i"));
+    $porcentaje = (int) $request->input("porcentaje_beneficiario$i", 0);
+
+    // Detectar si realmente se llenó beneficiario
+    if (!empty($nombre) && $nombre !== 'Vacío') {
+
+        $hayBeneficiarios = true;
+        $totalPorcentaje += $porcentaje;
+    }
+}
+
+if ($hayBeneficiarios) {
+
+    if ($totalPorcentaje < 100) {
+
+        $faltante = 100 - $totalPorcentaje;
+
+        return back()
+            ->withErrors([
+                'beneficiarios' =>
+                    "Los porcentajes de beneficiarios suman {$totalPorcentaje}%. Falta asignar {$faltante}% para completar el 100%."
+            ])
+            ->withInput();
+    }
+
+    if ($totalPorcentaje > 100) {
+
+        $excedente = $totalPorcentaje - 100;
+
+        return back()
+            ->withErrors([
+                'beneficiarios' =>
+                    "Los porcentajes de beneficiarios suman {$totalPorcentaje}%. Excede el límite por {$excedente}%."
+            ])
+            ->withInput();
+    }
+}
+
 $request->validate([
 
     // DATOS GENERALES
@@ -243,8 +284,8 @@ $request->validate([
     'primer_apellido' => ['required','regex:/^[\pL\s]+$/u','max:50'],
     'segundo_apellido' => ['nullable','regex:/^[\pL\s]+$/u','max:50'],
     'codigo' => ['required','regex:/^[0-9]{1,4}$/'],
-    'DNI' => ['required','unique:empleados,DNI','regex:/^[0-9]{13}$/'],
-    'RTN' => ['required','regex:/^[0-9]{14}$/'],
+    'DNI' => ['required','unique:empleados,DNI','regex:/^[0-9]{4}-[0-9]{4}-[0-9]{5}$/'],
+    'RTN' => ['required','regex:/^[0-9]{4}-[0-9]{4}-[0-9]{6}$/'],
     'sexo' => 'required|in:Masculino,Femenino',
 
     'estado_civil' => 'required|in:Soltero(a),Casado(a),Unión Libre,Divorciado(a),Viudo(a)',
@@ -311,6 +352,7 @@ $request->validate([
     'tipo' => ['required','in:Acuerdo,Contrato'],
     'salario_inicial' => ['required','regex:/^L\.?\s?[0-9]{1,3}(,[0-9]{3})*(\.[0-9]{2})?$/'],
     'departamento_id' => 'required|exists:departamentos_muni,id',
+    'fecha_fin_contrato' => ['nullable', 'date', 'after_or_equal:fecha_nombramiento', 'required_if:tipo,Contrato'],
 
     // DOCUMENTOS
     'copia_dni' => ['nullable','file','mimes:pdf,jpg,jpeg,png','max:5120'],
@@ -338,11 +380,11 @@ $request->validate([
     'segundo_apellido.regex' => 'El segundo apellido no debe aceptar números.',
     'segundo_apellido.max' => 'Máximo 50 caracteres.',
 
+    'DNI.regex' => 'El DNI debe tener el formato 0000-0000-00000.',
+    'RTN.regex' => 'El RTN debe tener el formato 0000-0000-000000.',
     'DNI.required' => 'El DNI es obligatorio.',
     'DNI.unique' => 'Este DNI ya está registrado.',
-    'DNI.regex' => 'El DNI debe contener exactamente 13 números.',
     'RTN.required' => 'El RTN es obligatorio.',
-    'RTN.regex' => 'El RTN debe contener exactamente 14 números.',
 
     'fecha_nacimiento.required' => 'La fecha de nacimiento es obligatoria.',
     'fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
@@ -399,9 +441,15 @@ $request->validate([
         'tipo.required' => 'Debe seleccionar el tipo de nombramiento.',
         'tipo.in' => 'El tipo de nombramientoi seleccionado no es válido.',
 
+        // FECHA FIN CONTRATO
+        'fecha_fin_contrato.required_if' => 'Debe ingresar la fecha de finalización del contrato.',
+        'fecha_fin_contrato.date' => 'La fecha fin de contrato no es válida.',
+        'fecha_fin_contrato.after_or_equal' => 'La fecha fin de contrato no puede ser anterior a la fecha de nombramiento.',
+
         // SALARIO
         'salario_inicial.required' => 'El ingreso del salario es obligatorio.',
         'salario_inicial.regex' => 'El salario debe tener formato: L. 12,000.00',
+        
 
         // DOCUMENTOS
         'copia_dni.mimes' => 'La copia del DNI debe ser PDF o imagen.',
@@ -435,6 +483,16 @@ $request->validate([
         'salario_inicial' => $salario
     ]);
 }
+//empleado es activo predeterminado, si es contrato se asigna fecha fin contrato, si es acuerdo se asigna null a fecha fin contrato
+    if ($request->tipo === 'Acuerdo') {
+        $request->merge([
+            'fecha_fin_contrato' => null,
+        ]);
+    }
+
+    $request->merge([
+        'estado_empleado' => 'activo',
+    ]);
 
     $data = $request->all();
     $data['usuario_crea'] = auth()->user()->name ?? 'Sistema';;
@@ -471,6 +529,7 @@ $request->validate([
         ->route('empleados.index')
         ->with('success', 'Empleado creado correctamente.');
 }
+
 
 
 
@@ -682,7 +741,11 @@ public function expediente($dni)
 
 public function verRegistro($dni)
 {
-    $empleado = Empleado::with('documentos')
+    $empleado = Empleado::with([
+            'documentos',
+            'departamento',
+            'departamentoFuncional'
+        ])
         ->where('DNI', $dni)
         ->firstOrFail();
 
@@ -690,14 +753,22 @@ public function verRegistro($dni)
 }
 
 
-public function imprimirRegistro($dni)
+public function verRegistroImprimir($dni)
 {
-    $empleado = Empleado::with('documentos')
-        ->where('DNI', $dni)
-        ->firstOrFail();
+    $empleado = Empleado::where('DNI', $dni)->firstOrFail();
 
-    return view('empleados.verRegistroImprimir', compact('empleado'));
+    $pdf = Pdf::loadView(
+        'empleados.verRegistroImprimir',
+        compact('empleado')
+    );
+
+    $pdf->setPaper('letter');
+
+    return $pdf->stream(
+        'registro-empleado-'.$empleado->DNI.'.pdf'
+    );
 }
+
 
     /**
      * Show the form for editing the specified resource.

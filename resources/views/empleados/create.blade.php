@@ -636,6 +636,12 @@ En caso de emergencia se autoriza llamar a las personas en el siguiente orden:
                 Complete únicamente si el empleado desea registrar beneficiarios.
             </p>
 
+            @error('beneficiarios')
+                <div class="alert alert-danger">
+                    {{ $message }}
+                </div>
+            @enderror
+
            @for ($i = 1; $i <= 7; $i++)
 <hr>
 <h6 class="fw-bold">Beneficiario {{ $i }}</h6>
@@ -825,13 +831,30 @@ required>
 
                             <div class="col-md-4 mb-3">
     <label>Tipo de contrato</label>
-    <select name="tipo" class="form-control @error('tipo') is-invalid @enderror">
+        <select name="tipo" id="tipo" class="form-control @error('tipo') is-invalid @enderror">
         <option value="">Seleccione</option>
         <option value="Acuerdo" {{ old('tipo') == 'Acuerdo' ? 'selected' : '' }}>Acuerdo</option>
         <option value="Contrato" {{ old('tipo') == 'Contrato' ? 'selected' : '' }}>Contrato</option>
     </select>
 
     @error('tipo')
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+    @enderror
+</div>
+
+<div class="col-md-4 mb-3" id="campo_fecha_fin_contrato" style="display:none;">
+    <label>Fecha fin de contrato</label>
+    <input type="date"
+           name="fecha_fin_contrato"
+           id="fecha_fin_contrato"
+           value="{{ old('fecha_fin_contrato') }}"
+           class="form-control @error('fecha_fin_contrato') is-invalid @enderror">
+
+    <small class="text-muted">
+        Solo aplica para empleados por contrato.
+    </small>
+
+    @error('fecha_fin_contrato')
         <div class="invalid-feedback d-block">{{ $message }}</div>
     @enderror
 </div>
@@ -958,4 +981,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </div>
 
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tipo = document.getElementById('tipo');
+    const campoFechaFin = document.getElementById('campo_fecha_fin_contrato');
+    const fechaFin = document.getElementById('fecha_fin_contrato');
+
+    function controlarFechaFinContrato() {
+        if (tipo.value === 'Contrato') {
+            campoFechaFin.style.display = 'block';
+            fechaFin.disabled = false;
+        } else {
+            campoFechaFin.style.display = 'none';
+            fechaFin.value = '';
+            fechaFin.disabled = true;
+        }
+    }
+
+    if (tipo && campoFechaFin && fechaFin) {
+        controlarFechaFinContrato();
+        tipo.addEventListener('change', controlarFechaFinContrato);
+    }
+});
+</script>
 @endsection
